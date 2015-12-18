@@ -1,0 +1,199 @@
+#include "LobbyUpdate.h"
+#include "LobbyFactory.h"
+#include "LobbyServer.h"
+#include <JsonParser.h>
+
+
+void LobbyUpdate::JoinAgentSession ( AgentSession * pSession )
+{
+    WORD _wport = pSession->GetPort();
+    if ( _wport != 0 ) {
+        pSession->SetIndexKey( _wport );
+        mapAgentObject[_wport] = pSession;
+        m_pAllAgent.push_back( pSession );
+    }
+    printf("[LobbyUpdate::JoinAgentSession] pSession = %d \n", _wport);
+}
+
+void LobbyUpdate::QuitAgentSession ( AgentSession * pSession )
+{
+    WORD _wport = pSession->GetIndexKey();
+    if ( _wport != 0 ) {
+        mapAgentObject[_wport] = NULL;
+        m_pAllAgent.remove( pSession );
+        printf( "[LobbyUpdate::QuitAgentSession] pSession = %d \n", _wport );
+    }
+}
+
+/***********************************************
+
+************************************************/
+void LobbyUpdate::JoinLobby ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    JsonMap js_map;
+    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+        return;
+    }
+
+    int _userport;
+    js_map.ReadInteger( "userkey", _userport );
+
+    if (_userport != 0) {
+        iOnlinesInfo++;
+        LobbyUser * pUser = LobbyFactory::Instance()->AllocUserSession();
+        if (pUser) {
+            pUser->SetHashKey(_userport);
+        }
+
+        AgentSession * pSession = (AgentSession*) pServerSession;
+        if (pSession) {
+            pSession->AddUser(_userport, pUser);
+            printf( "[LobbyUpdate::JoinLobby] userkey = %d \n", _userport );
+        }
+    }
+}
+
+void LobbyUpdate::QuitLobby ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    JsonMap js_map;
+    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+        return;
+    }
+
+    int _userport;
+    js_map.ReadInteger( "userkey", _userport );
+
+    if (_userport != 0) {
+        AgentSession * pSession = (AgentSession*) pServerSession;
+        if (pSession) {
+            pSession->RemoveUser( _userport );
+            printf( "[LobbyUpdate::QuitLobby] userkey = %d \n", _userport );
+        }
+    }
+}
+
+void LobbyUpdate::JoinTable ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    JsonMap js_map;
+    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+        return;
+    }
+
+    int _userport;
+    js_map.ReadInteger( "userkey", _userport );
+
+    printf("LobbyUpdate::JoinTable\n");
+    char szMsg[1024] = {0};
+    snprintf( szMsg, sizeof(szMsg), " { \"protocol\":\"%d\", \"userkey\":\"%d\" } ",
+            MAKEDWORD( Games_Protocol, JoinTable_REQ), _userport );
+    int nLen = strlen(szMsg);
+    g_LobbyServer->SendToDBServer( (BYTE*) szMsg, nLen );
+}
+
+void LobbyUpdate::QuitTable ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    JsonMap js_map;
+    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+        return;
+    }
+
+    int _userport;
+    js_map.ReadInteger( "userkey", _userport );
+
+    printf("LobbyUpdate::QuitTable\n");
+    char szMsg[1024] = {0};
+    snprintf( szMsg, sizeof(szMsg), " { \"protocol\":\"%d\", \"userkey\":\"%d\" } ",
+            MAKEDWORD( Games_Protocol, QuitTable_REQ), _userport );
+    int nLen = strlen(szMsg);
+    g_LobbyServer->SendToDBServer( (BYTE*) szMsg, nLen );
+}
+
+void LobbyUpdate::RoomInfo_REQ  (ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize)
+{
+    JsonMap js_map;
+    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+        return;
+    }
+
+    int _userport;
+    int _userroom;
+    js_map.ReadInteger( "userkey",  _userport );
+
+    if ( pAgent ) {
+        char szInfo[1024] = {0};
+        int nLen = JsonRoomInfo( szInfo, sizeof(szInfo) );
+        pServerSession->Send( (BYTE*)szInfo, wSize );
+    }
+}
+
+void LobbyUpdate::TableInfo_REQ (ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize)
+{
+    JsonMap js_map;
+    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+        return;
+    }
+
+    int _userport;
+    int _userroom;
+    js_map.ReadInteger( "userkey", _userport );
+    js_map.ReadInteger( "roomid",  _userroom );
+
+    if ( mapUserObject[(WORD)_userport] ) {
+        char szInfo[1024] = {0};
+        int nLen = JsonTableInfo( _userroom, szInfo, sizeof(szInfo) );
+        mapUserObject[_userport]->SendToClient( (BYTE*)szInfo, wSize);
+    }
+}
+
+
+void LobbyUpdate::Onlines_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    JsonMap js_map;
+    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+        return;
+    }
+
+    int _userport;
+    js_map.ReadInteger( "userkey", _userport );
+
+    if ( mapUserObject[(WORD)_userport] ) {
+        char szInfo[1024] = {0};
+        int nLen = JsonOnlineInfo( szInfo, sizeof(szInfo) );
+        mapUserObject[_userport]->SendToClient( (BYTE*)szInfo, wSize);
+    }
+}
+
+void LobbyUpdate::WRankInfo_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    JsonMap js_map;
+    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+        return;
+    }
+
+    int _userport;
+    js_map.ReadInteger( "userkey", _userport );
+
+    if ( mapUserObject[(WORD)_userport] ) {
+        char szInfo[8192] = {0};
+        int nLen = JsonWeekRank( szInfo, sizeof(szInfo) );
+        mapUserObject[_userport]->SendToClient( (BYTE*)szInfo, wSize);
+    }
+}
+
+void LobbyUpdate::DRankInfo_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    JsonMap js_map;
+    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+        return;
+    }
+
+    int _userport;
+    js_map.ReadInteger( "userkey", _userport );
+
+    if ( mapUserObject[(WORD)_userport] ) {
+        char szInfo[8192] = {0};
+        int nLen = JsonDayRank( szInfo, sizeof(szInfo) );
+        mapUserObject[_userport]->SendToClient( (BYTE*)szInfo, wSize);
+    }
+}
+

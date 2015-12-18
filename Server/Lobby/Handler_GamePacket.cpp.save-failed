@@ -1,0 +1,14 @@
+#include "Handler_Module.h"
+#include <dbCommon.h>
+
+void MSG_Handler_GamePacket_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    g_LobbyServer->SendToDBServer( (BYTE*) pMsg, wSize );
+}
+
+void MSG_Handler_GamePacket_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    g_AgentServer->SendToClient( (BYTE*) pMsg, wSize );
+}
+
+

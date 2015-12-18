@@ -1,0 +1,193 @@
+#ifndef _GamePlyer_H_INCLUDED_
+#define _GamePlyer_H_INCLUDED_
+
+#include <Utility.h>
+#include <Common.h>
+#include <Network.h>
+
+#define BASE_POKER  (  3 )
+#define MAX_USER    (  3 )
+#define MAX_BHOLD   ( 20 )
+#define MAX_PHOLD   ( 17 )
+#define MAX_POKER   ( 54 )
+
+// 叫地主次数
+#define MAX_CALL    (  4 )
+
+// 设置 m_byTableStatus[x] 状态
+enum
+{
+    eGB_EMPTY   = 0x00,
+    eGB_LEAVE   = 0x01,
+    eGB_SIT     = 0x02,   // 坐下阶段
+    eGB_DEALING = 0x03,   // 发牌阶段
+    eGB_CALLING = 0x05,   // 叫牌阶段
+    eGB_PLAYING = 0x06,   // 正完阶段
+
+};
+
+// 设置 m_byStart[] 和 m_byShow[] 状态
+enum
+{
+    eGB_READY   = 0x01,   // 开始游戏
+    eGB_SHOW    = 0x02,   // 明牌游戏
+};
+
+enum
+{
+    eGB_BANKER  = 0x10,   // 庄
+    eGB_PLAYER  = 0x20,   // 贤
+};
+
+// 设置 m_byOnline[] 现在状态
+enum
+{
+    eGB_ONLINE  = 0x30,   // 在线
+    eGB_OffLINE = 0x40,   // 离线
+};
+
+// 设置 m_byCalls[] 状态
+enum
+{
+    eGB_APPLY   = 0x01,   // 争取
+    eGB_WAIVER  = 0x02,   // 放弃
+};
+
+class GameBattle
+{
+public:
+	GameBattle();
+	virtual ~GameBattle();
+
+public:
+    int GetAllPlayerKey(char * json_text, WORD wSize);
+	int SendToSettleAccounts();
+
+public:
+    int SetIndex( WORD index );
+	int SetTable( BYTE room, BYTE table );
+	int SetID( BYTE seatid,  int id );
+    int SetKey( BYTE seatid, int key );
+    int SetStartSeat( BYTE seatid );                 // 定义申请地主人;
+
+	int SetStart( BYTE seatid, BYTE status );       // 开始设置
+	int SetShow( BYTE seatid );                     // 显牌设置
+    int SetCalled( BYTE seatid, BYTE called );
+    int SetBank( BYTE seatid );
+    int SetPlaying( BYTE seatid );
+
+    int SetBasecards( BYTE * poker, BYTE bySize );
+    int SetUsercards( BYTE seatid, BYTE * poker, BYTE bySize ); // 用户分配的牌设置
+    int SetDiscards ( BYTE seatid, BYTE * poker, BYTE bySize );
+    int SetModel( BYTE _byDoub );    // 设置为加倍模式;
+    int SetBattleStatus( BYTE _status );
+
+    int SetLastSeat(  BYTE _seatid );    // 最后出牌的坐位;
+    int SetLastType(  BYTE _type   );    // 最后出牌的类型；
+    int SetLastValue( BYTE _value  );    // 最后出牌的值;
+    int SetLastCount( BYTE _count  );    // 最后出牌个数；
+
+public:
+    BYTE getUsercards( BYTE seatid, char * poker, WORD bySize );
+    BYTE getBasecards( BYTE seatid, char * poker, WORD bySize );
+
+
+public:
+    BYTE getBanker();        // 取得庄;
+    BYTE getBattleStatus();  // 制造一个战斗状态;
+    BYTE getStartSeat();     // 获得上次的赢家;
+    BYTE& getLastSeat();     // 最后出牌的坐位;
+    BYTE& getLastType();     // 最后出牌的类型；
+    BYTE& getLastValue();    // 最后出牌的值;
+    BYTE& getLastCount();    // 最后出牌个数；
+    BYTE prevSeat( BYTE seatid );    // 前一个
+    BYTE nextSeat( BYTE seatid );    // 后一个
+    BYTE getPlaying();       // 取得正在玩
+
+public:
+    int canStart();      // 能否开始发牌
+    int canDealing();    // 能否发牌
+    int canCall();       // 能否继续叫庄
+    int canGame();       // 地主已经分清，可以开始
+    int canPlaying();    // 能否继续玩
+    int canEnd();        // 能否结束
+
+public:
+    WORD getIndex();
+	WORD prevKey(BYTE seatid);
+	WORD nextKey(BYTE seatid);
+    WORD getKey( BYTE seatid);
+
+private:
+    WORD m_wIndex;
+    UINT m_uCycle;
+	BYTE m_byRoomid;
+	BYTE m_byTableid;
+    BYTE m_byModel;                 // 加倍模式
+	UINT m_uiUpdate;                // 更新时间
+	BYTE m_byPlaying;               // 正在玩的人
+	BYTE m_byTimes;                 // 设置玩的次数；
+	BYTE m_byStartSeat;             // 开始的桌子, 主要是叫地主;
+	BYTE m_byCallSeat;              // 第一个为m_byStartSeat, 下一个叫地主;
+	BYTE m_byCallTimes;             // 叫地主次数;
+	BYTE m_byBanker;                // 地主;
+	BYTE m_byTableStatus;           // 桌子现有状态;
+	BYTE m_byStatus[MAX_USER];      // 是否地主;
+	BYTE m_byStart[MAX_USER];       // 开始状态
+	BYTE m_byCalls[MAX_CALL];       // 叫地主状态
+    BYTE m_byShow[MAX_USER];        // 显示状态
+    UINT m_uiUserid[MAX_USER];      // 用户ID
+    WORD m_wUserkey[MAX_USER];      // 用户端口
+    BYTE m_byOnline[MAX_USER];      // 用户在线状态
+    BYTE m_byUsercards[MAX_USER][MAX_POKER+1];  // 用户手上的牌
+    int  m_nDiscardsSize[MAX_USER];
+    BYTE m_byDiscards[MAX_USER][MAX_POKER+1];
+    BYTE m_byBasecards[BASE_POKER+1];
+    BYTE m_byLastActive;
+    BYTE m_byLastType;
+	BYTE m_byLastValue;
+	BYTE m_byLastCount;
+
+public:
+    GameBattle * set_prev( GameBattle * _prev );
+    GameBattle * set_next( GameBattle * _next );
+
+    bool is_null_prev();
+    bool is_null_next();
+
+    GameBattle * get_prev();
+    GameBattle * get_next();
+
+private:
+    GameBattle * m_prev;
+    GameBattle * m_next;
+};
+
+
+/**********************************************
+    游戏桌子队列对象
+**********************************************/
+class GameBattleList
+{
+public:
+	GameBattleList();
+	~GameBattleList();
+
+public:
+
+    void clear();
+    void push_back(GameBattle * pUser);
+    void remove(GameBattle * pUser);
+    WORD size() { return m_size; }
+
+    GameBattle * get_frist();
+    GameBattle * pop_frist();
+
+private:
+    WORD m_size;
+    GameBattle * m_head;
+    GameBattle * m_last;
+};
+
+
+#endif // _AGENTPLAYER_H_INCLUDED_

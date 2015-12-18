@@ -1,0 +1,175 @@
+#include "UserSession.h"
+#include "PacketHandler.h"
+#include "AgentServer.h"
+#include "AgentFactory.h"
+
+#include <Public.h>
+
+DWORD UserSession::m_dwClientDelay = 0xFFFFFFFF;
+DWORD UserSession::m_dwServerDelay = 0xFFFFFFFF;
+
+UserSession::UserSession()
+: m_bFirst(TRUE)
+{
+	m_eUserType = UT_USER;
+}
+
+UserSession::~UserSession()
+{
+}
+
+BOOL UserSession::SendPacket(BYTE *pMsg, WORD wSize)
+{
+	return Send( (BYTE *)pMsg, wSize );
+}
+
+WORD UserSession::GetUserKey() const
+{
+	return m_wUserKey;
+}
+
+void  UserSession::SetUserKey(WORD dwKey)
+{
+	m_wUserKey = dwKey;
+}
+
+/************ protected *************/
+void UserSession::Init()
+{
+	m_wUserKey 		= 0;
+	m_bFirst 		= TRUE;
+
+	DWORD dwCurrent = Session::GetTickCount();
+	m_dwOvertime    = dwCurrent + UserSession::m_dwClientDelay;
+	printf( "[UserSession::Init %d] \n", m_dwOvertime);
+
+	this->NotPackageHeader();
+}
+
+BOOL UserSession::Update( DWORD dwDeltaTick )
+{
+	printf( "[UserSession::Update %d = %d] \n", dwDeltaTick, m_dwOvertime);
+
+	// Count Down;
+	if ( dwDeltaTick > m_dwOvertime ) {
+		Disconnect(TRUE);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+void UserSession::CloseSession()
+{
+	printf(" [ UserSession::CloseSession ] \n");
+
+	if ( m_pSession != NULL) {
+		m_pSession->CloseSocket();
+	}
+
+	m_bFirst = TRUE;
+
+}
+
+void UserSession::Release()
+{
+	printf(" [ UserSession::Release ] \n");
+
+	m_bFirst = TRUE;
+
+	g_AgentServer->SetUserSession( this->m_wUserKey, NULL);
+
+	AgentFactory::Instance()->FreeUserSession(this);
+}
+
+void UserSession::OnAccept( DWORD dwNetworkIndex )
+{
+	WORD PortKey = this->GetPort();
+	if ( PortKey == 0 )
+	{
+	    return;
+    }
+
+    this->SetUserKey(PortKey);
+    g_AgentServer->SetUserSession(PortKey, this);
+    AgentFactory::Instance()->FreeUserSession( this );
+
+	char buff[1024]  =  {0};
+	char format[256] = 	"{\"protocol\":\"%d\",\"data\":{\"type\":\"text/json\"}}";
+
+	MSG_ENTERSERVER_ANC msg2;
+	sprintf( buff, format, msg2.m_dwProtocol);
+
+	printf("[UserSession::OnAccept %s] \n", buff);
+	int len = strlen(buff);
+	this->Send( (BYTE*) buff,  len );
+}
+
+void UserSession::OnDisconnect()
+{
+	printf("[UserSession::OnDisconnect]\n");
+	NetworkObject::OnDisconnect();
+
+	char buff[1024]  =  {0};
+	char format[256] = 	"{\"protocol\":\"%d\",\"data\":{\"type\":\"text/json\"}}";
+	sprintf( buff, format, msg2.m_dwProtocol);
+	int len = strlen(buff);
+	g_AgentServer->SendToGameServer( (BYTE*) buff, len );
+}
+
+void UserSession::OnRecv(BYTE *pMsg, WORD wSize)
+{
+	printf(">>>> [UserSession::OnRecv]\n");
+
+	BYTE msgPlus[1024] = {0};
+
+	// Alloc Port
+	if ( m_wUserKey != 0 ) {
+
+        /*
+		char json_msgs[1024] = {0};
+		memcpy(json_msgs, pMsg, wSize);
+
+		JsonMap js_map;
+        if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+            return;
+        }
+
+        int _errmsg;
+        js_map.ReadInteger( "protocol", _errmsg );
+        */
+
+		g_PacketHandler.ParsePacket_Client(this, (MSG_BASE*)pMsg, wSize);
+	}
+}
+
+void UserSession::OnConnect( BOOL bSuccess, DWORD dwNetworkIndex )
+{
+
+}
+
+void UserSession::OnLogString( char * pszLog)
+{
+
+}
+
+void UserSession::DBResult( WORD cate, WORD ptcl, QueryResult * pData )
+{
+    /*
+    MSG_DBPROXY_RESULT msg;
+    msg.m_byCategory = cate;
+    msg.m_byProtocol = ptcl;
+    msg.m_pData = pData;
+    g_PacketHandler.ParsePacket_Database( (ServerSession*)this, (MSG_BASE*)&msg, sizeof(msg) );
+    */
+}
+
+
+void UserSession::Login( ServerSession * pServerSession )
+{
+   Session * pSession = pServerSession->GetSesstion();
+   if ( pSession != NULL ) {
+        m_pSession->UnbindNetworkObject();
+        pSession->BindNetworkObject(this);
+    }
+}

@@ -1,0 +1,64 @@
+#ifndef _GameMgr_H_INCLUDED_
+#define _GameMgr_H_INCLUDED_
+
+#include <Utility.h>
+#include <Common.h>
+#include <Network.h>
+#include "GameBattle.h"
+
+class GamePoker
+{
+public:
+    GamePoker();
+    virtual ~GamePoker();
+
+public:
+
+    void SetPoker( BYTE * _poker, BYTE _size );
+
+    // Step1, 分析出手上的牌;
+    void Parser( BYTE * _poker, BYTE _size );
+
+    // Step2, 判断是否有大于他手上的牌;
+    BOOL MoreThan( BYTE _type, BYTE _value, BYTE _count, BYTE _size );
+
+    // Step3, 匹配一个最家组合;
+    BOOL MarchObject( BYTE & _type, BYTE & _value, BYTE & _count, BYTE & _size );
+
+private:
+
+    // Step4, PK类型表;
+    BYTE  PokerTypeTable[MAX_PK_TYPE];
+
+private:
+
+    void Zero();
+
+    // Step5, 组合的参数表;
+    short Poker_1g_size;
+    short Poker_1g_max_value;
+    short Poker_1g_min_value;
+    short Poker_1g_t_size;
+    short Poker_1g_seq_max_value;
+    short Poker_1g_seq_min_value;
+    short Poker_2g_size;
+    short Poker_2g_max_value;
+    short Poker_2g_min_value;
+    short Poker_2g_seq_size;
+    short Poker_2g_seq_max_value;
+    short Poker_2g_seq_min_value;
+    short Poker_3g_size;
+    short Poker_3g_max_value;
+    short Poker_3g_min_value;
+    short Poker_3g_seq_size;
+    short Poker_3g_seq_max_value;
+    short Poker_3g_seq_min_value;
+    short Poker_4g_size;
+    short Poker_4g_max_value;
+    short Poker_4g_min_value;
+    short Poker_king_size;
+    short Poker_king_max_value;
+    short Poker_king_min_value;
+};
+
+#endif // ...
