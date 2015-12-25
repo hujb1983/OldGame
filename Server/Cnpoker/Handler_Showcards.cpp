@@ -41,7 +41,7 @@ int Processed_Showcards ( ServerSession * pServerSession, const char * pInput )
         pBattle->GetAllPlayerKey( szPlayerkey, sizeof(szPlayerkey) );
 
         // @{{{ 组合所有的牌
-        char szMsg[1024] = {0};
+        char szMsg[2048] = {0};
         char poker[256]  = {0};
         char format[256] = 	"{\"protocol\":\"%d\", "
                             " \"showcard\":\"%d\", "

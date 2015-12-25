@@ -96,6 +96,7 @@ typedef unsigned long		ULONG;
 #include "FunctionMap.hpp"
 #include "Linkedlist.h"
 #include "Yond_ini.h"
+#include "SysLog.h"
 
 #include "SolarHashTable.h"
 // #include "ObjKeyGenerator.h"

@@ -4,7 +4,7 @@
 
 void MSG_Handler_JoinTable_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    printf( "[MSG_Handler_JoinTable_REQ] pMsg = %s \n",  (char*)pMsg );
+    DEBUG_MSG( LVL_DEBUG, "JoinTable_REQ to recv: %s \n",  (char*)pMsg );
 
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
@@ -36,7 +36,7 @@ void MSG_Handler_JoinTable_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg
 
 void MSG_Handler_JoinTable_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    printf( "[MSG_Handler_JoinTable_BRD] pMsg = %s \n",  (char*)pMsg );
+    DEBUG_MSG( LVL_DEBUG, "JoinTable_BRD to recv: %s \n",  (char*)pMsg );
 
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
@@ -44,7 +44,7 @@ void MSG_Handler_JoinTable_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg
     }
 
     int  _userkey(0), _userid(0), _roomid(0), _agentkey(0),
-    _tableid(0), _battleid(0), _status(0);
+    _tableid(0), _battleid(0), _status(0), _seatid(0);
 
     js_map.ReadInteger( "userid",    _userid   );
     js_map.ReadInteger( "userkey",   _userkey  );
@@ -52,6 +52,7 @@ void MSG_Handler_JoinTable_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg
     js_map.ReadInteger( "roomid",    _roomid   );
     js_map.ReadInteger( "tableid",   _tableid  );
     js_map.ReadInteger( "battleid",  _battleid );
+    js_map.ReadInteger( "seatid",    _seatid   );
     js_map.ReadInteger( "status",    _status   );
 
     {
@@ -61,12 +62,13 @@ void MSG_Handler_JoinTable_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg
                             "\"userkey\":\"%d\","
                             "\"agentkey\":\"%d\","
                             "\"battleid\":\"%d\","
+                            "\"seatid\":\"%d\","
                             "\"roomid\":\"%d\","
                             "\"tableid\":\"%d\","
                             "\"status\":\"%d\"}";
 
         snprintf( buff, sizeof(buff), format, MAKEDWORD( Games_Protocol, JoinGame_REQ ),
-            _userid, _userkey, _agentkey, _battleid, _roomid, _tableid, _status);
+            _userid, _userkey, _agentkey, _battleid, _seatid, _roomid, _tableid, _status);
 
         int nLen = strlen( buff );
         g_AgentServer->SendToGameServer( (BYTE*) buff, nLen );

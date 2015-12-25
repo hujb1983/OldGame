@@ -83,13 +83,13 @@ BOOL AgentServer::Init()
 
 	m_pGameServer = AgentFactory::Instance()->AllocGameSession();
 	if ( m_pGameServer == NULL) {
-		printf("[AgentFactory::Instance()->AllocGameSession] fail\n");
+		DEBUG_MSG( LVL_DEBUG, "AllocGameSession fail.");
 		return FALSE;
 	}
 
 	m_pLobbyServer = AgentFactory::Instance()->AllocLobbySession();
 	if ( m_pLobbyServer == NULL) {
-		printf("[AgentFactory::Instance()->AllocLobbySession] fail\n");
+		DEBUG_MSG( LVL_DEBUG, "AllocLobbySession fail.");
 		return FALSE;
 	}
     else {
@@ -156,7 +156,6 @@ BOOL AgentServer::Update( DWORD dwDeltaTick )
 }
 
 BOOL AgentServer::SendToGameServer( BYTE * pMsg, WORD wSize) {
-	printf("[AgentServer::SendToGameServer]\n");
 	if ( m_pGameServer ) {
 		return m_pGameServer->Send( pMsg, wSize );
 	}
@@ -167,7 +166,6 @@ ServerSession * AgentServer::GetGameSession() const {
 }
 
 BOOL AgentServer::SendToLobbyServer( BYTE * pMsg, WORD wSize) {
-	printf("[AgentServer::SendToLobbyServer]\n");
 	if ( m_pLobbyServer ) {
 		return m_pLobbyServer->Send( pMsg, wSize );
 	}
@@ -188,7 +186,6 @@ BOOL AgentServer::SendToClient( WORD wIndex, BYTE * pMsg, WORD wSize )
         msgBuff.Write(wSize);
         msgBuff.Write((char*)pMsg);
 		pSession->Send( msgBuff.GetHead(), msgBuff.GetWriteLen()-1 );
-		printf("[AgentServer::SendToClient] = %d, %d \n", wSize, msgBuff.GetWriteLen() );
 		return TRUE;
 	}
     return FALSE;
@@ -213,7 +210,6 @@ BOOL AgentServer::SendToClient( BYTE * pMsg, WORD wSize )
         msgBuff.Write(wSize);
         msgBuff.Write((char*)pMsg);
 		pSession->Send( msgBuff.GetHead(), msgBuff.GetWriteLen()-1 );
-		printf("[AgentServer::SendToClient] = %d, %d \n", wSize, msgBuff.GetWriteLen() );
 		return TRUE;
 	}
     return FALSE;
@@ -221,27 +217,18 @@ BOOL AgentServer::SendToClient( BYTE * pMsg, WORD wSize )
 
 BOOL AgentServer::SetUserSession( WORD wIndex, UserSession * pSession )
 {
-	printf("[AgentServer::SetUserSession]\n");
-
 	if ( wIndex == 0 ) {
 		return FALSE;
 	}
-
 	m_pUserSession[wIndex] = pSession;
-
-	printf(" [ LoginServer::SetUserSession pSession = %d ] \n", pSession);
-
 	return TRUE;
 }
 
 UserSession * AgentServer::GetUserSession( WORD wIndex )
 {
-	printf("[AgentServer::GetUserSession]\n");
-
 	if ( wIndex == 0 ) {
 		return NULL;
 	}
-
 	return m_pUserSession[wIndex];
 }
 

@@ -18,7 +18,8 @@ void MSG_Handler_JoinGame_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg,
 void MSG_Handler_JoinGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 
 /*   2. 退出桌子；*/
-void MSG_Handler_QuitGame_REQ   ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
+void MSG_Handler_QuitGame_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
+void MSG_Handler_QuitGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 
 /*   2. 开始游戏；*/
 void MSG_Handler_StartGame_REQ  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );

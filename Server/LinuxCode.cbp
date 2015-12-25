@@ -48,14 +48,15 @@
 		<Unit filename="Agent/Handler_DiscardsLicense.cpp" />
 		<Unit filename="Agent/Handler_DiscardsOvertime.cpp" />
 		<Unit filename="Agent/Handler_GamePacket.cpp" />
+		<Unit filename="Agent/Handler_InitCards.cpp" />
 		<Unit filename="Agent/Handler_JoinGame.cpp" />
 		<Unit filename="Agent/Handler_JoinTable.cpp" />
-		<Unit filename="Agent/Handler_License.cpp" />
 		<Unit filename="Agent/Handler_Login.cpp" />
 		<Unit filename="Agent/Handler_Logout.cpp" />
 		<Unit filename="Agent/Handler_Module.h" />
 		<Unit filename="Agent/Handler_Offline.cpp" />
 		<Unit filename="Agent/Handler_Onlines.cpp" />
+		<Unit filename="Agent/Handler_QuitGame.cpp" />
 		<Unit filename="Agent/Handler_QuitTable.cpp" />
 		<Unit filename="Agent/Handler_Relogin.cpp" />
 		<Unit filename="Agent/Handler_RoomInfo.cpp" />
@@ -95,9 +96,11 @@
 		<Unit filename="Cnpoker/Handler_CreateBank.cpp" />
 		<Unit filename="Cnpoker/Handler_Discard.cpp" />
 		<Unit filename="Cnpoker/Handler_DiscardsLicense.cpp" />
+		<Unit filename="Cnpoker/Handler_InitCards.cpp" />
 		<Unit filename="Cnpoker/Handler_JoinGame.cpp" />
 		<Unit filename="Cnpoker/Handler_Module.h" />
 		<Unit filename="Cnpoker/Handler_Offline.cpp" />
+		<Unit filename="Cnpoker/Handler_QuitGame.cpp" />
 		<Unit filename="Cnpoker/Handler_Relogin.cpp" />
 		<Unit filename="Cnpoker/Handler_Settlement.cpp" />
 		<Unit filename="Cnpoker/Handler_Showcards.cpp" />
@@ -143,6 +146,7 @@
 		<Unit filename="DB/Handler_Module.h" />
 		<Unit filename="DB/Handler_Onlines.cpp" />
 		<Unit filename="DB/Handler_PreLogin.cpp" />
+		<Unit filename="DB/Handler_QuitGame.cpp" />
 		<Unit filename="DB/Handler_QuitTable.cpp" />
 		<Unit filename="DB/Handler_Relogin.cpp" />
 		<Unit filename="DB/Handler_RoomInfo.cpp" />
@@ -290,6 +294,8 @@
 		<Unit filename="Utility/Single_List_T.h" />
 		<Unit filename="Utility/Singleton.hpp" />
 		<Unit filename="Utility/SolarHashTable.h" />
+		<Unit filename="Utility/SysLog.cpp" />
+		<Unit filename="Utility/SysLog.h" />
 		<Unit filename="Utility/Utility.h" />
 		<Unit filename="Utility/Yond_ini.cpp" />
 		<Unit filename="Utility/Yond_ini.h" />

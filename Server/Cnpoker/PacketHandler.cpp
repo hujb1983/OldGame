@@ -57,6 +57,7 @@ BOOL PacketHandler::Register_Agent()
 BOOL PacketHandler::Register_Database()
 {
     AddHandler_Database( Games_Protocol, JoinGame_BRD,   MSG_Handler_JoinGame_BRD   );
+    AddHandler_Database( Games_Protocol, QuitGame_BRD,   MSG_Handler_QuitGame_BRD   );
     AddHandler_Database( Games_Protocol, Settlement_BRD, MSG_Handler_Settlement_BRD );
 }
 
@@ -79,8 +80,6 @@ BOOL PacketHandler::AddHandler_Database( WORD category, WORD protocol, fnHandler
 VOID PacketHandler::ParsePacket_Agent( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-	printf("PacketHandler::ParsePacket_Agent \n");
-
 	DWORD pid = GetProtocol( (char*)pMsg );
     if ( pid != 0 ) {
         FUNC_Agent * pFuncInfo = (FUNC_Agent *)m_pFuncMap_Agent->Find( pid );
@@ -93,8 +92,6 @@ VOID PacketHandler::ParsePacket_Agent( ServerSession * pSession, MSG_BASE * pMsg
 VOID PacketHandler::ParsePacket_Database( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-	printf("PacketHandler::ParsePacket_Database \n");
-
 	DWORD pid = GetProtocol( (char*)pMsg );
     if ( pid != 0 ) {
         FUNC_Database * pFuncInfo = (FUNC_Database *)m_pFuncMap_Database->Find( pid );

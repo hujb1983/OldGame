@@ -53,8 +53,8 @@ void MSG_Handler_QuitTable     ( ServerSession * pServerSession, MSG_BASE * pMsg
 void MSG_Handler_JoinGame      ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 void MSG_Handler_QuitGame      ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 void MSG_Handler_JoinTable_DBR ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
-void MSG_Handler_QuitTable_DBR ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 void MSG_Handler_JoinGame_DBR  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
+void MSG_Handler_QuitGame_DBR  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 
 /*  更新数据 */
 void MSG_Handler_UpdateBattle     ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );

@@ -25,6 +25,9 @@ public:
 	virtual WORD GetUserKey() const;
 	void SetUserKey(WORD dwKey);
 
+	virtual BYTE GetSeatKey() const;
+	void SetSeatKey(BYTE dwKey);
+
 	virtual WORD GetBattleKey() const;
 	void SetBattleKey(WORD dwKey);
 
@@ -33,8 +36,19 @@ public:
 
     void setName( char * _name , int _size );           // 名称
     void setGamesinfo( int _point, UINT _wons, UINT _failed, UINT _aways );  // 胜率
-    void setMoney( int _money );            // 钱
-    void getSeatInfo( char * _seatinfo, int _size );     // 坐位信息
+    void setMoney( int _money );  // 钱
+
+    void setReady( BOOL _ready );  // 准备
+    void setShowcards( BOOL _showcards );  // 显牌
+
+    BYTE & getPokerSize( );                         // 牌数量
+    void setPokers( char * poker, WORD _size);      // 牌
+
+    void getSeatInfo( char * _seatinfo, int _size );    // 坐位信息
+    void getPokerInfo( int userkey, char * _pokerinfo,
+                      int _size );                      // 牌的信息
+
+    void QuitTable();   // 退出桌子;
 
 	void CloseSession();
 
@@ -54,6 +68,7 @@ private:
 	BOOL            m_bFirst;
 	eUSER_TYPE 		m_eUserType;
 	WORD 			m_wUserKey;         // 用户健值
+	BYTE            m_bySeatKey;        // 坐位ID;
     WORD 			m_wBattleKey;       // 房间号
     UINT            m_dwUserid;         // 用户ID
     char            m_szName[33];       // 名称
@@ -61,6 +76,10 @@ private:
     UINT            m_uiWons;           // 赢的次数
 	UINT            m_uiFaileds; 	    // 失败次数
 	UINT            m_uiAways; 		    // 逃跑次数
+    BOOL            m_bReady; 	        // 已经准备好了
+	BOOL            m_bShowcards;       // 显示牌
+	BYTE            m_bPokerSize;       // 牌数量
+    char            m_bPoker[128];      // 牌
 
 public:
 	// static DWORD    m_byCloseDelay;

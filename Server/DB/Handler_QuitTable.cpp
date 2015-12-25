@@ -3,7 +3,7 @@
 #pragma pack(push,1)
 
 
-/*  1. 日排名，从数据库中查找 */
+/*  1. 日排名，从数据库中查找用户并清理掉 */
 class Query_QuitTable : public QueryResult
 {
 	_DECLARE_QUERY_POOL( Query_QuitTable );
@@ -59,7 +59,7 @@ int User_Query_QuitTable( ServerSession * pServerSession, const char * js_text )
     char szQueryBuff[256] = {0};
 	snprintf( szQueryBuff, sizeof(szQueryBuff), " call p_UserQuitTable( %d ); ");
 
-    pQuery->SetIndex( MAKEDWORD( (WORD)Games_Protocol, (WORD)StartGame_DBR ) );
+    pQuery->SetIndex( MAKEDWORD( (WORD)Games_Protocol, (WORD)QuitGame_DBR ) );
     pQuery->SetVoidObject( pServerSession );
     pQuery->SetQuery( szQueryBuff );
     pServerSession->DBQuery( pQuery );
@@ -88,7 +88,7 @@ int User_Result_QuitTable ( ServerSession * pServerSession, Query_QuitTable * pQ
 void MSG_Handler_QuitTable_DBR ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
     MSG_DBPROXY_RESULT * msg = (MSG_DBPROXY_RESULT*) pMsg;
-    Query_QuitTable * pQuery = (Query_QuitTable*) msg->m_pData;
+    Query_QuitTable * pQuery = (Query_QuitTable *) msg->m_pData;
     if ( pQuery ) {
         User_Result_QuitTable( pServerSession, pQuery );
         Query_QuitTable::FREE(pQuery);

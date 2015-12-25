@@ -176,7 +176,6 @@ BOOL LoginServer::OvertimeClear( DWORD dwDeltaTick )
 
 BOOL LoginServer::SendToDBServer( BYTE * pMsg, WORD wSize)
 {
-	printf("[LoginServer::SendToDBServer]\n");
     if ( m_pDBServer ) {
 		return m_pDBServer->Send( pMsg, wSize );
 	}

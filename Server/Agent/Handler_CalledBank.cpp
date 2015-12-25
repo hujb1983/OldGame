@@ -4,7 +4,23 @@
 
 void MSG_Handler_CalledBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    g_AgentServer->SendToGameServer( (BYTE*) pMsg, wSize );
+    UserSession * pSession = (UserSession*) pServerSession;
+    assert(pSession==NULL);
+
+    int _battleid = pSession->GetBattleKey();
+    int _seatid   = pSession->GetSeatKey();
+
+    char _buff[1024] = {0};
+    char _format[256] = "{\"protocol\":\"%d\","
+                         "\"battleid\":\"%d\","
+                         "\"seatid\":\"%d\" }" ;
+
+    sprintf( _buff, _format, MAKEDWORD( Games_Protocol, Called_REQ ), _battleid, _seatid );
+
+    WORD _wLen = strlen( _buff );
+    g_AgentServer->SendToGameServer( (BYTE*) _buff, _wLen );
+
+    DEBUG_MSG( LVL_DEBUG, "Called_REQ to game: %s \n", _buff );
 }
 
 void MSG_Handler_CalledBank_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
@@ -15,12 +31,8 @@ void MSG_Handler_CalledBank_BRD ( ServerSession * pServerSession, MSG_BASE * pMs
         return;
     }
 
-    int _userkey1  = 0;
-    int _userkey2  = 0;
-    int _userkey3  = 0;
-    int _create    = 0;
-    int _initcard  = 0;
-
+    int _userkey1(0), _userkey2(0), _userkey3(0);
+    int _create(0), _initcard(0);
     js_map.ReadInteger( "userkey1",  _userkey1 );
     js_map.ReadInteger( "userkey2",  _userkey2 );
     js_map.ReadInteger( "userkey3",  _userkey3 );

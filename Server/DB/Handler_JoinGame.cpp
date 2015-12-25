@@ -68,7 +68,7 @@ _IMPL_QUERY_POOL(Query_JoinGame);
     */
 int User_Query_JoinGame( ServerSession * pServerSession, const char * js_text )
 {
-    printf( "[User_Query_JoinGame] pMsg = %s \n",  js_text );
+    DEBUG_MSG(LVL_DEBUG, "JoinGame_REQ to recv: %s.",  js_text );
 
     JsonMap js_map;
     if ( js_map.set_json( js_text ) == -1 ) {
@@ -126,8 +126,6 @@ int User_Result_JoinGame ( ServerSession * pServerSession, Query_JoinGame * pQue
     if ( iSize > 0 )
     {
         int iError = pQuery->vctRes[0].m_iError;
-        printf( " m_iError = %d \n", pQuery->vctRes[0].m_iError );
-
         WORD _userid   = pQuery->userid;
         WORD _userkey  = pQuery->userport;
         WORD _agentkey = pQuery->agentport;
@@ -135,7 +133,6 @@ int User_Result_JoinGame ( ServerSession * pServerSession, Query_JoinGame * pQue
         BYTE _tableid  = pQuery->tableid;
         BYTE _seatid   = pQuery->seatid;
         WORD _battleid = pQuery->battleid;
-
 
         char szJsonBuff[1024] = {0};
         if ( iError == 0 ) {
@@ -171,7 +168,8 @@ int User_Result_JoinGame ( ServerSession * pServerSession, Query_JoinGame * pQue
                      _seatid);
         }
 
-        printf("[DBServer::User_Result_JoinGame] %s.\n", szJsonBuff);
+        DEBUG_MSG( LVL_DEBUG, "JoinGame_BRD to send: %s.", szJsonBuff);
+
         int nLength = strlen(szJsonBuff);
         pServerSession->Send( (BYTE*)szJsonBuff, nLength );
     }

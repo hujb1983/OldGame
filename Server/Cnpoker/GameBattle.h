@@ -11,14 +11,19 @@ public:
 	GameBattle();
 	virtual ~GameBattle();
 
+public:
+    int InitBattle();
+    int JoinBattle( BYTE _seatid );
+    int QuitBattle( BYTE _seatid );
+
 public: // 超时
-    BOOL UpdateOvertime( DWORD dwTicket );  // 操时更新
-    BOOL SendOvertimeMessage();             // 发送操时信息
-    BOOL IsOvertime();                      // 判断是否操时
-    BOOL LockOvertime();                    // 已经操时
-    BOOL UnlockOvertime();                  // 解锁
-    BOOL SetCalledOvertime();               // 设置叫牌操时
-    BOOL SetDiscardsOvertime();             // 设置出牌操时
+    int UpdateOvertime( DWORD dwTicket );  // 操时更新
+    int SendOvertimeMessage();             // 发送操时信息
+    int IsOvertime();                      // 判断是否操时
+    int LockOvertime();                    // 已经操时
+    int UnlockOvertime();                  // 解锁
+    int SetCalledOvertime();               // 设置叫牌操时
+    int SetDiscardsOvertime();             // 设置出牌操时
 
 public: // 获取用户key
     int GetAllPlayerKey(char * json_text, WORD wSize);  // 取得所有用户Hash入口
@@ -33,13 +38,16 @@ public: // 基本设置
 	int SetTable( BYTE room, BYTE table );
 	int SetID ( BYTE seatid, int id  );
     int SetKey( BYTE seatid, int key );
+    int SetMaxMoney  ( UINT _money );               // 设置高限额;
+    int SetMinMoney  ( UINT _money );               // 设置底柱;
+    int SetBrokerage ( UINT _rate  );               // 设置佣金;
     int SetStartSeat( BYTE seatid );                // 定义申请地主人;
     int SetOnline( BYTE seatid, BYTE status );      // 设置在线状态;
 
 	int SetStart( BYTE seatid, BYTE status );       // 开始设置
 	int SetShow( BYTE seatid );                     // 显牌设置
     int SetCalled( BYTE seatid, BYTE called );      // 设置叫牌
-    int SetBank( BYTE seatid );                     // 设置为银行
+    int SetBank( BYTE seatid );                     // 设置为庄家
     int SetPlaying( BYTE seatid );                  // 设置玩牌人员
     int SetTrusteeship( BYTE seatid );              // 是否托管
     int CancelTrusteeship( BYTE seatid );           // 取消托管
@@ -63,6 +71,11 @@ public: // 牌设置
     BYTE getCurrentCards( BYTE seatid, BYTE * poker, WORD bySize );
 
 public: // 获取数据
+    UINT  getMaxMoney ();                   // 设置高限额;
+    UINT  getMinMoney ();                   // 设置底柱;
+    UINT  getBrokerage();                   // 设置佣金;
+    BYTE  getModel();                       // 取得桌子的现有倍数;
+    WORD& getMultiple();                    // 取得桌子的现有倍数;
     BYTE  getSeatid(int key, BYTE & seatid);// 根据Key获得座位ID;
     BYTE  getBanker();                      // 取得庄;
     BYTE  getBattleStatus();                // 制造一个战斗状态;
@@ -93,44 +106,49 @@ public:
     WORD getIndex();
 	WORD prevKey(BYTE seatid);
 	WORD nextKey(BYTE seatid);
+	UINT getID ( BYTE seatid);
     WORD getKey( BYTE seatid);
 
 private:
-    WORD m_wIndex;                              // 复本下标
-    UINT m_uCycle;                              // 周期
-	BYTE m_byRoomid;                            // 房间
-	BYTE m_byTableid;                           // 桌子
-    BYTE m_byModel;                             // 加倍模式
-	UINT m_uiUpdate;                            // 更新时间
-	BYTE m_byPlaying;                           // 正在玩的人
-	BYTE m_byStartSeat;                         // 开始的桌子, 主要是叫地主;
+    WORD m_wIndex;                              // 复本下标;
+    UINT m_uCycle;                              // 周期;
+	BYTE m_byRoomid;                            // 房间;
+	BYTE m_byTableid;                           // 桌子;
+    BYTE m_byModel;                             // 加倍模式;
+    WORD m_wMultiple;                           // 加倍模式下动态数变化;
+    UINT m_uiMaxMoney;                          // 最大金额;
+    UINT m_uiMinMoney;                          // 最小金额;
+    WORD m_wBrokerage;                          // 佣金;
+	UINT m_uiUpdate;                            // 更新时间;
+	BYTE m_byPlaying;                           // 正在玩的人;
+	BYTE m_byStartSeat;                         // 开始的桌子, 叫地主要做偏移;
 	BYTE m_byCallSeat;                          // 第一个为m_byStartSeat, 下一个叫地主;
-	BYTE m_byCallTimes;                         // 叫地主次数;
-	BYTE m_byBanker;                            // 地主;
-	BYTE m_byTableStatus;                       // 桌子现有状态;
+	BYTE m_byCallTimes;                         // 桌子已经叫地主整的次数;
+	BYTE m_byBanker;                            // 记录地主的坐位号;
+	BYTE m_byTableStatus;                       // 桌子现有状态：（坐下阶段、叫地主阶段、打牌阶段、结算阶段）;
 	BYTE m_byStatus[MAX_USER];                  // 是否地主;
-	BYTE m_byStart[MAX_USER];                   // 开始状态
-	BYTE m_byCalls[MAX_CALL];                   // 叫地主状态
-    BYTE m_byShow[MAX_USER];                    // 显示状态
-    UINT m_uiUserid[MAX_USER];                  // 用户ID
-    WORD m_wUserkey[MAX_USER];                  // 用户端口
-    BYTE m_byOnline[MAX_USER];                  // 用户在线状态
-    BYTE m_byTrusteeship[MAX_USER];             // 用户托管状态
-    char m_szUsercards[MAX_USER][CHAR_POKER+1]; // 用户打掉的牌
-    BYTE m_byUsercards[MAX_USER][MAX_POKER+1];  // 用户手上的牌
-    int  m_nDiscardsSize[MAX_USER];             // 用户手上的牌Size
-    char m_szDiscards[MAX_USER][CHAR_POKER+1];  // 用户打掉的牌
-    BYTE m_byBasecards[BASE_POKER+1];           // 地主牌
+	BYTE m_byStart[MAX_USER];                   // 是否已经点击, 开始状态;
+	BYTE m_byCalls[MAX_CALL];                   // 记录叫地主状态的用户状态;
+    BYTE m_byShow[MAX_USER];                    // 记录显示牌的用户状态;
+    UINT m_uiUserid[MAX_USER];                  // 用户ID;
+    WORD m_wUserkey[MAX_USER];                  // 用户端口;
+    BYTE m_byOnline[MAX_USER];                  // 用户在线状态;
+    BYTE m_byTrusteeship[MAX_USER];             // 用户托管状态;
+    char m_szUsercards[MAX_USER][CHAR_POKER+1]; // 用户打掉的牌;
+    BYTE m_byUsercards[MAX_USER][MAX_POKER+1];  // 用户手上的牌;
+    int  m_nDiscardsSize[MAX_USER];             // 用户手上的牌Size;
+    char m_szDiscards[MAX_USER][CHAR_POKER+1];  // 用户打掉的牌;
+    BYTE m_byBasecards[BASE_POKER+1];           // 地主牌;
 	BYTE m_byPlayTimes;                         // 设置玩的次数；
-    BYTE m_byLastActive;                        // 最后打牌的坐位
-    BYTE m_byLastType;                          // 最后打牌的类型
-	BYTE m_byLastValue;                         // 最后打牌的值
-	BYTE m_byLastCount;                         // 最后打牌的比较个数
-	BYTE m_byLastSize;                          // 最后打牌总张数
-    DWORD m_dwBeginTicket;                      // 开始滴达
-    DWORD m_dwOverTicket;                       // 操时滴达
-    BYTE  m_byOverTime;                         // 是否已经操时
-    char  m_szOverTime[OT_SIZE];                // 操时时配置好
+    BYTE m_byLastActive;                        // 最后打牌的坐位;
+    BYTE m_byLastType;                          // 最后打牌的类型;
+	BYTE m_byLastValue;                         // 最后打牌的值;
+	BYTE m_byLastCount;                         // 最后打牌的比较个数;
+	BYTE m_byLastSize;                          // 最后打牌总张数;
+    DWORD m_dwBeginTicket;                      // 开始滴达;
+    DWORD m_dwOverTicket;                       // 操时滴达;
+    BYTE  m_byOverTime;                         // 是否已经操时;
+    char  m_szOverTime[OT_SIZE];                // 操时时配置好;
 
 public:
     GameBattle * set_prev( GameBattle * _prev );

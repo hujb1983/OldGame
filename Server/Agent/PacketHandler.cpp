@@ -30,6 +30,9 @@ DWORD PacketHandler::GetProtocol( char * szMsg )
 
     int pid = 0;
     js_map.ReadInteger("protocol", pid);
+    if (pid==0) {
+        DEBUG_MSG( LVL_ERROR, "AgentServer PacketHandler::GetProtocol %s ", szMsg );
+    }
     return (DWORD) pid;
 }
 
@@ -78,6 +81,7 @@ BOOL PacketHandler::Register_Games()
 	AddHandler_Games( Games_Protocol, JoinTable_BRD,         MSG_Handler_JoinTable_BRD       );
 	AddHandler_Games( Games_Protocol, JoinGame_BRD,          MSG_Handler_JoinGame_BRD        );
 	AddHandler_Games( Games_Protocol, JoinGame_NAK,          MSG_Handler_JoinGame_NAK        );
+	AddHandler_Games( Games_Protocol, QuitGame_BRD,          MSG_Handler_QuitGame_BRD        );
 	AddHandler_Games( Games_Protocol, QuitTable_BRD,         MSG_Handler_QuitTable_BRD       );
 	AddHandler_Games( Games_Protocol, StartGame_BRD,         MSG_Handler_StartGame_BRD       );
 	AddHandler_Games( Games_Protocol, InitCards_BRD,         MSG_Handler_InitCards_BRD       );
@@ -122,8 +126,6 @@ BOOL PacketHandler::AddHandler_Games( WORD category, WORD protocol, fnHandler fn
 VOID PacketHandler::ParsePacket_Client( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-	// printf("PacketHandler::ParsePacket_Client \n");
-
     DWORD pid = GetProtocol( (char*)pMsg );
     if ( pid != 0 ) {
         FUNC_Client * pFuncInfo = (FUNC_Client *)m_pFuncMap_Client->Find( pid );
@@ -136,8 +138,6 @@ VOID PacketHandler::ParsePacket_Client( ServerSession * pSession, MSG_BASE * pMs
 VOID PacketHandler::ParsePacket_Lobby( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-	// printf("PacketHandler::ParsePacket_Lobby \n");
-
     DWORD pid = GetProtocol( (char*)pMsg );
     if ( pid != 0 ) {
         FUNC_Lobby * pFuncInfo = (FUNC_Lobby *)m_pFuncMap_Lobby->Find( pid );
@@ -150,8 +150,6 @@ VOID PacketHandler::ParsePacket_Lobby( ServerSession * pSession, MSG_BASE * pMsg
 VOID PacketHandler::ParsePacket_Games( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-	printf("PacketHandler::ParsePacket_Games \n");
-
 	DWORD pid = GetProtocol( (char*)pMsg );
     if ( pid != 0 ) {
         FUNC_Games * pFuncInfo = (FUNC_Games *)m_pFuncMap_Games->Find( pid );

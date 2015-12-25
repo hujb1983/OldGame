@@ -82,8 +82,8 @@ BOOL PacketHandler::Register_Database()
 	AddHandler_Database( Update_Protocol, WRankInfo_DBR,    MSG_Handler_WRankInfo_DBR   );
 	AddHandler_Database( Update_Protocol, DRankInfo_DBR,    MSG_Handler_DRankInfo_DBR   );
 	AddHandler_Database( Games_Protocol,  JoinTable_DBR,    MSG_Handler_JoinTable_DBR   );
-	AddHandler_Database( Games_Protocol,  QuitTable_DBR,    MSG_Handler_QuitTable_DBR   );
 	AddHandler_Database( Games_Protocol,  JoinGame_DBR,     MSG_Handler_JoinGame_DBR    );
+	AddHandler_Database( Games_Protocol,  QuitGame_DBR,     MSG_Handler_QuitGame_DBR    );
 	AddHandler_Database( Games_Protocol,  UpdateBattle_DBR, MSG_Handler_UpdateBattle_DBR);
 	AddHandler_Database( Games_Protocol,  Settlement_DBR,   MSG_Handler_Settlement_DBR  );
 }
@@ -124,10 +124,7 @@ BOOL PacketHandler::AddHandler_Database( WORD category, WORD protocol, fnHandler
 VOID PacketHandler::ParsePacket_Login( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-
     DWORD pid = GetProtocol( (char*)pMsg );
-	printf("[DBServer PacketHandler::ParsePacket_Lobby] %d.\n", pid);
-
     if ( pid != 0 ) {
         FUNC_Login * pFuncInfo = (FUNC_Login *)m_pFuncMap_Login->Find( pid );
         if (pFuncInfo) {
@@ -139,10 +136,7 @@ VOID PacketHandler::ParsePacket_Login( ServerSession * pSession, MSG_BASE * pMsg
 VOID PacketHandler::ParsePacket_Lobby( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-
     DWORD pid = GetProtocol( (char*)pMsg );
-	printf("[DBServer PacketHandler::ParsePacket_Lobby] %d.\n", pid);
-
     if ( pid != 0 ) {
         FUNC_Lobby * pFuncInfo = (FUNC_Lobby *)m_pFuncMap_Lobby->Find( pid );
         if (pFuncInfo) {
@@ -154,8 +148,6 @@ VOID PacketHandler::ParsePacket_Lobby( ServerSession * pSession, MSG_BASE * pMsg
 VOID PacketHandler::ParsePacket_Games( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-	printf("PacketHandler::ParsePacket_Games \n");
-
     DWORD pid = GetProtocol( (char*)pMsg );
     if ( pid != 0 ) {
         FUNC_Games * pFuncInfo = (FUNC_Games *)m_pFuncMap_Games->Find( pid );
@@ -168,8 +160,6 @@ VOID PacketHandler::ParsePacket_Games( ServerSession * pSession, MSG_BASE * pMsg
 VOID PacketHandler::ParsePacket_Database( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-	printf("PacketHandler::ParsePacket_Database \n");
-
     FUNC_Database * pFuncInfo = (FUNC_Database *)m_pFuncMap_Database->Find( MAKELONG( pMsg->m_byCategory, pMsg->m_byProtocol ) );
     if (pFuncInfo) {
         pFuncInfo->m_fnHandler( pSession, pMsg, wSize );

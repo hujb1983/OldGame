@@ -29,7 +29,8 @@ PublicObjs 		= Public/InfoParser.o \
 				  Public/Yond_string.o \
 				  Public/Yond_md5.o 
 	  
-UtilityObjs 	= Utility/Yond_mutex.o \
+UtilityObjs 	= Utility/SysLog.o \
+				  Utility/Yond_mutex.o \
 				  Utility/Yond_ini.o \
 				  Utility/Yond_thread.o \
 				  Utility/Yond_thread_pool.o \
@@ -103,6 +104,7 @@ LobbyObjs   	= Lobby/LobbyMain.o \
 				  Lobby/Handler_Relogin.o \
 				  Lobby/Handler_Logout.o \
 				  Lobby/Handler_JoinTable.o \
+				  Lobby/Handler_QuitTable.o \
 				  Lobby/Handler_GamePacket.o \
 				  Lobby/Handler_RoomInfo.o \
 				  Lobby/Handler_TableInfo.o \
@@ -136,6 +138,7 @@ AgentObjs   	= Agent/AgentMain.o \
 				  Agent/Handler_Settlement.o \
 				  Agent/Handler_CalledBank.o \
 				  Agent/Handler_JoinGame.o \
+				  Agent/Handler_QuitGame.o \
 				  Agent/Handler_CreateBank.o \
 				  Agent/Handler_Discard.o \
 				  Agent/Handler_Upline.o \

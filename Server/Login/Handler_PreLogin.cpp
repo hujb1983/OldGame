@@ -3,6 +3,8 @@
 
 void MSG_Handler_PreLogin_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
+    DEBUG_MSG( LVL_DEBUG, "PreLogin_REQ to recv: %s. \n", (char*)pMsg );
+
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
         return;
@@ -38,15 +40,13 @@ void MSG_Handler_PreLogin_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg,
 	sprintf( buff, format, MAKEDWORD( (WORD)Login_Protocol, (WORD)PreLogin_REQ ),
 		_iUserKey, _iAccessID, _cUsername, _cPassword, _cSshKey, _iGameID, _iLoginType );
 
-    printf("[buff = %s] \n", buff);
-
 	int len = strlen( buff );
     g_pLoginServer->SendToDBServer( (BYTE*) buff, len );
 }
 
 void MSG_Handler_PreLogin_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    printf("[LoginServer::MSG_Handler_PreLogin_ANC] %s \n", (char*)pMsg );
+    DEBUG_MSG( LVL_DEBUG, "PreLogin_ANC to recv: %s. \n", (char*)pMsg );
 
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
@@ -63,7 +63,7 @@ void MSG_Handler_PreLogin_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg,
 
 void MSG_Handler_PreLogin_NAK ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    printf("[LoginServer::MSG_Handler_PreLogin_NAK] %s \n", (char*)pMsg );
+    DEBUG_MSG( LVL_DEBUG, "PreLogin_NAK to recv: %s. \n", (char*)pMsg );
 
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {

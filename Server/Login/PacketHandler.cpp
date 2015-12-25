@@ -25,6 +25,9 @@ DWORD PacketHandler::GetProtocol( char * szMsg )
 
     int pid = 0;
     js_map.ReadInteger("protocol", pid);
+    if (pid==0) {
+        DEBUG_MSG( LVL_ERROR, "LoginServer PacketHandler::GetProtocol %s ", szMsg );
+    }
     return (DWORD) pid;
 }
 
@@ -65,8 +68,6 @@ BOOL PacketHandler::AddHandler_Database( WORD category, WORD protocol, fnHandler
 VOID PacketHandler::ParsePacket_Client( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert( NULL != pMsg );
-	printf("[Login] PacketHandler::ParsePacket_Client \n");
-
 	DWORD pid = GetProtocol( (char*)pMsg );
     if ( pid != 0 ) {
         FUNC_Client * pFuncInfo = (FUNC_Client *)m_pFuncMap_Client->Find( pid );
@@ -79,8 +80,6 @@ VOID PacketHandler::ParsePacket_Client( ServerSession * pSession, MSG_BASE * pMs
 VOID PacketHandler::ParsePacket_Database( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
     assert( NULL != pMsg );
-	printf("[Login] PacketHandler::ParsePacket_Database \n");
-
 	DWORD pid = GetProtocol( (char*)pMsg );
     if ( pid != 0 ) {
         FUNC_Database * pFuncInfo = (FUNC_Database *)m_pFuncMap_Database->Find( pid );

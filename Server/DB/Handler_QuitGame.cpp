@@ -12,19 +12,18 @@ class Query_QuitGame : public QueryResult
 public:
 
     int  userid;
-    WORD userport;
-    WORD agentport;
-    BYTE roomid;
-    BYTE tableid;
+    int  battleid;
+    int  seatid;
 
 	enum {
-		RESULT_COL_NUM = 2,
+		RESULT_COL_NUM = 3,
 		PARAM_COL_NUL  = 0,
 	};
 
 	struct sRESULT {
         int  m_iError;
         int  m_iBattle;
+        int  m_iSeatid;
 		sRESULT() {
 			memset( this, 0, sizeof(sRESULT) );
 		}
@@ -47,6 +46,7 @@ public:
 	_BEGIN_BINDING_DATA( sRESULT, vctRes, uLength, 1, RESULT_COL_NUM)
         _BINDING_COLUMN(0, m_iError)
         _BINDING_COLUMN(1, m_iBattle)
+        _BINDING_COLUMN(2, m_iSeatid)
 	_END_BINDING_DATA()
 };
 
@@ -56,41 +56,33 @@ _IMPL_QUERY_POOL(Query_QuitGame);
 
 
 /*  1. 设置房间号(tb_roominfo)；
-    2. 设置桌子号(tb_tableinfo)；
-    */
+    2. 设置桌子号(tb_tableinfo)；    */
 int User_Query_QuitGame( ServerSession * pServerSession, const char * js_text )
 {
+    DEBUG_MSG( LVL_DEBUG, "QuitGame_REQ to recv: %s \n", js_text );
+
     JsonMap js_map;
     if ( js_map.set_json( js_text ) == -1 ) {
         return -1;
     }
 
-    int _dwUserDB = 0;
-    int _roomid = 0;
-    int _tableid = 0;
-    int _userkey = 0;
-    int _agentkey = 0;
-
-    js_map.ReadInteger( "userkey",  _userkey  );
-    js_map.ReadInteger( "agentkey", _agentkey );
-    js_map.ReadInteger( "userid",   _dwUserDB );
-    js_map.ReadInteger( "roomid",   _roomid   );
-    js_map.ReadInteger( "tableid",  _tableid  );
+    int _userid(0), _battleid(0), _seatid(0);
+    js_map.ReadInteger( "userid",   _userid );
+    js_map.ReadInteger( "battleid", _battleid );
+    js_map.ReadInteger( "seatid",   _seatid );
 
     Query_QuitGame * pQuery = Query_QuitGame::ALLOC();
     if ( NULL == pQuery ) {
         return -1;     // 比较忙
     }
 
-    pQuery->userport  = _userkey;
-    pQuery->agentport = _agentkey;
-    pQuery->userid    = _dwUserDB;
-    pQuery->roomid    = _roomid;
-    pQuery->tableid   = _tableid;
+    pQuery->userid    = _userid;
+    pQuery->battleid  = _battleid;
+    pQuery->seatid    = _seatid;
 
     char szQueryBuff[256] = {0};
 	snprintf( szQueryBuff, sizeof(szQueryBuff),
-          " call p_UserQuitGame(%d, %d, %d, %d, %d); ", _dwUserDB, _userkey, _agentkey, _roomid, _tableid );
+          " call p_UserQuitGame( %d ); ", _userid );
 
     pQuery->SetIndex( MAKEDWORD( (WORD)Games_Protocol, (WORD)QuitGame_DBR ) );
     pQuery->SetVoidObject( pServerSession );
@@ -106,66 +98,48 @@ void MSG_Handler_QuitGame ( ServerSession * pServerSession, MSG_BASE * pMsg, WOR
 
 int User_Result_QuitGame ( ServerSession * pServerSession, Query_QuitGame * pQuery )
 {
-    int   iError;
-    int   nLength;
-    int   _nIndex = -1;
-
-    int iSize = pQuery->vctRes.size();
-    if ( iSize > 0 )
+    int _iError;
+    int _iSize = pQuery->vctRes.size();
+    if ( _iSize > 0 )
     {
-        int iError = pQuery->vctRes[0].m_iError;
-        printf( " m_iError = %d \n", pQuery->vctRes[0].m_iError );
+        _iError = pQuery->vctRes[0].m_iError;
+        WORD _battleid(0);
+        BYTE _seatid(0);
+        int  _nLength = 0;
+        char _szJsonBuff[1024] = {0};
 
-        WORD _userid   = pQuery->userid;
-        WORD _userkey  = pQuery->userport;
-        WORD _agentkey = pQuery->agentport;
-        BYTE _roomid   = pQuery->roomid;
-        BYTE _tableid  = pQuery->tableid;
-
-        int  nLength = 0;
-        char szJsonBuff[1024] = {0};
-        if ( iError == 0 )
+        DEBUG_MSG( LVL_DEBUG, "QuitGame_BRD to _iError : %d \n", _iError );
+        if ( _iError == 0 )
         {
-            _nIndex = pQuery->vctRes[0].m_iBattle;
-            snprintf( szJsonBuff, sizeof(szJsonBuff),
+            _battleid = pQuery->vctRes[0].m_iBattle;
+            _seatid   = pQuery->vctRes[0].m_iSeatid;
+            DEBUG_MSG( LVL_DEBUG, "QuitGame_BRD to _iError : %d %d \n", _battleid, _seatid );
+
+            snprintf( _szJsonBuff, sizeof(_szJsonBuff),
                      "{\"protocol\":%d,"
-                     "\"userid\":%d,"
-                     "\"roomid\":%d,"
-                     "\"tableid\":%d,"
-                     "\"battleid\":%d,"
-                     "\"status\": 0,"
-                     "\"userkey\":%d}",
+                     " \"battleid\":%d,"
+                     " \"seatid\":%d }",
                       MAKEDWORD(Games_Protocol, QuitGame_BRD),
-                      _userid,
-                      _agentkey,
-                      _roomid,
-                      _tableid,
-                      _nIndex,
-                      _userkey);
-            nLength = strlen(szJsonBuff);
+                      _battleid,
+                      _seatid);
+            _nLength = strlen(_szJsonBuff);
         }
         else
         {
-            snprintf( szJsonBuff, sizeof(szJsonBuff),
+            _battleid = pQuery->battleid;
+            _seatid   = pQuery->seatid;
+            snprintf( _szJsonBuff, sizeof(_szJsonBuff),
                      "{\"protocol\":%d,"
-                     "\"userid\":%d,"
-                     "\"agentkey\":%d,"
-                     "\"roomid\":%d,"
-                     "\"tableid\":%d,"
-                     "\"battleid\":%d,"
-                     "\"status\": -1,"
-                     "\"userkey\":%d}",
+                     " \"battleid\":%d,"
+                     " \"seatid\":%d }",
                       MAKEDWORD(Games_Protocol, QuitGame_BRD),
-                      _userid,
-                      _agentkey,
-                      _roomid,
-                      _tableid,
-                      -1,
-                      _userkey);
-            nLength = strlen(szJsonBuff);
+                      _battleid,
+                      _seatid);
+            _nLength = strlen(_szJsonBuff);
         }
 
-        pServerSession->Send( (BYTE*)szJsonBuff, nLength );
+        DEBUG_MSG( LVL_DEBUG, "QuitGame_BRD to send: %s \n", _szJsonBuff );
+        pServerSession->Send( (BYTE*)_szJsonBuff, _nLength );
     }
 }
 

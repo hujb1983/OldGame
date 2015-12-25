@@ -82,8 +82,11 @@ GameBattle * GameMgr::AllocBattle()
 }
 
 /*  1. 通过找到桌子ID 查找一个 GameBattle； */
-GameBattle * GameMgr::GetBattle( int t_idx ) {
-    return m_pAllBattles[t_idx];
+GameBattle * GameMgr::GetBattle( WORD t_idx ) {
+    if ( t_idx<MC_BATTLES ) {
+        return m_pAllBattles[t_idx];
+    }
+    return NULL;
 }
 
 /*  1. 用作回收桌子操作；

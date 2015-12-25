@@ -53,6 +53,7 @@ void MSG_Handler_QuitTable_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg
 /* 1. 加入游戏；*/
 void MSG_Handler_JoinGame_BRD  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 void MSG_Handler_JoinGame_NAK  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
+void MSG_Handler_QuitGame_BRD  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 
 /* 2. 退出桌子；
    3. 开始游戏；

@@ -88,7 +88,7 @@ void LobbyUpdate::JoinTable ( ServerSession * pServerSession, MSG_BASE * pMsg, W
 
 void LobbyUpdate::QuitTable ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    JsonMap js_map;
+    /* JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
         return;
     }
@@ -102,7 +102,7 @@ void LobbyUpdate::QuitTable ( ServerSession * pServerSession, MSG_BASE * pMsg, W
             MAKEDWORD( Games_Protocol, QuitTable_REQ), _userport );
 
     int nLen = strlen(szMsg);
-    g_LobbyServer->SendToDBServer( (BYTE*) szMsg, nLen );
+    g_LobbyServer->SendToDBServer( (BYTE*) szMsg, nLen ); */
 }
 
 void LobbyUpdate::RoomInfo_REQ  (ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize)

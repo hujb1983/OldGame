@@ -1,4 +1,4 @@
-#include "Handler_Packet.h"
+﻿#include "Handler_Packet.h"
 #include "Handler_Module.h"
 
 int acl_msg_printf()
@@ -18,26 +18,27 @@ int acl_msg_printf()
 	printf( "%10d : >>加入房间信息 \n",   			MAKEDWORD(Games_Protocol,  JoinTable_REQ) );  
 	printf( "%10d : >>退出房间信息 \n",   			MAKEDWORD(Games_Protocol,  QuitTable_REQ) ); 
 	printf( "%10d : >>游戏准备请求 \n",   			MAKEDWORD(Games_Protocol,  StartGame_REQ) ); 
+	printf( "%10d : >>游戏准备广播 \n",   			MAKEDWORD(Games_Protocol,  StartGame_BRD) );
 	printf( "%10d : >>显示游戏请求 \n",   			MAKEDWORD(Games_Protocol,  ShowCards_REQ) ); 
 	printf( "%10d : >>叫地主请求 \n",      			MAKEDWORD(Games_Protocol,  Called_REQ) );    
 	printf( "%10d : >>出牌请求 \n",    			    MAKEDWORD(Games_Protocol,  Discards_REQ) ); 
 	printf( "%10d : >>托管游戏请求 \n", 			MAKEDWORD(Games_Protocol,  Trusteeship_REQ) );
-	printf( "%10d : <<加入游戏广播 \n",      		MAKEDWORD(Games_Protocol, JoinGame_BRD) );       
-	printf( "%10d : <<加入游戏失败 \n",      		MAKEDWORD(Games_Protocol, JoinGame_NAK) );         
-	printf( "%10d : <<退出桌子广播 \n",        		MAKEDWORD(Games_Protocol, QuitTable_BRD) );         
-	printf( "%10d : <<开始游戏广播 \n",        		MAKEDWORD(Games_Protocol, StartGame_BRD) );         
-	printf( "%10d : <<分配牌广播 \n",        		MAKEDWORD(Games_Protocol, InitCards_BRD) );         
-	printf( "%10d : <<显示牌广播 \n",        		MAKEDWORD(Games_Protocol, ShowCards_BRD) );        
-	printf( "%10d : <<叫地主广播 \n",           	MAKEDWORD(Games_Protocol, Called_BRD) );           
-	printf( "%10d : <<叫地主授权广播 \n",    		MAKEDWORD(Games_Protocol, CalledLicense_BRD) );     
-	printf( "%10d : <<创建地主广播 \n",       		MAKEDWORD(Games_Protocol, CreateBank_BRD) );        
-	printf( "%10d : <<出版授权广播 \n",  		    MAKEDWORD(Games_Protocol, DiscardsLicense_BRD) );   
-	printf( "%10d : <<出版广播 \n",         		MAKEDWORD(Games_Protocol, Discards_BRD) );          
-	printf( "%10d : <<叫地主超时通知 \n",   		MAKEDWORD(Games_Protocol, CalledOverTime_NAK) );    
-	printf( "%10d : <<出牌超时通知 \n", 		    MAKEDWORD(Games_Protocol, DiscardsOverTime_NAK) );  
-	printf( "%10d : <<玩家重新登入游戏广播 \n",     MAKEDWORD(Login_Protocol, Relogin_BRD) );           
-	printf( "%10d : <<玩家离开游戏广播 \n",         MAKEDWORD(Login_Protocol, Offline_BRD) );          
-	printf( "%10d : <<游戏托管广播 \n",      		MAKEDWORD(Games_Protocol, Trusteeship_BRD) );    
+	printf( "%10d : <<加入游戏广播 \n",      		MAKEDWORD(Games_Protocol,  JoinGame_BRD) );       
+	printf( "%10d : <<加入游戏失败 \n",      		MAKEDWORD(Games_Protocol,  JoinGame_NAK) );         
+	printf( "%10d : <<退出桌子广播 \n",        		MAKEDWORD(Games_Protocol,  QuitTable_BRD) );         
+	printf( "%10d : <<开始游戏广播 \n",        		MAKEDWORD(Games_Protocol,  StartGame_BRD) );         
+	printf( "%10d : <<分配牌广播 \n",        		MAKEDWORD(Games_Protocol,  InitCards_BRD) );         
+	printf( "%10d : <<显示牌广播 \n",        		MAKEDWORD(Games_Protocol,  ShowCards_BRD) );        
+	printf( "%10d : <<叫地主广播 \n",           	MAKEDWORD(Games_Protocol,  Called_BRD) );           
+	printf( "%10d : <<叫地主授权广播 \n",    		MAKEDWORD(Games_Protocol,  CalledLicense_BRD) );     
+	printf( "%10d : <<创建地主广播 \n",       		MAKEDWORD(Games_Protocol,  CreateBank_BRD) );        
+	printf( "%10d : <<出版授权广播 \n",  		    MAKEDWORD(Games_Protocol,  DiscardsLicense_BRD) );   
+	printf( "%10d : <<出版广播 \n",         		MAKEDWORD(Games_Protocol,  Discards_BRD) );          
+	printf( "%10d : <<叫地主超时通知 \n",   		MAKEDWORD(Games_Protocol,  CalledOverTime_NAK) );    
+	printf( "%10d : <<出牌超时通知 \n", 		    MAKEDWORD(Games_Protocol,  DiscardsOverTime_NAK) );  
+	printf( "%10d : <<玩家重新登入游戏广播 \n",     MAKEDWORD(Login_Protocol,  Relogin_BRD) );           
+	printf( "%10d : <<玩家离开游戏广播 \n",         MAKEDWORD(Login_Protocol,  Offline_BRD) );          
+	printf( "%10d : <<游戏托管广播 \n",      		MAKEDWORD(Games_Protocol,  Trusteeship_BRD) );    
 }
 
 

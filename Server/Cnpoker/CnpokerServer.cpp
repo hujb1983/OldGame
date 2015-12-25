@@ -55,7 +55,7 @@ BOOL CnpokerServer::Init()
 		return FALSE;
 	}
 
-	g_GameMgr.InitBattles(9);
+	g_GameMgr.InitBattles(90);
 
 	// 主动连接 Agent
 	m_pAgentSession = CnpokerFactory::Instance()->AllocAgentSession();
@@ -81,7 +81,6 @@ BOOL CnpokerServer::ConnectToServer( ServerSession * pSession, char * pszIP, WOR
 	}
 
 	return m_pIOCPServer->Connect( SERVER_SYNCHANDLER, (NetworkObject *)pSession, pszIP, wPort );
-	//return m_pIOCPServer->Connect( SERVER_SYNCHANDLER, (NetworkObject *)pSession, "127.0.0.1", 7000 );
 }
 
 BOOL CnpokerServer::MaintainConnection()
@@ -109,16 +108,12 @@ BOOL CnpokerServer::Update( DWORD dwDeltaTick )
 		m_pIOCPServer->Update();
 	}
 
-	// Connect other Servers
 	MaintainConnection();
-
 	return TRUE;
 }
 
 BOOL CnpokerServer::SendToDBServer( BYTE * pMsg, WORD wSize)
 {
-	printf("[CnpokerServer::SendToDBServer]\n");
-
 	if ( m_pDBSession ) {
 		return m_pDBSession->Send( pMsg, wSize );
 	}
@@ -127,8 +122,6 @@ BOOL CnpokerServer::SendToDBServer( BYTE * pMsg, WORD wSize)
 
 BOOL CnpokerServer::SendToAgentServer( BYTE * pMsg, WORD wSize)
 {
-	printf("[CnpokerServer::SendToAgentServer]\n");
-
 	if ( m_pAgentSession ) {
 		return m_pAgentSession->Send( pMsg, wSize );
 	}
@@ -138,16 +131,13 @@ BOOL CnpokerServer::SendToAgentServer( BYTE * pMsg, WORD wSize)
 //////////////////////////////////////////////////////
 
 NetworkObject * CreateServerSideAcceptedObject() {
-	printf("CnpokerServer::CreateServerSideAcceptedObject \n");
 	//ServerSession * obj = GameFactory::Instance()->AllocGameUser();
 	//return obj;
 }
 
 VOID DestroyServerSideAcceptedObject( NetworkObject *pNetworkObject ) {
-	printf("CnpokerServer::DestroyServerSideAcceptedObject \n");
 	//AgentFactory::Instance()->FreeUserSession(pNetworkObject);
 }
 
 VOID DestroyServerSideConnectedObject( NetworkObject *pNetworkObject ) {
-	printf("CnpokerServer::DestroyServerSideConnectedObject\n");
 }

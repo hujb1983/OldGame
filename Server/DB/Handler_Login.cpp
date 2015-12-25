@@ -50,6 +50,8 @@ _IMPL_QUERY_POOL(Query_Login);
     2. 返回参数后验证； */
 int User_Query_Login( ServerSession * pServerSession, const char * js_text )
 {
+    DEBUG_MSG( LVL_DEBUG, "Login_REQ to recv: %s \n", (char*)js_text );
+
     int  _userport;
     int  _agentport;
     int  _dwUserDB;
@@ -106,7 +108,6 @@ int User_Result_Login ( ServerSession * pServerSession, Query_Login * pQuery )
         _userid    = pQuery->userid;
 
         int iError = pQuery->vctRes[0].m_iError;
-        printf( " m_iError = %d \n", iError );
 
         char szJsonBuff[1024] = {0};
         if ( iError == 0 ) {
@@ -120,7 +121,7 @@ int User_Result_Login ( ServerSession * pServerSession, Query_Login * pQuery )
                     _userid,  _userport, _agentport, MAKEDWORD(Login_Protocol, Login_ANC), MAKEDWORD(Errors_Protocol, ClientLogin_NAK) );
         }
 
-        printf("[DBServer::User_Result_Login] %s.\n", szJsonBuff);
+        DEBUG_MSG( LVL_DEBUG, "Login_ANC to send: %s \n", (char*)szJsonBuff );
 
         int nLength = strlen(szJsonBuff);
         pServerSession->Send( (BYTE*)szJsonBuff, nLength );

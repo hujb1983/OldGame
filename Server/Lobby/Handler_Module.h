@@ -25,6 +25,9 @@ void MSG_Handler_Relogin_ANC    ( ServerSession * pServerSession, MSG_BASE * pMs
 void MSG_Handler_JoinTable_REQ  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 void MSG_Handler_JoinTable_BRD  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 
+void MSG_Handler_QuitTable_REQ  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
+void MSG_Handler_QuitTable_BRD  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
+
 void MSG_Handler_GamePacket_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 void MSG_Handler_GamePacket_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 

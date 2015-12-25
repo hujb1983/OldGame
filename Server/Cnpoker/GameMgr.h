@@ -25,7 +25,7 @@ public:
     GameBattle * AllocBattle();
 
     /*  1. 通过找到桌子ID 查找一个 GameTable； */
-    GameBattle * GetBattle( int t_idx );
+    GameBattle * GetBattle( WORD t_idx );
 
     /*  1. 用作回收桌子操作； */
     void  FreeBattles(GameBattle * pBattle);

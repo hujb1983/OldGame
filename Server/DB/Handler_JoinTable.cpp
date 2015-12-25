@@ -18,13 +18,14 @@ public:
     BYTE tableid;
 
 	enum {
-		RESULT_COL_NUM = 2,
+		RESULT_COL_NUM = 3,
 		PARAM_COL_NUL  = 0,
 	};
 
 	struct sRESULT {
         int  m_iError;
         int  m_iBattle;
+        int  m_iSeatid;
 		sRESULT() {
 			memset( this, 0, sizeof(sRESULT) );
 		}
@@ -47,6 +48,7 @@ public:
 	_BEGIN_BINDING_DATA( sRESULT, vctRes, uLength, 1, RESULT_COL_NUM)
         _BINDING_COLUMN(0, m_iError)
         _BINDING_COLUMN(1, m_iBattle)
+        _BINDING_COLUMN(2, m_iSeatid)
 	_END_BINDING_DATA()
 };
 
@@ -60,6 +62,8 @@ _IMPL_QUERY_POOL(Query_JoinTable);
     */
 int User_Query_JoinTable( ServerSession * pServerSession, const char * js_text )
 {
+    DEBUG_MSG( LVL_DEBUG, "JoinTable_REQ to recv: %s. \n", js_text );
+
     JsonMap js_map;
     if ( js_map.set_json( js_text ) == -1 ) {
         return -1;
@@ -92,7 +96,7 @@ int User_Query_JoinTable( ServerSession * pServerSession, const char * js_text )
 	snprintf( szQueryBuff, sizeof(szQueryBuff),
           " call p_UserJoinTable(%d, %d, %d, %d, %d); ", _dwUserDB, _userkey, _agentkey, _roomid, _tableid );
 
-    printf ( "[User_Query_JoinTable = %s] \n", szQueryBuff );
+    DEBUG_MSG( LVL_DEBUG, "JoinTable_REQ to db: %s . \n", szQueryBuff );
     pQuery->SetIndex( MAKEDWORD( (WORD)Games_Protocol, (WORD)JoinTable_DBR ) );
     pQuery->SetVoidObject( pServerSession );
     pQuery->SetQuery( szQueryBuff );
@@ -109,13 +113,12 @@ int User_Result_JoinTable ( ServerSession * pServerSession, Query_JoinTable * pQ
 {
     int   iError;
     int   nLength;
-    int   _iBattle = -1;
+    int   _iBattle(-1), _iSeatid(0);
 
     int iSize = pQuery->vctRes.size();
     if ( iSize > 0 )
     {
         int iError = pQuery->vctRes[0].m_iError;
-        printf( " m_iError = %d \n", pQuery->vctRes[0].m_iError );
 
         WORD _userid   = pQuery->userid;
         WORD _userkey  = pQuery->userport;
@@ -128,6 +131,7 @@ int User_Result_JoinTable ( ServerSession * pServerSession, Query_JoinTable * pQ
         if ( iError == 0 )
         {
             _iBattle = pQuery->vctRes[0].m_iBattle;
+            _iSeatid = pQuery->vctRes[0].m_iSeatid;
             snprintf( szJsonBuff, sizeof(szJsonBuff),
                      "{\"protocol\":%d,"
                      "\"userid\":%d,"
@@ -135,6 +139,7 @@ int User_Result_JoinTable ( ServerSession * pServerSession, Query_JoinTable * pQ
                      "\"roomid\":%d,"
                      "\"tableid\":%d,"
                      "\"battleid\":%d,"
+                     "\"seatid\":%d,"
                      "\"status\": 0,"
                      "\"userkey\":%d}",
                       MAKEDWORD(Games_Protocol, JoinTable_BRD),
@@ -143,8 +148,8 @@ int User_Result_JoinTable ( ServerSession * pServerSession, Query_JoinTable * pQ
                       _roomid,
                       _tableid,
                       _iBattle,
+                      _iSeatid,
                       _userkey);
-            nLength = strlen(szJsonBuff);
         }
         else
         {
@@ -155,6 +160,7 @@ int User_Result_JoinTable ( ServerSession * pServerSession, Query_JoinTable * pQ
                      "\"roomid\":%d,"
                      "\"tableid\":%d,"
                      "\"battleid\":%d,"
+                     "\"seatid\":0,"
                      "\"status\": -1,"
                      "\"userkey\":%d}",
                       MAKEDWORD(Games_Protocol, JoinTable_BRD),
@@ -164,9 +170,12 @@ int User_Result_JoinTable ( ServerSession * pServerSession, Query_JoinTable * pQ
                       _tableid,
                       -1,
                       _userkey);
-            nLength = strlen(szJsonBuff);
         }
 
+
+        DEBUG_MSG( LVL_DEBUG, "JoinTable_DBR to send: %s. \n", szJsonBuff);
+
+        nLength = strlen(szJsonBuff);
         pServerSession->Send( (BYTE*)szJsonBuff, nLength );
     }
 }

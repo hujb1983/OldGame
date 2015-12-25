@@ -19,13 +19,10 @@ BOOL UserSession::SendPacket(BYTE *pMsg, WORD wSize)
 	return Send( (BYTE *)pMsg, wSize );
 }
 
-WORD UserSession::GetUserKey() const
-{
+WORD UserSession::GetUserKey() const {
 	return m_wUserKey;
 }
-
-void  UserSession::SetUserKey(WORD dwKey)
-{
+void UserSession::SetUserKey(WORD dwKey) {
 	m_wUserKey = dwKey;
 }
 
@@ -34,18 +31,14 @@ void UserSession::Init()
 {
 	m_wUserKey 		= 0;
 	m_bFirst 		= TRUE;
-
 	DWORD dwCurrent = Session::GetTickCount();
 	m_dwOvertime    = dwCurrent + UserSession::m_dwClientDelay;
 	printf( "[UserSession::Init %d] \n", m_dwOvertime);
-
 	this->NotPackageHeader();
 }
 
 BOOL UserSession::Update( DWORD dwDeltaTick )
 {
-	printf( "[UserSession::Update %d = %d] \n", dwDeltaTick, m_dwOvertime);
-
 	// Count Down;
 	if ( dwDeltaTick > m_dwOvertime ) {
 		Disconnect(TRUE);
@@ -57,22 +50,15 @@ BOOL UserSession::Update( DWORD dwDeltaTick )
 
 void UserSession::CloseSession()
 {
-	printf(" [ UserSession::CloseSession ] \n");
-
 	if ( m_pSession != NULL) {
 		m_pSession->CloseSocket();
 	}
-
 	m_bFirst = TRUE;
-
 }
 
 void UserSession::Release()
 {
-	printf(" [ UserSession::Release ] \n");
-
 	m_bFirst = TRUE;
-
 	g_pLoginServer->SetUserSession( this->m_wUserKey, NULL);
 	LoginFactory::Instance()->FreeUserSession(this);
 }
@@ -86,7 +72,6 @@ void UserSession::OnAccept( DWORD dwNetworkIndex )
 
     this->SetUserKey( _wUserKey );
     g_pLoginServer->SetUserSession( _wUserKey, this);
-
 
 	char buff[1024]  =  {0};
 	char format[256] = 	"{\"protocol\":\"%d\",\"data\":{\"type\":\"text/json\"}}  ";
@@ -108,9 +93,7 @@ void UserSession::OnAccept( DWORD dwNetworkIndex )
 
 void UserSession::OnDisconnect()
 {
-	printf("[UserSession::OnDisconnect]\n");
 	NetworkObject::OnDisconnect();
-
 	{
 	    g_pLoginServer->FreeSessionKey(m_wUserKey);
         NetworkObject::OnDisconnect();
@@ -120,9 +103,7 @@ void UserSession::OnDisconnect()
 
 void UserSession::OnRecv(BYTE *pMsg, WORD wSize)
 {
-	printf(">>>> [UserSession::OnRecv]\n");
-
-	// Alloc Port
+    // Alloc Port
 	BYTE msgPlus[1024] = {0};
 	if ( m_wUserKey != 0 ) {
 		g_PacketHandler.ParsePacket_Client(this, (MSG_BASE*)pMsg, wSize);

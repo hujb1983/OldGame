@@ -26,11 +26,11 @@ void AgentSession::OnConnect( BOOL bSuccess, DWORD dwNetworkIndex )
 {
 	ServerSession::OnConnect( bSuccess, dwNetworkIndex );
 	if ( bSuccess ) {
-		printf("[GameServer] : AgentSession::OnConnect success.\n");
+		DEBUG_MSG( LVL_DEBUG, "OnConnect success");
 		ServerSession::SendServerType();
 	}
 	else {
-	    printf("[GameServer] : AgentSession::OnConnect fail\n");
+	    DEBUG_MSG( LVL_DEBUG, "OnConnect fail");
 	}
 }
 

@@ -6,6 +6,8 @@
 */
 int Processed_StartGame ( ServerSession * pServerSession, const char * pInput )
 {
+    DEBUG_MSG( LVL_DEBUG, "StartGame_REQ to recv: %s. \n",  pInput );
+
     JsonMap js_map;
     if ( js_map.set_json( (char *) pInput ) == -1 ) {
         return -1;
@@ -18,8 +20,7 @@ int Processed_StartGame ( ServerSession * pServerSession, const char * pInput )
 
     js_map.ReadInteger("battleid",  _nBattleid);
     js_map.ReadInteger("seatid",    _nSeatid  );
-    js_map.ReadInteger("userkey",   _nUserkey );
-    js_map.ReadInteger("status",    _nStatus );
+    js_map.ReadInteger("status",    _nStatus  );
 
     // @{{{ 检查参数
     if ( (_nSeatid<0) || (_nSeatid>=3) ) {
@@ -31,8 +32,10 @@ int Processed_StartGame ( ServerSession * pServerSession, const char * pInput )
         return FALSE;
     }
 
-    // -- 设置为已开始  _nStatus 用于判断是标准开始，还是显示开始
-    if ( !pBattle->SetStart( _nSeatid, _nStatus ) ) {
+    _nUserkey = pBattle->getKey(_nSeatid);
+
+    // 如果为 FALSE, 表示已经开始游戏了;
+    if ( pBattle->SetStart( _nSeatid, eGB_Ready )==FALSE ) {
         return FALSE;
     }
 
@@ -49,30 +52,38 @@ int Processed_StartGame ( ServerSession * pServerSession, const char * pInput )
         char szPlayerkey[256] = {0};
         pBattle->GetAllPlayerKey( szPlayerkey, sizeof(szPlayerkey) );
 
+        UINT _mult(0), _mmax(0), _mmin(0);
+        WORD _brokerage(0);
+        _mult = pBattle->getMultiple();
+        _mmax = pBattle->getMaxMoney();
+        _mmin = pBattle->getMinMoney();
+        _brokerage = pBattle->getBrokerage();
+
         // @{{{ 组合所有的牌
         char format[256] = 	"{\"protocol\":\"%d\","
-                            " \"ready\":\" %d \","
                             "%s,"
-                            "\"data\":[{"
-                                "\"battleid\":\"%d\","
-                                "\"seatid\":\"%d\","
-                                "\"status\":\"%d\"}] }";
+                            "\"userkey\":\"%d\","
+                            "\"ready\":\"%d\","
+                            "\"seatid\":\"%d\","
+                            "\"status\":\"%d\","
+                            "\"battleid\":\"%d\","
+                            "\"multiple\":\"%d\","
+                            "\"basics\":\"%d\","
+                            "\"brokerage\":\"%d\"}";
 
         sprintf( szMsg, format, MAKEDWORD( Games_Protocol, StartGame_BRD ),
-                1,
-                szPlayerkey,
+                szPlayerkey, _nUserkey, _nReady, _nSeatid, _nStatus,
                 pBattle->getIndex(),
-                _nSeatid,
-                _nStatus );     // 明牌开始
+                _mult, _mmin, _brokerage );
         // }}}@ 组合所有的牌
 
         // @{{{ 发送到其他玩家；
         WORD nLen = strlen( szMsg );
         g_pCnpokerServer->SendToAgentServer( (BYTE*)szMsg, nLen );
+
+        DEBUG_MSG( LVL_DEBUG, "StartGame_REQ to agent: %s. \n",  szMsg );
         return TRUE;
     }
-
-	// }}}@ 发送到其他玩家;
 }
 
 void MSG_Handler_StartGame_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )

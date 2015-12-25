@@ -23,12 +23,15 @@ BOOL UserSession::SendPacket(BYTE *pMsg, WORD wSize)
 	return Send( (BYTE *)pMsg, wSize );
 }
 
+
 WORD UserSession::GetUserKey() const        { return m_wUserKey;    }
 void UserSession::SetUserKey(WORD dwKey)    { m_wUserKey = dwKey;   }
+BYTE UserSession::GetSeatKey() const        { return m_bySeatKey;   }
+void UserSession::SetSeatKey(BYTE dwKey)    { m_bySeatKey = dwKey;  }
 WORD UserSession::GetBattleKey() const      { return m_wBattleKey;  }
 void UserSession::SetBattleKey(WORD dwKey)  { m_wBattleKey = dwKey; }
-WORD UserSession::GetUserid() const        { return m_dwUserid;    }
-void UserSession::SetUserid(UINT dwID)    { m_dwUserid = dwID;   }
+WORD UserSession::GetUserid() const         { return m_dwUserid;    }
+void UserSession::SetUserid(UINT dwID)      { m_dwUserid = dwID;    }
 
 /************ protected *************/
 void UserSession::Init()
@@ -50,11 +53,14 @@ void UserSession::Init()
     m_uiWons     = 0;       // 赢的次数
 	m_uiFaileds  = 0; 	    // 失败次数
 	m_uiAways    = 0; 		// 逃跑次数
+
+	m_bReady     = FALSE;
+    m_bShowcards = FALSE;
 }
 
 BOOL UserSession::Update( DWORD dwDeltaTick )
 {
-	printf( "[UserSession::Update %d = %d] \n", dwDeltaTick, m_dwOvertime);
+	DEBUG_MSG( LVL_TRACE, "[UserSession::Update %d = %d]", dwDeltaTick, m_dwOvertime);
 
 	// Count Down;
 	if ( dwDeltaTick > m_dwOvertime ) {
@@ -67,23 +73,20 @@ BOOL UserSession::Update( DWORD dwDeltaTick )
 
 void UserSession::CloseSession()
 {
-	printf(" [ UserSession::CloseSession ] \n");
+	DEBUG_MSG( LVL_TRACE, " UserSession::CloseSession ");
 
 	if ( m_pSession != NULL) {
 		m_pSession->CloseSocket();
 	}
-
 	m_bFirst = TRUE;
 }
 
 void UserSession::Release()
 {
-	printf(" [ UserSession::Release ] \n");
+	DEBUG_MSG( LVL_TRACE, " UserSession::Release " );
 
 	m_bFirst = TRUE;
-
 	g_AgentServer->SetUserSession( this->m_wUserKey, NULL);
-
 	AgentFactory::Instance()->FreeUserSession(this);
 }
 
@@ -143,38 +146,18 @@ void UserSession::OnDisconnect()
 
 void UserSession::OnRecv(BYTE *pMsg, WORD wSize)
 {
-	printf(">>>> [UserSession::OnRecv]\n");
-
 	BYTE msgPlus[1024] = {0};
-
-	// Alloc Port
 	if ( m_wUserKey != 0 ) {
-
-        /*
-		char json_msgs[1024] = {0};
-		memcpy(json_msgs, pMsg, wSize);
-
-		JsonMap js_map;
-        if ( js_map.set_json( (char *) pMsg ) == -1 ) {
-            return;
-        }
-
-        int _errmsg;
-        js_map.ReadInteger( "protocol", _errmsg );
-        */
-
 		g_PacketHandler.ParsePacket_Client(this, (MSG_BASE*)pMsg, wSize);
 	}
 }
 
 void UserSession::OnConnect( BOOL bSuccess, DWORD dwNetworkIndex )
 {
-
 }
 
 void UserSession::OnLogString( char * pszLog)
 {
-
 }
 
 void UserSession::DBResult( WORD cate, WORD ptcl, QueryResult * pData )
@@ -188,7 +171,6 @@ void UserSession::DBResult( WORD cate, WORD ptcl, QueryResult * pData )
     */
 }
 
-
 void UserSession::Login( ServerSession * pServerSession )
 {
    Session * pSession = pServerSession->GetSesstion();
@@ -196,6 +178,15 @@ void UserSession::Login( ServerSession * pServerSession )
         m_pSession->UnbindNetworkObject();
         pSession->BindNetworkObject(this);
     }
+}
+
+void UserSession::QuitTable()
+{
+    m_wBattleKey    = 0;          // 房间号
+    m_bReady        = FALSE; 	  // 已经准备好了
+	m_bShowcards    = FALSE;      // 显示牌
+	m_bPokerSize    = 0;          // 牌数量
+    memset( m_bPoker, 0x0, sizeof(m_bPoker) );  // 牌
 }
 
 void UserSession::setName( char * _name, int _size ) {
@@ -214,10 +205,32 @@ void UserSession::setMoney( int _money ) {
     m_iMoneys = _money;
 }
 
+void UserSession::setReady( BOOL _ready ) {
+    m_bReady = _ready;
+}
+void UserSession::setShowcards( BOOL _showcards ) {
+    m_bShowcards = _showcards;
+}
+
+// 牌数量
+BYTE & UserSession::getPokerSize( ) {
+    return m_bPokerSize;
+}
+
+// 牌
+void UserSession::setPokers( char * poker, WORD _size) {
+    memset( m_bPoker, 0x0, sizeof(m_bPoker) );
+    strcat( m_bPoker, poker);
+}
+
 void UserSession::getSeatInfo( char * _seatinfo, int _size )
 {
+    char _true[10]  = {"true"};
+    char _false[10] = {"false"};
     char _buff[256]   = {0};
-    char _format[256] = "{\"show\":\"true\","
+    char _format[256] = "{\"show\":true,"
+                         "\"ready\":%s,"
+                         "\"showcards\":%s,"
                          "\"name\":\"%s\","
                          "\"rate\":\"%.0f\","
                          "\"money\":\"%d\"}";
@@ -229,10 +242,47 @@ void UserSession::getSeatInfo( char * _seatinfo, int _size )
         _rate = m_uiWons / _sum * 100;
     }
 
-    snprintf( _buff, sizeof(_buff), _format, m_szName, _rate, m_iMoneys );
+    char * cReady = _true;
+    if ( m_bReady == FALSE ) {
+        cReady = _false;
+    }
+
+    char * cShowcards = _true;
+    if ( m_bShowcards == FALSE ) {
+        cShowcards = _false;
+    }
+
+    snprintf( _buff, sizeof(_buff), _format,
+             cReady, cShowcards, m_szName, _rate,  m_iMoneys );
 
     int szLen = strlen( _buff );
     if ( szLen < _size ) {
         strcat( _seatinfo, _buff );
+    }
+}
+
+// 牌的信息
+void UserSession::getPokerInfo( int userkey, char * _pokerinfo, int _size )
+{
+    char _true[10]  = {"true"};
+    char _false[10] = {"false"};
+
+    char _buff[256]   = {0};
+    char _format[256] = "{\"show\":%s,"
+                        "\"name\":\"%s\","
+                        "\"count\":%d,"
+                        "\"poker\":[%s]}";
+
+    char * cShow = _false;
+    if ( userkey == m_wUserKey ) {
+        cShow = _true;
+    }
+
+    snprintf( _buff, sizeof(_buff), _format,
+        cShow, m_szName, m_bPokerSize, m_bPoker );
+
+    int szLen = strlen( _buff );
+    if ( szLen < _size ) {
+        strcat( _pokerinfo, _buff );
     }
 }

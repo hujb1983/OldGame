@@ -56,6 +56,7 @@ _IMPL_QUERY_POOL(Query_PreLogin);
     2. 返回参数后验证； */
 int User_Query_PreLogin( ServerSession * pServerSession, const char * js_text )
 {
+    DEBUG_MSG( LVL_DEBUG, "PreLogin_REQ to recv: %s. \n", (char*)js_text );
 
     JsonMap js_map;
     if ( js_map.set_json( js_text ) == -1 ) {
@@ -153,6 +154,8 @@ int User_Result_PreLogin ( ServerSession * pServerSession, Query_PreLogin * pQue
             sprintf( szJsonBuff, format, MAKEDWORD( (WORD)Login_Protocol,(WORD)PreLogin_ANC ),
                     _userkey, _userid, _sip, _sport );
 
+            DEBUG_MSG( LVL_DEBUG, "PreLogin_ANC to send: %s. \n", (char*)szJsonBuff );
+
             int nLength = strlen(szJsonBuff);
             pServerSession->Send( (BYTE*)szJsonBuff, nLength );
             return TRUE;
@@ -163,6 +166,9 @@ int User_Result_PreLogin ( ServerSession * pServerSession, Query_PreLogin * pQue
         char szJsonBuff[1024]  = {0};
         char format[256] = 	"{\"protocol\":\"%d\", \"userkey\":\"%d\" }";
         sprintf( szJsonBuff, format, MAKEDWORD( (WORD)Login_Protocol, (WORD)PreLogin_NAK), _userkey );
+
+        DEBUG_MSG( LVL_DEBUG, "PreLogin_NAK to send: %s. \n", (char*)szJsonBuff );
+
         int nLength = strlen(szJsonBuff);
         pServerSession->Send( (BYTE*)szJsonBuff, nLength );
     }

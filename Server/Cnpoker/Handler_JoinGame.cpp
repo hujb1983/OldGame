@@ -3,7 +3,7 @@
 
 void MSG_Handler_JoinGame_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    printf( "[MSG_Handler_JoinGame_REQ] pMsg = %s \n",  (char*)pMsg );
+    DEBUG_MSG( LVL_DEBUG , "JoinGame_REQ to recv: %s \n",  (char*)pMsg );
 
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
@@ -32,20 +32,25 @@ void MSG_Handler_JoinGame_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg,
             pBattle->SetStartSeat( _seatid );       // 设置开始玩家;
             pBattle->SetOnline( _seatid, 0 );       // 开始时都为在线;
         }
+        DEBUG_MSG( LVL_DEBUG , "GetBattle: %x, %d \n",  pBattle, _battleid );
     }
-    else
+    else if( _status == -1 )
     {
         GameBattle * pBattle = g_GameMgr.AllocBattle();
         if ( pBattle ) {
+            pBattle->InitBattle();     // 创建房间的时候初始化
             _seatid = 0;
             _battleid = pBattle->getIndex();
-            pBattle->SetID ( _seatid,  _userid  );
-            pBattle->SetKey( _seatid,  _userkey );
+            pBattle->SetID ( _seatid,  _userid  );      // 初始化 userid;
+            pBattle->SetKey( _seatid,  _userkey );      // 初始化 userkey;
+            pBattle->SetTable( _roomid, _tableid );     // 初始化房间号;
         }
+        DEBUG_MSG( LVL_DEBUG , "AllocBattle %x, %d \n",  pBattle, _battleid );
     }
 
-    char buff[256]   = {0};
-    char format[256] = 	   "{\"Protocol\":\"%d\","
+    {
+        char _buff[256]   = {0};
+        char _format[256] = "{\"Protocol\":\"%d\","
                             "\"userid\":\"%d\","
                             "\"userkey\":\"%d\","
                             "\"agentkey\":\"%d\","
@@ -54,16 +59,20 @@ void MSG_Handler_JoinGame_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg,
                             "\"roomid\":\"%d\","
                             "\"tableid\":\"%d\" }";
 
-    snprintf( buff, sizeof(buff), format, MAKEDWORD( Games_Protocol, JoinGame_REQ ),
-            _userid, _userkey, _agentkey, _seatid, _battleid, _roomid, _tableid);
+        snprintf( _buff, sizeof(_buff), _format, MAKEDWORD( Games_Protocol, JoinGame_REQ ),
+                _userid, _userkey, _agentkey, _seatid, _battleid, _roomid, _tableid);
 
-    WORD nLen = strlen( buff );
-    g_pCnpokerServer->SendToDBServer( (BYTE*)buff, nLen );
+        DEBUG_MSG( LVL_DEBUG , "JoinGame_REQ to db: %s \n", _buff );
+
+        WORD nLen = strlen( _buff );
+        g_pCnpokerServer->SendToDBServer( (BYTE*)_buff, nLen );
+    }
 }
 
 void MSG_Handler_JoinGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    // printf( "[MSG_Handler_JoinGame_BRD] pMsg = %s \n",  (char*)pMsg );
+    DEBUG_MSG( LVL_DEBUG , "JoinGame_REQ to recv: %s \n", (char*)pMsg );
+
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
         return;
@@ -87,6 +96,10 @@ void MSG_Handler_JoinGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg,
         if ( pBattle ) {
             pBattle->SetID ( _seatid, _userid  );
             pBattle->SetKey( _seatid, _userkey );
+            pBattle->getMultiple() = 1;
+            pBattle->SetMaxMoney( _mmax );
+            pBattle->SetMinMoney( _mmin );
+            pBattle->SetBrokerage( _brokerage );
 
             char szPlayerkey[256] = {0};
             pBattle->GetAllPlayerKey( szPlayerkey, sizeof(szPlayerkey) );
@@ -94,18 +107,18 @@ void MSG_Handler_JoinGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg,
             char buff[256]   = {0};
             char format[256] = 	"{\"protocol\":\"%d\","
                                 "%s,"
+                                "\"userkey\":\"%d\","
+                                "\"seatid\":\"%d\","
                                 "\"status\":\"%d\","
                                 "\"battleid\":\"%d\","
+                                "\"multiple\":\"%d\","
                                 "\"basics\":\"%d\","
                                 "\"brokerage\":\"%d\"}";
 
             snprintf( buff, sizeof(buff), format,
                       MAKEDWORD( Games_Protocol, JoinGame_BRD ),
-                      szPlayerkey,
-                      _status,
-                      _battleid,
-                      _mmin,
-                      _brokerage);
+                      szPlayerkey, _userkey, _seatid, _status, _battleid,
+                      1, _mmin, _brokerage);
 
             WORD nLen = strlen( buff );
             g_pCnpokerServer->SendToAgentServer( (BYTE*)buff, nLen );
@@ -127,6 +140,7 @@ void MSG_Handler_JoinGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg,
 
         WORD nLen = strlen( buff );
         g_pCnpokerServer->SendToAgentServer( (BYTE*)buff, nLen );
+        return;
    }
 }
 

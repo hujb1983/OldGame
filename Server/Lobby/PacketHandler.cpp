@@ -44,6 +44,7 @@ BOOL PacketHandler::Register_Agent()
     AddHandler_Agent( Login_Protocol,  Relogin_REQ,    MSG_Handler_Relogin_REQ );
     AddHandler_Agent( Login_Protocol,  GamePacket_SYN, MSG_Handler_GamePacket_REQ  );
     AddHandler_Agent( Games_Protocol,  JoinTable_REQ,  MSG_Handler_JoinTable_REQ );
+    AddHandler_Agent( Games_Protocol,  QuitTable_REQ,  MSG_Handler_QuitTable_REQ );
     AddHandler_Agent( Update_Protocol, RoomInfo_SYN,   MSG_Handler_RoomInfo_REQ );
     AddHandler_Agent( Update_Protocol, TableInfo_SYN,  MSG_Handler_TableInfo_REQ );
 	AddHandler_Agent( Update_Protocol, OnlineInfo_SYN, MSG_Handler_Onlines_REQ   );
@@ -85,8 +86,6 @@ BOOL PacketHandler::AddHandler_Database( WORD category, WORD protocol, fnHandler
 VOID PacketHandler::ParsePacket_Agent( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-	printf("PacketHandler::ParsePacket_Agent \n");
-
     DWORD pid = GetProtocol( (char*)pMsg );
     if ( pid != 0 ) {
         FUNC_Agent * pFuncInfo = (FUNC_Agent *)m_pFuncMap_Agent->Find( pid );
@@ -99,8 +98,6 @@ VOID PacketHandler::ParsePacket_Agent( ServerSession * pSession, MSG_BASE * pMsg
 VOID PacketHandler::ParsePacket_Database( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-	printf("PacketHandler::ParsePacket_Database \n");
-
     DWORD pid = GetProtocol( (char*)pMsg );
     if ( pid != 0 ) {
         FUNC_Database * pFuncInfo = (FUNC_Database *)m_pFuncMap_Database->Find( pid );

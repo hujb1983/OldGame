@@ -1,17 +1,17 @@
 #include "Handler_Module.h"
 #include "CnpokerServer.h"
 
-int SendToPlayer_OwendPoker( BYTE _bySeat, GameBattle * pBattle );
+int Initcards_SendToAgentServer( WORD _wBattleid, GameBattle * pBattle );
 int Battle_Dealer_Shuffle( BYTE * _byAllcards, BYTE _bySize );
 int Battle_Check_Shuffle( BYTE * _byAllcards, BYTE _bySize );
 int Battle_Poker_Alloc( GameBattle * pBattle, BYTE * _byAllcards, BYTE _bySize );
 int Battle_Poker_Random(BYTE i) { return rand() % i; }
 
-/*
-    由 [AgentServer] 转发过来!
-*/
+/*  由 [AgentServer] 转发过来! */
 void MSG_Handler_InitCards_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
+    printf( "[MSG_Handler_InitCards_REQ %s] \n",  (char *) pMsg );
+
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
         return;
@@ -37,58 +37,73 @@ void MSG_Handler_InitCards_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg
     // }}}@ 发牌
 
     // @{{{ 组合自己的牌
-    SendToPlayer_OwendPoker(0, pBattle);
-    SendToPlayer_OwendPoker(1, pBattle);
-    SendToPlayer_OwendPoker(2, pBattle);
+    Initcards_SendToAgentServer( _nBattleid, pBattle );
     // }}}@ 组合所有的牌
 
     // 设置已经发牌了；
     pBattle->SetBattleStatus( eGB_CALLING );
 }
 
-/*  1. 取牌 */
-int SendToPlayer_OwendPoker( BYTE _bySeat, GameBattle * pBattle )
+/* 取牌 */
+int Initcards_SendToAgentServer( WORD _wBattleid, GameBattle * pBattle )
 {
 	char szMsg[1024]  = {0};
-	char poker[256]  = {0};
-    char format[256] = 	"{\"protocol\":\"%d\", "
-                        " \"userkey\":\"%d\", "
-                        " \"data\":[{"
-                            "\"battleid\":\"%d\", "
-                            "\"seatid\":\"%d\", "
-                            "\"status\":\"%d\", "
-                            "\"poker\":\"%s\"}] }";
 
-    pBattle->getUsercards( _bySeat, poker, sizeof(poker) );
+    char format[256] = 	"{\"protocol\":\"%d\","
+                        " %s,"
+                        " \"battleid\":\"%d\","
+                        " \"count\":\"%d\","
+                        " \"poker\":\"-1\","
+                        " \"count0\":\"%d\","
+                        " \"poker0\":\"%s\","
+                        " \"count1\":\"%d\","
+                        " \"poker1\":\"%s\","
+                        " \"count2\":\"%d\","
+                        " \"poker2\":\"%s\" }";
+    char poker1[256]  = {0};
+    char poker2[256]  = {0};
+    char poker3[256]  = {0};
+
+    BYTE pkSize1(0), pkSize2(0), pkSize3(0);
+    pkSize1   = pBattle->getUsercards( 0, poker1, sizeof(poker1) );
+    pkSize2   = pBattle->getUsercards( 1, poker2, sizeof(poker2) );
+    pkSize3   = pBattle->getUsercards( 2, poker3, sizeof(poker3) );
+
+    char szPlayerkey[256] = {0};
+    pBattle->GetAllPlayerKey( szPlayerkey, sizeof(szPlayerkey) );
+
     sprintf( szMsg, format, MAKEDWORD(Games_Protocol, InitCards_BRD ),
-         pBattle->getKey(_bySeat),
-         pBattle->getIndex(),
-         pBattle->getStartSeat(),
-         1,
-         poker );
+         szPlayerkey,
+         _wBattleid,        // 复本ID;
+         3,                 // 底牌
+         pkSize1, poker1,   // 用户-1
+         pkSize2, poker2,   // 用户-2
+         pkSize3, poker3);  // 用户-3
 
     int len = strlen(szMsg);
     g_pCnpokerServer->SendToAgentServer( (BYTE*)szMsg, len );
 	return len;
 }
 
-/*  1. 取牌 */
+
+
+/* 取牌 */
 int Battle_Poker_Alloc( GameBattle * pBattle, BYTE * _byAllcards, BYTE _bySize )
 {
     pBattle->SetUsercards(0, _byAllcards, 17);
     pBattle->SetUsercards(1, _byAllcards + 17, 17);
     pBattle->SetUsercards(2, _byAllcards + 34, 17);
-    pBattle->SetBasecards(_byAllcards + 52, 3);
+    pBattle->SetBasecards( _byAllcards + 52, 3 );
     return TRUE;
 }
 
-/*  1. 检查炸弹数量 */
+/* 检查炸弹数量 */
 int Battle_Check_Shuffle( BYTE * _byAllcards, BYTE _bySize )
 {
 
 }
 
-/*  1. 洗牌 */
+/* 洗牌 */
 int Battle_Dealer_Shuffle( BYTE * _byAllcards, BYTE _bySize )
 {
     // 随机打乱牌

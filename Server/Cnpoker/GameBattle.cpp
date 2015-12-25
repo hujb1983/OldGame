@@ -7,7 +7,6 @@ GameBattle::GameBattle()
     m_prev = NULL;
     m_next = NULL;
 
-
     m_dwBeginTicket = 0;
     m_dwOverTicket  = 0;
     m_byOverTime    = eGB_HaveNot;      // 没有定时器
@@ -50,7 +49,45 @@ GameBattle * GameBattle::get_next() {
 /**********************************************
     超时处理
 **********************************************/
-BOOL GameBattle::UpdateOvertime( DWORD dwTicket )
+int GameBattle::InitBattle()
+{
+    m_byTableStatus = eGB_EMPTY;
+}
+
+int GameBattle::JoinBattle( BYTE _seatid )
+{
+
+}
+
+
+
+int GameBattle::QuitBattle( BYTE _seatid )
+{
+    if (m_byTableStatus==eGB_SIT)
+    {
+        if (_seatid<MAX_USER) {
+            m_uiUserid[_seatid] = 0;    // 用户的id;
+            m_wUserkey[_seatid] = 0;    // 用户的key;
+            m_byStatus[_seatid] = 0;    // 是否地主;
+            m_byStart[_seatid]  = 0;    // 是否已经点击, 开始状态;
+            m_byCalls[_seatid]  = 0;    //记录叫地主状态的用户状态;
+            m_byShow[_seatid]   = 0;    // 记录显示牌的用户状态;
+            return FALSE;
+        }
+    }
+    else
+    {
+        if (_seatid<MAX_USER) {
+            m_byOnline[_seatid] = eGB_Leave;
+        }
+    }
+    return TRUE;
+}
+
+/**********************************************
+    超时处理
+**********************************************/
+int GameBattle::UpdateOvertime( DWORD dwTicket )
 {
     if ( IsOvertime()==eGB_TimerOpen ) {
         if ( dwTicket>=m_dwOverTicket ) {
@@ -60,7 +97,7 @@ BOOL GameBattle::UpdateOvertime( DWORD dwTicket )
     }
 }
 
-BOOL GameBattle::SendOvertimeMessage()
+int GameBattle::SendOvertimeMessage()
 {
     if ( m_byOverTime != eGB_TimerLock ) {
         WORD nLen = strlen( m_szOverTime );
@@ -68,19 +105,19 @@ BOOL GameBattle::SendOvertimeMessage()
     }
 }
 
-BOOL GameBattle::IsOvertime() {
+int GameBattle::IsOvertime() {
     return (m_byOverTime==eGB_TimerLock);      // 如果是锁住即操时
 }
 
-BOOL GameBattle::LockOvertime() {
+int GameBattle::LockOvertime() {
     return (m_byOverTime=eGB_TimerLock);
 }
 
-BOOL GameBattle::UnlockOvertime() {
+int GameBattle::UnlockOvertime() {
     return (m_byOverTime=eGB_TimerOpen);       // 下一次授权通知即开锁
 }
 
-BOOL GameBattle::SetCalledOvertime()
+int GameBattle::SetCalledOvertime()
 {
     {
         char szPlayerkey[256] = {0};
@@ -109,7 +146,7 @@ BOOL GameBattle::SetCalledOvertime()
     g_GameMgr.push_CalledBattles( this );           // 放入循环队列中
 }
 
-BOOL GameBattle::SetDiscardsOvertime()
+int GameBattle::SetDiscardsOvertime()
 {
     {
         char szPlayerkey[256] = {0};
@@ -178,6 +215,15 @@ int GameBattle::SetID( BYTE seatid,  int id) {
 int GameBattle::SetKey( BYTE seatid, int key) {
     m_wUserkey[seatid] = key;
 }
+int GameBattle::SetMaxMoney  ( UINT _money ) {
+    m_uiMaxMoney = _money;
+}
+int GameBattle::SetMinMoney  ( UINT _money ) {
+    m_uiMinMoney = _money;
+}
+int GameBattle::SetBrokerage ( UINT _rate  ) {
+    m_wBrokerage = _rate;
+}
 int GameBattle::SetStartSeat( BYTE seatid ) {
     m_byStartSeat = seatid;
     m_byCallSeat  = seatid;
@@ -200,16 +246,14 @@ int GameBattle::SetOnline( BYTE seatid, BYTE status )
     设置每一个阶段的状态
 ******************************************************/
 int GameBattle::SetStart( BYTE seatid, BYTE status ) {
-    if ( status == 0 ) {
-        m_byStart[seatid] = eGB_Ready;  // 正常开始
-        return TRUE;
+    if (status==eGB_Ready) {
+        m_byStart[seatid] = eGB_Ready;
+        if (m_byTableStatus== eGB_DEALING) {
+            return FALSE;   // 表示已经开始游戏
+        }
+        return TRUE;    // 表示已经开始游戏
     }
-    else if ( status == 1 ) {
-        m_byStart[seatid] = eGB_Show;   // 显牌开始
-        SetShow( eGB_Show );
-        return TRUE;
-    }
-    return FALSE;
+    m_byStart[seatid] = status; // 表示其他状态
 }
 int GameBattle::SetShow( BYTE seatid ) {
     m_byShow[seatid] = eGB_Show;
@@ -262,6 +306,7 @@ int GameBattle::SetPlaying( BYTE seatid ) {
     m_byPlaying = seatid;
 }
 int GameBattle::SetModel( BYTE _byDouble ) {
+    m_wMultiple = 0;
     m_byModel = _byDouble;
 }
 int GameBattle::SetBasecards( BYTE * poker, BYTE bySize ) {
@@ -332,13 +377,18 @@ BYTE GameBattle::getUsercards( BYTE seatid, char * poker, WORD wSize ) {
     int disSize = sizeof( m_byUsercards[seatid] );
 
      // step1 : 把用户的牌给用户或其他玩家看到;
+    BYTE retSize = 0;
     BYTE byPoker  = 0;
     for (int i=0; i<disSize; i++) {
         byPoker = pMove[i];
         if ( byPoker == 1 ) {
             memset( szPoker, 0x0, sizeof(szPoker) );
-            sprintf( szPoker, "%d,", i );
+            if (retSize!=0) {
+                strcat( szPokerList, ",");
+            }
+            sprintf( szPoker, "%d", i );
             strcat( szPokerList, szPoker);
+            retSize++;
         }
     }
 
@@ -346,16 +396,19 @@ BYTE GameBattle::getUsercards( BYTE seatid, char * poker, WORD wSize ) {
     if ( iLen < wSize ) {
         memcpy( poker, szPokerList, wSize);
     }
+    return retSize;
 }
 
 BYTE GameBattle::getBasecards( BYTE seatid, char * poker, WORD wSize ) {
 
     // step1 : 把底牌给地主坐位;
+    BYTE retSize = 0;
     BYTE byPoker  = 0;
     for (int i=0; i<BASE_POKER; i++) {
         byPoker = m_byBasecards[i];
         if ( byPoker < MAX_POKER ) {
              m_byUsercards[seatid][byPoker] = 1;
+             retSize = i;
         }
     }
 
@@ -368,6 +421,7 @@ BYTE GameBattle::getBasecards( BYTE seatid, char * poker, WORD wSize ) {
     if ( iLen < wSize ) {
         memcpy( poker, szPokerList, wSize);
     }
+    return retSize;
 }
 
 // 取得现在手上的牌
@@ -417,14 +471,19 @@ BYTE GameBattle::getSeatid(int key, BYTE & seatid) {
     return FALSE;
 }
 
-BYTE GameBattle::getBanker()        {  return m_byBanker;     }
-BYTE GameBattle::getStartSeat()     {  return m_byStartSeat;  }
-BYTE& GameBattle::getLastSeat()     {  return m_byLastActive; }
-BYTE& GameBattle::getLastType()     {  return m_byLastType;   }
-BYTE& GameBattle::getLastValue()    { return m_byLastValue;   }
-BYTE& GameBattle::getLastCount()    { return m_byLastCount;   }
-BYTE& GameBattle::getLastSize()     { return m_byLastSize;    }
-BYTE& GameBattle::getDiscardTimes() { return m_byPlayTimes;   }
+UINT GameBattle::getMaxMoney ()     {  return m_uiMaxMoney;     }    // 设置高限额;
+UINT GameBattle::getMinMoney ()     {  return m_uiMinMoney;     }    // 设置底柱;
+UINT GameBattle::getBrokerage()     {  return m_wBrokerage;     }    // 设置佣金;
+BYTE GameBattle::getModel()         {  return m_byModel;        }
+WORD& GameBattle::getMultiple()     {  return m_wMultiple;      }
+BYTE GameBattle::getBanker()        {  return m_byBanker;       }
+BYTE GameBattle::getStartSeat()     {  return m_byStartSeat;    }
+BYTE& GameBattle::getLastSeat()     {  return m_byLastActive;   }
+BYTE& GameBattle::getLastType()     {  return m_byLastType;     }
+BYTE& GameBattle::getLastValue()    { return m_byLastValue;     }
+BYTE& GameBattle::getLastCount()    { return m_byLastCount;     }
+BYTE& GameBattle::getLastSize()     { return m_byLastSize;      }
+BYTE& GameBattle::getDiscardTimes() { return m_byPlayTimes;     }
 
 /******************************************************
     设置下一个阶段的状态
@@ -440,7 +499,7 @@ BYTE GameBattle::getBattleStatus( ) {
     判断下一个阶段的状态
 ******************************************************/
 int GameBattle::canStart() {
-    if ( m_byTableStatus == eGB_Ready ) {
+    if ( m_byTableStatus == eGB_SIT ) {
         if ( m_byStart[0] == eGB_Ready &&
              m_byStart[1] == eGB_Ready &&
              m_byStart[2] == eGB_Ready ) {
@@ -509,6 +568,9 @@ WORD GameBattle::prevKey(BYTE seatid){
 }
 WORD GameBattle::nextKey(BYTE seatid){
     return m_wUserkey[(seatid + 1) % MAX_USER];
+}
+UINT GameBattle::getID(BYTE seatid) {
+    return m_uiUserid[seatid];
 }
 WORD GameBattle::getKey( BYTE seatid ){
     return m_wUserkey[seatid];
