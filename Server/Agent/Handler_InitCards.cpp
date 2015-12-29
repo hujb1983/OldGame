@@ -56,20 +56,17 @@ void save_to_user_session( ServerSession * pServerSession, MSG_BASE * pMsg, WORD
     }
 }
 
-void get_user_pokerinfo( int _userkey, char * _szPokerInfo, int _size )
+void get_user_pokerinfo( int _userkey, int _sendkey, char * _szPokerInfo, int _size )
 {
     char _buff[256]   = {0};
 
     UserSession * pSession = NULL;
     pSession = g_AgentServer->GetUserSession( _userkey );
     if ( pSession ) {
-        pSession->getPokerInfo( _userkey, _buff, sizeof( _buff ) );
+        pSession->getPokerInfo( _sendkey, _buff, sizeof( _buff ) );
     }
     else {
-        char _format[256] = "{\"show\":false,"
-                            "\"name\":\"-\","
-                            "\"count\":17,"
-                            "\"poker\":[-1]}";
+        char _format[256] = "{\"show\":false, \"name\":\"-\", \"count\":17, \"poker\":[-1]}";
         strcat(_buff, _format);
     }
 
@@ -98,11 +95,11 @@ void send_to_user_pokerinfo( int _seatid, int _userkey, ServerSession * pServerS
     js_map.ReadString ( "poker",    _poker, sizeof(_poker) );
 
     char _pokerinfo[1024] = {0};
-    get_user_pokerinfo( _userkey1,  _pokerinfo, sizeof(_pokerinfo) );
+    get_user_pokerinfo( _userkey1, _userkey, _pokerinfo, sizeof(_pokerinfo) );
     strcat( _pokerinfo, ",");
-    get_user_pokerinfo( _userkey2,  _pokerinfo, sizeof(_pokerinfo) );
+    get_user_pokerinfo( _userkey2, _userkey, _pokerinfo, sizeof(_pokerinfo) );
     strcat( _pokerinfo, ",");
-    get_user_pokerinfo( _userkey3,  _pokerinfo, sizeof(_pokerinfo) );
+    get_user_pokerinfo( _userkey3, _userkey, _pokerinfo, sizeof(_pokerinfo) );
 
     {
         char _buff[2048]   = {0};
@@ -128,7 +125,6 @@ void send_to_user_pokerinfo( int _seatid, int _userkey, ServerSession * pServerS
 
         DEBUG_MSG( LVL_DEBUG,  "InitCards_BRD to client: %s \n",  (char*)_buff );
     }
-
 }
 
 void initcards_send_to_client( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize  )
@@ -154,7 +150,6 @@ void initcards_send_to_client( ServerSession * pServerSession, MSG_BASE * pMsg, 
     }
 }
 
-
 void game_send_called_license(ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize)
 {
     // 自动开始游戏
@@ -167,12 +162,8 @@ void game_send_called_license(ServerSession * pServerSession, MSG_BASE * pMsg, W
     js_map.ReadInteger( "battleid", _battleid );
 
     char szMsg[1024] = {0};
-    char format[256] = 	"{\"protocol\":\"%d\","
-                         "\"battleid\":\"%d\" }" ;
-
-    sprintf( szMsg, format,
-            MAKEDWORD( Games_Protocol, CalledLicense_REQ ),
-            _battleid );
+    char format[256] = 	"{\"protocol\":\"%d\", \"battleid\":\"%d\" }" ;
+    sprintf( szMsg, format, MAKEDWORD( Games_Protocol, CalledLicense_REQ ), _battleid );
 
     // }}}@ 组合所有的牌
     WORD nLen = strlen( szMsg );
@@ -185,7 +176,6 @@ void MSG_Handler_InitCards_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg
 {
     DEBUG_MSG( LVL_DEBUG,  "InitCards_BRD to recv: %s \n",  (char*)pMsg );
 
-    // 自动开始游戏
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
         return;

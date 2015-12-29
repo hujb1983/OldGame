@@ -3,7 +3,7 @@
 #pragma pack(push,1)
 
 
-void get_user_calledinfo( int _seatid, int _main_seat, char * _szCalledInfo, int _size )
+void get_user_called_license_info( int _seatid, int _main_seat, char * _szCalledInfo, int _size )
 {
     char _buff[256]   = {0};
 
@@ -48,7 +48,6 @@ void server_to_user_calledlicense(int _userkey, int _battleid, int _seatid, int 
     DEBUG_MSG( LVL_DEBUG, "CalledLicense_BRD to client: %s \n", _buff );
 }
 
-
 void MSG_Handler_CalledLicense_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
     DEBUG_MSG( LVL_DEBUG, "CalledLicense_BRD to recv: %s \n", (char *) pMsg  );
@@ -70,13 +69,12 @@ void MSG_Handler_CalledLicense_BRD ( ServerSession * pServerSession, MSG_BASE * 
     js_map.ReadInteger( "multiple",  _multiple );
     js_map.ReadInteger( "times",     _times    );
 
-
     char _calledinfo[256] = {0};
-    get_user_calledinfo( 0,  _seatid, _calledinfo, sizeof(_calledinfo) );
+    get_user_called_license_info( 0,  _seatid, _calledinfo, sizeof(_calledinfo) );
     strcat( _calledinfo, ",");
-    get_user_calledinfo( 1,  _seatid, _calledinfo, sizeof(_calledinfo) );
+    get_user_called_license_info( 1,  _seatid, _calledinfo, sizeof(_calledinfo) );
     strcat( _calledinfo, ",");
-    get_user_calledinfo( 2,  _seatid, _calledinfo, sizeof(_calledinfo) );
+    get_user_called_license_info( 2,  _seatid, _calledinfo, sizeof(_calledinfo) );
 
     if (_userkey1 != 0) {
         server_to_user_calledlicense(_userkey1, _battleid, 0, _multiple, _dmodel, _times, _calledinfo );

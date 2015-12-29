@@ -17,7 +17,7 @@ void MSG_Handler_InitCards_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg
         return;
     }
 
-    int _nBattleid = 0;
+    int _nBattleid(0);
     js_map.ReadInteger("battleid",  _nBattleid);
 
     GameBattle *pBattle = g_GameMgr.GetBattle( _nBattleid );
@@ -41,7 +41,9 @@ void MSG_Handler_InitCards_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg
     // }}}@ 组合所有的牌
 
     // 设置已经发牌了；
+    pBattle->SetStartSeat( 0 );
     pBattle->SetBattleStatus( eGB_CALLING );
+    pBattle->SetBank( eGB_NoBanker );
 }
 
 /* 取牌 */
@@ -85,15 +87,13 @@ int Initcards_SendToAgentServer( WORD _wBattleid, GameBattle * pBattle )
 	return len;
 }
 
-
-
 /* 取牌 */
 int Battle_Poker_Alloc( GameBattle * pBattle, BYTE * _byAllcards, BYTE _bySize )
 {
     pBattle->SetUsercards(0, _byAllcards, 17);
     pBattle->SetUsercards(1, _byAllcards + 17, 17);
     pBattle->SetUsercards(2, _byAllcards + 34, 17);
-    pBattle->SetBasecards( _byAllcards + 52, 3 );
+    pBattle->SetBasecards( _byAllcards + 51, 3 );
     return TRUE;
 }
 
@@ -122,6 +122,5 @@ int Battle_Dealer_Shuffle( BYTE * _byAllcards, BYTE _bySize )
 	for(int i = 0; i < _bySize; ++i) {
         pMove[i] = vecCards[i];  // 把额外那三张牌给保存下来
 	}
-
 }
 

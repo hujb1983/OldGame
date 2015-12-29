@@ -89,14 +89,15 @@ public: // 获取数据
     BYTE prevSeat( BYTE seatid );           // 前一个
     BYTE nextSeat( BYTE seatid );           // 后一个
     BYTE getPlaying();                      // 取得正在玩的 Seat
+    BYTE getCalled();                       // 叫地主的玩家;
 
 public: // 判断
     int canStart();                         // 能否开始发牌
     int canDealing();                       // 能否发牌
     int canCall();                          // 能否继续叫庄
+    int checkCall();                        // 检查叫牌的参数;
     int canGame();                          // 地主已经分清，可以开始
     int canEnd();                           // 能否结束
-
 public:
     int hadDiscards( BYTE seatid, BYTE * poker, BYTE bySize );      // 判断是否有这些牌
     int IsOnline( BYTE seatid );            // 是否在线

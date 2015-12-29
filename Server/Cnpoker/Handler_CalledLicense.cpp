@@ -11,10 +11,8 @@ void MSG_Handler_CalledLicense_REQ ( ServerSession * pServerSession, MSG_BASE * 
         return;
     }
 
-    int _seatid(0);
-    int _battleid(0);
+    int _seatid(0), _battleid(0);
     js_map.ReadInteger( "battleid", _battleid );
-    js_map.ReadInteger( "seatid",   _seatid );
 
     GameBattle * pBattle = NULL;
     pBattle = g_GameMgr.GetBattle( _battleid );
@@ -22,7 +20,11 @@ void MSG_Handler_CalledLicense_REQ ( ServerSession * pServerSession, MSG_BASE * 
         return;
     }
 
-    int _multiple = pBattle->getMultiple();
+    // 设置基本参数;
+    int _basics    = pBattle->getMinMoney();
+    int _multiple  = pBattle->getMultiple();
+    int _brokerage = pBattle->getBrokerage();
+    _seatid = pBattle->getCalled();
 
     {
         char szPlayerkey[256] = {0};
@@ -32,7 +34,9 @@ void MSG_Handler_CalledLicense_REQ ( ServerSession * pServerSession, MSG_BASE * 
         char format[128] = 	"{\"protocol\":\"%d\","
                             "%s,"
                             "\"battleid\":\"%d\","
+                            "\"basics\":\"%d\","
                             "\"multiple\":\"%d\","
+                            "\"brokerage\":\"%d\","
                             "\"seatid\":\"%d\","
                             "\"times\":\"%d\" }";   // 暂时设定为18秒;
 
@@ -40,12 +44,15 @@ void MSG_Handler_CalledLicense_REQ ( ServerSession * pServerSession, MSG_BASE * 
                 MAKEDWORD( Games_Protocol, CalledLicense_BRD ),
                 szPlayerkey,
                 _battleid,
+                _basics,
                 _multiple,
+                _brokerage,
                 _seatid,
                 16 );
 
         WORD nLen = strlen( buff );
         g_pCnpokerServer->SendToAgentServer( (BYTE*)buff, nLen );
+
 
         /* step5. 送到超时判断队列...  */
         // pBattle->SetCalledOvertime();

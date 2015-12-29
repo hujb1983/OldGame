@@ -266,6 +266,7 @@ void UserSession::getPokerInfo( int userkey, char * _pokerinfo, int _size )
 {
     char _true[10]  = {"true"};
     char _false[10] = {"false"};
+    char _poker[128] ={ 0 };
 
     char _buff[256]   = {0};
     char _format[256] = "{\"show\":%s,"
@@ -276,10 +277,14 @@ void UserSession::getPokerInfo( int userkey, char * _pokerinfo, int _size )
     char * cShow = _false;
     if ( userkey == m_wUserKey ) {
         cShow = _true;
+        strcat( _poker, m_bPoker);
+    }
+    else {
+        strcat( _poker, "-1");
     }
 
     snprintf( _buff, sizeof(_buff), _format,
-        cShow, m_szName, m_bPokerSize, m_bPoker );
+        cShow, m_szName, m_bPokerSize, _poker );
 
     int szLen = strlen( _buff );
     if ( szLen < _size ) {

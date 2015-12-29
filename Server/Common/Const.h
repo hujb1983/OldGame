@@ -59,6 +59,14 @@ enum
 
 enum
 {
+    eGB_Banker1   = 0x00,   // 庄家坐位1
+    eGB_Banker2   = 0x01,   // 庄家坐位2
+    eGB_Banker3   = 0x02,   // 庄家坐位3
+    eGB_NoBanker  = 0x0F,   // 还没有庄家
+};
+
+enum
+{
     eGB_Banker  = 0x10,   // 庄家
     eGB_Player  = 0x20,   // 贤家
 };
@@ -76,6 +84,9 @@ enum
 {
     eGB_Apply   = 0x01,   // 申请
     eGB_Waiver  = 0x02,   // 放弃
+    eGB_Point1  = 0x10,   // 分-1
+    eGB_Point2  = 0x20,   // 分-2
+    eGB_Point3  = 0x30,   // 分-3
 };
 
 // 设置 m_byUsercards [] 状态

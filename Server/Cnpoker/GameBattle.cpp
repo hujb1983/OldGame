@@ -262,40 +262,56 @@ int GameBattle::SetShow( BYTE seatid ) {
 int GameBattle::SetCalled( BYTE seatid, BYTE called ) {
     if ( m_byCallSeat==seatid ) {
         m_byCallTimes++;
-        m_byCallSeat=(seatid+1)%MAX_USER;
+        if ( getModel()==0 ) {
+            if ( called==0 ) {
+                m_byCalls[seatid] = eGB_Waiver;
+                return TRUE;    // 不叫地主
+            }
 
-        if ( m_byCalls[seatid] == 0 ) {
-            m_byCalls[seatid] = (called==0)? eGB_Apply : eGB_Waiver;
-            return TRUE;
-        }
-
-        if ( m_byCallTimes==4 ) {
-
-            if ( m_byCalls[seatid] == eGB_Apply ) {     // 必须是同意的
-                if ( seatid == m_byStartSeat ) {        // 玩家必须是开始玩家
-                    if ( called == eGB_Apply ) {        // 必须是同意的
-                        SetBank( seatid );              // 玩家才能成了地主
-                        return TRUE;
-                    }
+            do {
+                if ( called==1 ) {
+                    m_byCalls[seatid] = eGB_Point1;
+                    break;
                 }
-            }
+                else if ( called==2 ) {
+                    m_byCalls[seatid] = eGB_Point2;
+                    break;
+                }
+                else if ( called==3 ) {
+                    m_byCalls[seatid] = eGB_Point3;
+                    break;
+                }
+                return FALSE;
+            } while(1);
 
-            BYTE _byTemp = 0;
-            _byTemp = (seatid-1)%MAX_USER;
-            if ( m_byCalls[ _byTemp ] == eGB_Apply ) {
-                SetBank( _byTemp );              // 下一级玩家地主
+            if ( m_byCallTimes==1 ) {
+                m_wMultiple = called;
+                return TRUE;    // 第一个叫地主者
+            }
+            else if ( called>m_wMultiple){
+                m_wMultiple = called;
+                return TRUE;   // 第二以上叫地主者要比前一个大
+            }
+            return FALSE;
+        }
+        else   // 翻
+        {
+            if ( called==0 ) {
+                m_byCalls[seatid] = eGB_Waiver;
                 return TRUE;
             }
-
-            _byTemp = (seatid-2)%MAX_USER;
-            if ( m_byCalls[ _byTemp ] == eGB_Apply ) {
-                SetBank( _byTemp );              // 下一级玩家地主
+            else {
+                m_byCalls[seatid] = eGB_Apply;
+                m_wMultiple *= 2;
                 return TRUE;
             }
+            return FALSE;
         }
     }
     return FALSE;
 }
+
+
 int GameBattle::SetBank( BYTE seatid ) {
     m_byStatus[(seatid-1)%MAX_USER] = eGB_Player;
     m_byStatus[seatid] = eGB_Banker;
@@ -306,7 +322,7 @@ int GameBattle::SetPlaying( BYTE seatid ) {
     m_byPlaying = seatid;
 }
 int GameBattle::SetModel( BYTE _byDouble ) {
-    m_wMultiple = 0;
+    m_wMultiple = 1;
     m_byModel = _byDouble;
 }
 int GameBattle::SetBasecards( BYTE * poker, BYTE bySize ) {
@@ -413,13 +429,15 @@ BYTE GameBattle::getBasecards( BYTE seatid, char * poker, WORD wSize ) {
     }
 
     // step2 : 返回给大家看底牌;
-    char szPokerList[60] = {0};
-    sprintf( szPokerList, "%d %d %d",
-        m_byBasecards[0], m_byBasecards[1], m_byBasecards[2]);
+    if ( poker ) {
+        char szPokerList[60] = {0};
+        sprintf( szPokerList, "%d,%d,%d",
+            m_byBasecards[0], m_byBasecards[1], m_byBasecards[2]);
 
-    int iLen = strlen( szPokerList );
-    if ( iLen < wSize ) {
-        memcpy( poker, szPokerList, wSize);
+        int iLen = strlen( szPokerList );
+        if ( iLen < wSize ) {
+            memcpy( poker, szPokerList, wSize);
+        }
     }
     return retSize;
 }
@@ -514,8 +532,54 @@ int GameBattle::canCall() {
     }
     return FALSE;
 }
+int GameBattle::checkCall() {
+    if (m_byCalls[m_byCallSeat]==eGB_Point3) {
+        m_byBanker =  m_byCallSeat;
+        return TRUE;  // 已经找出了地主了;
+    }
+    if (m_byCallTimes==3) {
+        if ( m_byCalls[0] == eGB_Waiver &&
+             m_byCalls[1] == eGB_Waiver &&
+             m_byCalls[2] == eGB_Waiver ) {
+            return FALSE;   // 3个都没叫, 就重新发牌
+        }
+        BYTE _byTemp = (m_byCallSeat+1)%MAX_USER;
+        if ( m_byCalls[_byTemp] == eGB_Waiver ) {
+            _byTemp = (m_byCallSeat)%MAX_USER;
+            if ( m_byCalls[ _byTemp ] == eGB_Apply ) {
+                SetBank( _byTemp );                     // 下一个玩家为地主
+                return TRUE;
+            }
+            _byTemp = (m_byCallSeat-1)%MAX_USER;
+            if ( m_byCalls[ _byTemp ] == eGB_Apply ) {
+                SetBank( _byTemp );                     // 下下个玩家地主
+                return TRUE;
+            }
+        }
+    }
+    if (m_byCallTimes==4) {
+        BYTE _byTemp = m_byCallSeat;
+        if ( m_byCalls[_byTemp] == eGB_Waiver ) {
+            _byTemp = (m_byCallSeat-1)%MAX_USER;
+            if ( m_byCalls[ _byTemp ] == eGB_Apply ) {
+                SetBank( _byTemp );                     // 下一个玩家为地主
+                return TRUE;
+            }
+            _byTemp = (m_byCallSeat-2)%MAX_USER;
+            if ( m_byCalls[ _byTemp ] == eGB_Apply ) {
+                SetBank( _byTemp );                     // 下下个玩家地主
+                return TRUE;
+            }
+            return FALSE;
+        }
+        SetBank( m_byCallSeat );                     // 下一个玩家为地主
+        return TRUE;
+    }
+    m_byCallSeat = (m_byCallSeat+1) % MAX_USER;
+    return TRUE;
+}
 int GameBattle::canGame() {
-    if ( m_byBanker != 0 ) {
+    if ( m_byBanker != eGB_NoBanker ) {
         return TRUE;
     }
     return FALSE;
@@ -577,6 +641,9 @@ WORD GameBattle::getKey( BYTE seatid ){
 }
 BYTE GameBattle::getPlaying() {
     return m_byPlaying;
+}
+BYTE GameBattle::getCalled() {
+    return m_byCallSeat;
 }
 
 int GameBattle::UpdateToDatabase() {

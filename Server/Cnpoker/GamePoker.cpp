@@ -12,9 +12,9 @@ GamePoker::~GamePoker()
 
 void GamePoker::SetPoker( BYTE * _byIndex, BYTE _byIndexSize )
 {
-    memcpy( PokerTypeTable,  0x0, sizeof(PokerTypeTable) );
-    memcpy( PokerIndexArray, 0x0, sizeof(PokerIndexArray) );
-    memcpy( PokerIndexTable, 0x0, sizeof(PokerIndexTable) );
+    memset( PokerTypeTable,  0x0, sizeof(PokerTypeTable) );
+    memset( PokerIndexArray, 0x0, sizeof(PokerIndexArray) );
+    memset( PokerIndexTable, 0x0, sizeof(PokerIndexTable) );
 
     BYTE j = 0;
     BYTE pv = 0;

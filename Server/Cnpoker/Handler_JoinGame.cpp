@@ -79,7 +79,7 @@ void MSG_Handler_JoinGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg,
     }
 
     int _userid(0) ,_userkey(0), _status(0), _seatid(0), _battleid(0);
-    int _mmax(0), _mmin(0), _brokerage(0);
+    int _mmax(0), _mmin(0), _brokerage(0), _dmodel(0);
 
     js_map.ReadInteger( "userid",   _userid   );
     js_map.ReadInteger( "userkey",  _userkey  );
@@ -88,6 +88,7 @@ void MSG_Handler_JoinGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg,
     js_map.ReadInteger( "battleid", _battleid );
 
     if ( _status == 0) {
+        js_map.ReadInteger( "dmodel",    _dmodel );
         js_map.ReadInteger( "mmax",      _mmax );
         js_map.ReadInteger( "mmin",      _mmin );
         js_map.ReadInteger( "brokerage", _brokerage );
@@ -97,6 +98,7 @@ void MSG_Handler_JoinGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg,
             pBattle->SetID ( _seatid, _userid  );
             pBattle->SetKey( _seatid, _userkey );
             pBattle->getMultiple() = 1;
+            pBattle->SetModel( _dmodel );
             pBattle->SetMaxMoney( _mmax );
             pBattle->SetMinMoney( _mmin );
             pBattle->SetBrokerage( _brokerage );
