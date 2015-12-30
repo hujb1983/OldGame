@@ -74,6 +74,8 @@
 		<Unit filename="Agent/ServerSession.h" />
 		<Unit filename="Agent/TempSession.cpp" />
 		<Unit filename="Agent/TempSession.h" />
+		<Unit filename="Agent/UserGame.cpp" />
+		<Unit filename="Agent/UserGame.h" />
 		<Unit filename="Agent/UserSession.cpp" />
 		<Unit filename="Agent/UserSession.h" />
 		<Unit filename="Cnpoker/AgentSession.cpp" />

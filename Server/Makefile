@@ -118,6 +118,7 @@ AgentObjs   	= Agent/AgentMain.o \
 				  Agent/ServerSession.o \
 				  Agent/TempSession.o \
 				  Agent/UserSession.o \
+				  Agent/UserGame.o \
 				  Agent/GameSession.o \
 				  Agent/LobbySession.o \
 				  Agent/PacketHandler.o \

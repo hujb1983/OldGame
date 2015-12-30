@@ -9,7 +9,6 @@ void MSG_Handler_WRankInfo_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg
 
 int User_Login_Query_Day_Rank( WORD _userkey )
 {
-    printf("User_Login_Query_Day_Rank\n");
     char szMsg[1024] = {0};
     snprintf( szMsg, sizeof(szMsg), " { \"protocol\":\"%d\", \"userkey\":\"%d\" } ",
             MAKEDWORD( Update_Protocol, DRankInfo_SYN), _userkey );
@@ -20,7 +19,7 @@ int User_Login_Query_Day_Rank( WORD _userkey )
 
 void MSG_Handler_WRankInfo_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    printf("[AgentServer::MSG_Handler_WRankInfo_ANC] %s \n", (char*)pMsg );
+    DEBUG_MSG( LVL_DEBUG, "WRankInfo_ANC to recv: %s \n", (char*)pMsg );
 
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {

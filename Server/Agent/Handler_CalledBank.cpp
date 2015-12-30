@@ -22,11 +22,7 @@ void MSG_Handler_CalledBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMs
     int _seatid   = pSession->GetSeatKey();
 
     char _buff[1024] = {0};
-    char _format[256] = "{\"protocol\":\"%d\","
-                         "\"calltype\":\"%d\","
-                         "\"battleid\":\"%d\","
-                         "\"seatid\":\"%d\" }" ;
-
+    char _format[256] = "{\"protocol\":\"%d\",\"calltype\":\"%d\",\"battleid\":\"%d\",\"seatid\":\"%d\" }" ;
     sprintf( _buff, _format, MAKEDWORD( Games_Protocol, Called_REQ ), _calls, _battleid, _seatid );
 
     WORD _wLen = strlen( _buff );
@@ -122,6 +118,7 @@ void did_hava_called_initcards( int _battleid )
 
     DEBUG_MSG( LVL_DEBUG, "InitCards_REQ to game : %s. \n", szMsg );
 }
+
 
 void MSG_Handler_CalledBank_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {

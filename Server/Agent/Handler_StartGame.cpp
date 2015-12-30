@@ -30,8 +30,6 @@ void get_user_startgame(int _userkey, char * _szSeatInfo, int _size)
 
 void user_auto_initcards(ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize)
 {
-
-    // 自动开始游戏
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
         return;

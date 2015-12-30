@@ -1,7 +1,7 @@
 #include "Handler_Module.h"
 
 // 打牌授权
-void game_second_send_discards_license( int _battleid )
+void game_first_send_discards_license( int _battleid )
 {
     char szMsg[1024] = {0};
     char format[256] = 	"{\"protocol\":\"%d\", \"battleid\":\"%d\" }" ;
@@ -125,7 +125,7 @@ void MSG_Handler_CreateBank_BRD ( ServerSession * pServerSession, MSG_BASE * pMs
     }
 
     // 授权打牌
-    game_second_send_discards_license( _battleid );
+    game_first_send_discards_license( _battleid );
 }
 
 

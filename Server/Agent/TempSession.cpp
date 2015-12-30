@@ -26,11 +26,11 @@ void TempSession::OnRecv(BYTE *pMsg, WORD wSize)
 	}
 	m_bFirst = FALSE;
 
-	printf("Enter TempSession::OnRecv.\n");
+	DEBUG_MSG( LVL_TRACE, "TempSession::OnRecv.");
 	MSG_SERVER_TYPE * recvMsg = (MSG_SERVER_TYPE *)pMsg;
 	if ( recvMsg->m_byServerType == GAME_SERVER ) {
 
-		printf("\ng_AgentServer->GetGameSession Succ.\n");
+		DEBUG_MSG( LVL_TRACE, "g_AgentServer->GetGameSession Succ.");
 		ServerSession * Obj = g_AgentServer->GetGameSession();
 		if ( Obj == NULL) {
 			return;
@@ -41,14 +41,10 @@ void TempSession::OnRecv(BYTE *pMsg, WORD wSize)
 			m_pSession->UnbindNetworkObject();
 			pSession->BindNetworkObject(Obj);
 		}
-
-        char szMsg[256] = {"Hello World!"};
-        printf( "%s \n", szMsg );
-        Obj->Send( (BYTE*)szMsg, strlen(szMsg) );
 	}
 	else if ( recvMsg->m_byServerType == LOBBY_SERVER ) {
 
-        printf("\ng_AgentServer->GetLobbySession Succ.\n");
+        DEBUG_MSG( LVL_TRACE, "g_AgentServer->GetLobbySession Succ.");
 		ServerSession * Obj = g_AgentServer->GetLobbySession();
 		if ( Obj == NULL) {
 			return;
@@ -59,10 +55,6 @@ void TempSession::OnRecv(BYTE *pMsg, WORD wSize)
 			m_pSession->UnbindNetworkObject();
 			pSession->BindNetworkObject(Obj);
 		}
-
-        char szMsg[256] = {"Hello World!"};
-        printf( "%s \n", szMsg );
-        Obj->Send( (BYTE*)szMsg, strlen(szMsg) );
 	}
 	AgentFactory::Instance()->FreeTempSession(this);
 }

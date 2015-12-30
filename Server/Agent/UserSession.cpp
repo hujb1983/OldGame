@@ -41,7 +41,7 @@ void UserSession::Init()
 
 	DWORD dwCurrent = Session::GetTickCount();
 	m_dwOvertime    = dwCurrent + UserSession::m_dwClientDelay;
-	printf( "[UserSession::Init %d] \n", m_dwOvertime);
+	DEBUG_MSG( LVL_TRACE, "UserSession::Init: %d", m_dwOvertime);
 
 	this->NotPackageHeader();
 
@@ -60,7 +60,7 @@ void UserSession::Init()
 
 BOOL UserSession::Update( DWORD dwDeltaTick )
 {
-	DEBUG_MSG( LVL_TRACE, "[UserSession::Update %d = %d]", dwDeltaTick, m_dwOvertime);
+	DEBUG_MSG( LVL_TRACE, "UserSession::Update: %d %d", dwDeltaTick, m_dwOvertime);
 
 	// Count Down;
 	if ( dwDeltaTick > m_dwOvertime ) {
@@ -73,7 +73,7 @@ BOOL UserSession::Update( DWORD dwDeltaTick )
 
 void UserSession::CloseSession()
 {
-	DEBUG_MSG( LVL_TRACE, " UserSession::CloseSession ");
+	DEBUG_MSG( LVL_TRACE, "UserSession::CloseSession ");
 
 	if ( m_pSession != NULL) {
 		m_pSession->CloseSocket();
@@ -83,7 +83,7 @@ void UserSession::CloseSession()
 
 void UserSession::Release()
 {
-	DEBUG_MSG( LVL_TRACE, " UserSession::Release " );
+	DEBUG_MSG( LVL_TRACE, "UserSession::Release " );
 
 	m_bFirst = TRUE;
 	g_AgentServer->SetUserSession( this->m_wUserKey, NULL);
@@ -107,7 +107,7 @@ void UserSession::OnAccept( DWORD dwNetworkIndex )
 	MSG_ENTERSERVER_ANC msg2;
 	sprintf( buff, format, msg2.m_dwProtocol);
 
-	printf("[UserSession::OnAccept %s] \n", buff);
+	DEBUG_MSG( LVL_TRACE, "UserSession::OnAccept: %s", buff);
 	WORD len = strlen(buff);
 
     CMsgBuff msgBuff;
@@ -117,13 +117,12 @@ void UserSession::OnAccept( DWORD dwNetworkIndex )
     msgBuff.Write( (char*)buff );
     this->Send( msgBuff.GetHead(), msgBuff.GetWriteLen()-1 );
 
-	//this->Send( (BYTE*) buff,  len );
-	printf("[UserSession::OnAccept] = %d, %d \n", len, msgBuff.GetWriteLen() );
+	DEBUG_MSG( LVL_TRACE, "UserSession::OnAccept: %d %d", len, msgBuff.GetWriteLen() );
 }
 
 void UserSession::OnDisconnect()
 {
-	printf("[UserSession::OnDisconnect]\n");
+	DEBUG_MSG( LVL_TRACE, "UserSession::OnDisconnect");
 
     WORD  _userkey   = this->GetUserKey();
     WORD  _battlekey = this->GetBattleKey();

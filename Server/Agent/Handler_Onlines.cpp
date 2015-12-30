@@ -8,8 +8,11 @@ void MSG_Handler_Onlines_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, 
     // g_AgentServer->SendToLobbyServer( (BYTE*) pMsg, wSize );
 }
 
+
+/*******************************************************
+        从大厅获取在线人数   ( Onlines_ANC )
+******************************************************/
 void MSG_Handler_Onlines_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    printf("[UserSession::OnAccept] = %s \n", pMsg );
     g_AgentServer->SendToClient( (BYTE*) pMsg, wSize );
 }

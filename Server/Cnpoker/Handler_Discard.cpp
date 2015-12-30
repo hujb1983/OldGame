@@ -17,6 +17,8 @@ int Battle_Poker_Transform ( BYTE * byIndex, BYTE byIndexSize, BYTE * byPK, BYTE
 /* {protocol : 1, userkey : 2, status : 3} */
 int Processed_Discards ( ServerSession * pServerSession, const char * pInput )
 {
+    DEBUG_MSG( LVL_DEBUG, "Discards_REQ to recv: %s \n", (char *) pInput  );
+
     JsonMap js_map;
     if ( js_map.set_json( (char *) pInput ) == -1 ) {
         return FALSE;
@@ -31,9 +33,9 @@ int Processed_Discards ( ServerSession * pServerSession, const char * pInput )
     js_map.ReadInteger("count" ,   _iCount );
     js_map.ReadString ("poker" ,   _szPoker,  sizeof(_szPoker) );
 
-    if ( !(strlen( _szPoker ) > 0) ) {
+    /* if ( !(strlen( _szPoker ) > 0) ) {
         return FALSE;
-    }
+    } */
 
     // @{{{ 检查参数
     if ( (_iSeatid<0) || (_iSeatid>=3) ) {
@@ -41,7 +43,7 @@ int Processed_Discards ( ServerSession * pServerSession, const char * pInput )
     }
 
     GameBattle *pBattle = g_GameMgr.GetBattle( _iBattleid );
-    if ( pBattle==NULL ) {
+    if ( !pBattle ) {
         return FALSE;
     }
 
@@ -55,82 +57,85 @@ int Processed_Discards ( ServerSession * pServerSession, const char * pInput )
         return FALSE;
     }
 
+    int _status(0);
     int _byPokerType = 0;
     if ( _iCount>0 ) {
 
-        /* step1. 打牌作判断 */
+        /* step1. 取牌 */
         BYTE byPokers[MAX_POKER+1] = {0};
         int nSize = Battle_Poker_Get_Byte_Array( _szPoker, byPokers, sizeof(byPokers), ' ');
 
-        /* step2. 第一个打牌不作判断 */
-        if ( pBattle->getDiscardTimes()>0 )     // 第一个出牌不做比较
-        {
-            /* step3. 判断是否属于你拥有的牌 */
-            if ( !pBattle->hadDiscards( _iSeatid, byPokers, nSize )  ) {
-                return FALSE;
+        if (_iCount==nSize) {
+
+            /* step2. 第一个打牌不作判断 */
+            if ( pBattle->getDiscardTimes()>0 )     // 第一个出牌不做比较
+            {
+                /* step3. 判断是否属于你拥有的牌 */
+                if ( !pBattle->hadDiscards( _iSeatid, byPokers, nSize )  ) {
+                    return FALSE;
+                }
+
+                /* step4. 判断比较是否大于前面的玩家 */
+                if ( Battle_Poker_Compare( pBattle, byPokers, nSize, _byPokerType) == FALSE ) {
+                    return FALSE;
+                }
             }
 
-            /* step4. 判断比较是否大于前面的玩家 */
-            if ( Battle_Poker_Compare( pBattle, byPokers, nSize, _byPokerType) == FALSE ) {
-                return FALSE;
-            }
+            /* step5. 设置参数 */
+            pBattle->getDiscardTimes()++;
+            pBattle->SetDiscards( _iSeatid, byPokers, nSize );
+            pBattle->SetDiscardString( _iSeatid, _szPoker );
+            pBattle->SetLastSeat( _iSeatid );  // 出牌的坐位;
+            _status = 1;    // 授权下一位出牌
         }
-
-        /* step5. 设置参数 */
-        pBattle->getDiscardTimes()++;
-        pBattle->SetDiscards( _iSeatid, byPokers, nSize );
-        pBattle->SetDiscardString( _iSeatid, _szPoker );
-        pBattle->SetLastSeat( _iSeatid );  // 出牌的坐位;
     }
     else {
-         /* step6. 如果没出牌，判断是否第一个，第一个不能不出牌的，亲! */
         if ( pBattle->getDiscardTimes()==0 ) {
-            _errmsg = -1;
+            return FALSE;     /* step6. 如果没出牌，判断是否第一个，第一个不能不出牌的 */
         }
     }
 
-    /* step6. 打印参数到所有客户端 */
     {
+        /* step6. 打印参数到所有客户端 */
+        if ( pBattle->canEnd()==FALSE ) {
+            BYTE _nextkey = pBattle->nextSeat( _iSeatid );
+            pBattle->SetPlaying( _nextkey ); // 授权-并判断
+        }
+
+        int _dmodel   = pBattle->getModel();
+        int _multiple = pBattle->getMultiple();
+
+        char _poker0[128] = {0};
+        int  _count0 = pBattle->getUsercards( _iSeatid, _poker0, sizeof(_poker0) );
         // @{{{ 组合所有的牌，发送给所有玩家;
         char szMsg[1024] = {0};
         char format[256] = 	"{ \"protocol\":\"%d\","
                                 "%s,"
-                                "\"data\":[{"
-                                "\"errmsg\":\"%d\","
-                                "\"battleid\":\"%d\","
-                                "\"seatid\":\"%d\","
-                                "\"pktype\":\"%d\","
-                                "\"count\":\"%d\","
-                                "\"poker\":\"%s\"}] }";
+                                "\"battleid\":%d,"
+                                "\"seatid\":%d,"
+                                "\"multiple\":%d,"
+                                "\"dmodel\":%d,"
+                                "\"count\":%d,"
+                                "\"poker\":\"%s\""
+                                "\"count0\":%d,"
+                                "\"poker0\":\"%s\""
+                             "}";
         char szPlayerkey[256] = {0};
         pBattle->GetAllPlayerKey( szPlayerkey, sizeof(szPlayerkey) );
 
         sprintf( szMsg, format, MAKEDWORD(Games_Protocol, Discards_BRD ),
-                szPlayerkey,
-                _errmsg,
-                pBattle->getIndex(),
-                _iSeatid,
-                _byPokerType,
-                _iCount,
-                _szPoker);
+                szPlayerkey, _iBattleid, _iSeatid, _multiple, _dmodel,
+                _iCount, _szPoker, _count0, _poker0 );
         // }}}@ 组合所有的牌
 
         // @{{{ 发送到其他玩家；
         WORD nLen = strlen( szMsg );
         g_pCnpokerServer->SendToAgentServer( (BYTE*)szMsg, nLen );
-
-        if ( pBattle->canEnd()==FALSE ) {
-            BYTE _byNextSeatid;
-            _byNextSeatid = pBattle->nextSeat( _iSeatid );  // 授权-并判断
-            pBattle->SetPlaying( _byNextSeatid );
-        }
     }
 }
 
 void MSG_Handler_Discards_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize ) {
-
-    // 解析牌后返送
-    Processed_Discards( pServerSession, (char*) pMsg );
+    Processed_Discards( pServerSession, (char*) pMsg ); // 解析牌后返送
 }
 
 
