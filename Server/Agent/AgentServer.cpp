@@ -43,9 +43,7 @@ BOOL AgentServer::Init()
 	}
 
 	m_pIOCPServer = new IOCPServer;
-
 	SYNCHANDLER_DESC desc[2];
-
 	desc[0].dwSyncHandlerKey			= SERVER_SYNCHANDLER;
 	desc[0].dwMaxAcceptSession			= 3;
 	desc[0].dwMaxConnectSession			= 3;
@@ -59,7 +57,6 @@ BOOL AgentServer::Init()
 	desc[0].fnCreateAcceptedObject		= CreateServerSideAcceptedObject;
 	desc[0].fnDestroyAcceptedObject		= DestroyServerSideAcceptedObject;
 	desc[0].fnDestroyConnectedObject	= DestroyServerSideConnectedObject;
-
 	desc[1].dwSyncHandlerKey 			= CLIENT_SYNCHANDLER;
 	desc[1].dwMaxAcceptSession			= 700;
 	desc[1].dwMaxConnectSession			= 0;
@@ -257,17 +254,17 @@ BOOL AgentServer::ConnectToServer(ServerSession * pSession, char * pszIP, WORD w
 ///////////////////////////////////////////////////////////////
 
 NetworkObject * CreateServerSideAcceptedObject() {
-	printf("[AgentServer::CreateServerSideAcceptedObject]: Alloc TempSession.\n");
+    DEBUG_MSG( LVL_TRACE, "CreateServerSideAcceptedObject. \n");
 	TempSession * obj = AgentFactory::Instance()->AllocTempSession();
 	if ( obj == NULL) {
-		printf("\nAgentFactory::Instance()->AllocTempSession() Fail.\n");
+        DEBUG_MSG( LVL_ERROR, "AllocTempSession Fail . \n");
 		return NULL;
 	}
 	return (NetworkObject *)(obj);
 }
 
 VOID DestroyServerSideAcceptedObject( NetworkObject *pObjs ) {
-	printf("[AgentServer::DestroyServerSideAcceptedObject] Function\n");
+	DEBUG_MSG( LVL_TRACE, "DestroyServerSideAcceptedObject. \n");
 
 	ServerSession * pSession = (ServerSession *)pObjs;
 	eSERVER_TYPE eType = pSession->GetServerType();
@@ -276,8 +273,7 @@ VOID DestroyServerSideAcceptedObject( NetworkObject *pObjs ) {
 		GameSession * obj = (GameSession *)pObjs;
 		AgentFactory::Instance()->FreeGameSession(obj);
 	}
-	else if ( eType == TEMP_SERVER )
-    {
+	else if ( eType == TEMP_SERVER ) {
 		printf(">>>FreeTempSession( %x )\n", pObjs);
 		TempSession * obj = (TempSession *)pObjs;
 		AgentFactory::Instance()->FreeTempSession(obj);
@@ -285,28 +281,28 @@ VOID DestroyServerSideAcceptedObject( NetworkObject *pObjs ) {
 }
 
 VOID DestroyServerSideConnectedObject( NetworkObject *pNetworkObject ) {
-	printf("[AgentServer::DestroyServerSideConnectedObject]: Not Used.\n");
+     DEBUG_MSG( LVL_TRACE, "DestroyServerSideConnectedObject. \n");
 }
 
 // 客户端
 NetworkObject * CreateClientSideAcceptedObject() {
-	printf("[AgentServer::CreateClientSideAcceptedObject]: Alloc TempUserSession.\n");
+    DEBUG_MSG( LVL_TRACE, "CreateClientSideAcceptedObject. \n");
 	UserSession * obj = AgentFactory::Instance()->AllocUserSession();
 	if ( obj == NULL) {
 		printf("\nAgentFactory::Instance()->AllocUserSession() Fail.\n");
 		return NULL;
 	}
 	obj->Init();
-
 	return (NetworkObject *)(obj);
 }
 
 VOID DestroyClientSideAcceptedObject( NetworkObject * pObjs ) {
-	printf("[AgentServer::DestroyClientSideAcceptedObject]: Free User or TempUser.\n");
+    DEBUG_MSG( LVL_TRACE, "DestroyClientSideAcceptedObject. \n");
 	UserSession * pSession = (UserSession *)pObjs;
+	assert( pSession );
 	pSession->Release();
 }
 
 VOID DestroyClientSideConnectedObject( NetworkObject * pNetworkObject ) {
-	printf("[AgentServer::DestroyClientSideConnectedObject]: Not Used.\n");
+	DEBUG_MSG( LVL_TRACE, "DestroyClientSideConnectedObject. \n");
 }

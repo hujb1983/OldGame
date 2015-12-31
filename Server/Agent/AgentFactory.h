@@ -7,6 +7,7 @@
 #include "ServerSession.h"
 #include "TempSession.h"
 #include "UserSession.h"
+#include "UserGame.h"
 #include "GameSession.h"
 #include "LobbySession.h"
 
@@ -21,20 +22,19 @@ public:
 
 private:
 
-	/*  1. 已经连接上，未认证；
-        2. 时间太长要断开； */
+    /*  1. 用户会话层 */
 	MemoryFactory<UserSession> 	* m_pUserSessionPool;
 
-	/*  1. 已经连接上，未认证；
-        2. 时间太长要断开； */
+	/*  1. 用户游戏层 */
+	MemoryFactory<UserGame>	    * m_pUserGamePool;
+
+	/*  1. 游戏服务器 */
 	MemoryFactory<GameSession> 	* m_pGameSessionPool;
 
-	/*  1. 已经连接，未认证；
-        2. 时间太长要断开； */
+	/*  1. 大厅队列 */
 	MemoryFactory<LobbySession>	* m_pLobbySessionPool;
 
-	/*  1. 已经连接，未认证；
-        2. 时间太长要断开； */
+	/*  1. 临时服务器   */
 	MemoryFactory<TempSession>	* m_pTempSessionPool;
 
 public:
@@ -44,6 +44,10 @@ public:
 	// UserSession
 	UserSession * AllocUserSession();
 	void FreeUserSession(UserSession * pSession);
+
+	// UserGame
+	UserGame * AllocUserGame();
+	void FreeUserGame(UserGame * pUser);
 
 	// GameSession
 	GameSession * AllocGameSession();

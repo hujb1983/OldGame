@@ -86,20 +86,32 @@ void server_to_user_discards(int _userkey, int _seatid, char * _szHead, ServerSe
     get_user_discards_info( _userkey3, _userkey, _szCreatebank, sizeof(_szCreatebank) );
 
     char _buff[1024]   = {0};
-    char _format[256] = "{\"protocol\":\"%d\", \"data\":{ \"seatid\":%d, %s, \"bankerinfo\":[%s] }}";
-    snprintf( _buff, sizeof(_buff), _format, MAKEDWORD( Games_Protocol, CreateBank_BRD ),
+    char _format[256] = "{\"protocol\":\"%d\", \"data\":{ \"seatid\":%d, %s, \"showinfo\":[%s] }}";
+    snprintf( _buff, sizeof(_buff), _format, MAKEDWORD( Games_Protocol, Discards_BRD ),
               _seatid, _szHead, _szCreatebank );
 
     WORD wLen = strlen( _buff );
     g_AgentServer->SendToClient( _userkey, (BYTE*)_buff, wLen );
 
-    DEBUG_MSG( LVL_DEBUG, "CreateBank_BRD to client: %s \n", _buff );
+    DEBUG_MSG( LVL_DEBUG, "Discards_BRD to client: %s \n", _buff );
 }
 
+// 发送错误信息
+void agent_discards_error_to_user( int _userkey )
+{
+    char _szBuff[256]   = {0};
+    char _szFormat[128] = " { \"protocol\":\"%d\" }";
+    snprintf( _szBuff, sizeof(_szBuff), _szFormat, MAKEDWORD( Games_Protocol, Discards_NAK ) );
+
+    WORD wLen = strlen( _szBuff );
+    g_AgentServer->SendToClient( _userkey, (BYTE*)_szBuff, wLen );
+
+    DEBUG_MSG( LVL_DEBUG, "Discards_NAK to send: %s \n", (char *) _szBuff  );
+}
 
 void MSG_Handler_Discards_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    DEBUG_MSG( LVL_DEBUG, "Called_BRD to recv: %s \n", (char *) pMsg  );
+    DEBUG_MSG( LVL_DEBUG, "Discards_BRD to recv: %s \n", (char *) pMsg  );
 
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
@@ -124,6 +136,12 @@ void MSG_Handler_Discards_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg,
     js_map.ReadString ( "poker",     _poker,  sizeof(_poker) );
     js_map.ReadInteger( "count0",    _count0    );
     js_map.ReadString ( "poker0",    _poker0, sizeof(_poker0) );
+
+    if ( _status==-1 ) {
+        int _userkey_array[3] ={ _userkey1, _userkey2, _userkey3 };
+        agent_discards_error_to_user( _userkey_array[_seatid] );
+        return;
+    }
 
     // 获得头数据
     char _szBuff[256]   = {0};

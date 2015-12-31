@@ -104,21 +104,11 @@ void send_to_user_pokerinfo( int _seatid, int _userkey, ServerSession * pServerS
     {
         char _buff[2048]   = {0};
         char _format[256] = "{\"protocol\":\"%d\","
-                              " \"data\":{"
-                                    "\"battleid\":\"%d\","
-                                    "\"count\":\"%d\","
-                                    "\"poker\":[%s],"
-                                    "\"seatid\":\"%d\","
-                                    "\"pokerinfo\":[%s]"
-                                    "}}";
-
+             " \"data\":{ \"battleid\":\"%d\", \"count\":\"%d\", \"poker\":[%s], \"seatid\":\"%d\","
+             "\"pokerinfo\":[%s] }}";
         snprintf( _buff, sizeof(_buff), _format,
                  MAKEDWORD( Games_Protocol, InitCards_BRD ),
-                 _battleid,
-                 _count,
-                 _poker,
-                 _seatid,
-                 _pokerinfo );
+                 _battleid, _count, _poker, _seatid, _pokerinfo );
 
         WORD wLen = strlen( _buff );
         g_AgentServer->SendToClient( _userkey, (BYTE*)_buff, wLen );

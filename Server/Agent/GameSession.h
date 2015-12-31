@@ -6,6 +6,7 @@
 #include <Network.h>
 #include "ServerSession.h"
 
+
 class GameSession : public ServerSession
 {
 public:
@@ -22,6 +23,7 @@ public:
 
 private:
 	BOOL m_bFirst;
+
 };
 
 

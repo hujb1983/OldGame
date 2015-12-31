@@ -2,17 +2,26 @@
 #include <dbCommon.h>
 #pragma pack(push,1)
 
-void get_user_discards_license_info( int _seatid, int _main_seat, char * _szCalledInfo, int _size )
+void get_user_discards_license_info( int _userkey, int _seatid, int _main_seat, char * _szCalledInfo, int _size )
 {
     char _buff[256]   = {0};
+    int  _count = 0;
 
+    UserSession * pSession = NULL;
+    pSession = g_AgentServer->GetUserSession( _userkey );
+    if ( pSession ) {
+        _count = pSession->getPokerSize();
+    }
+
+    char _format[128] = {0};
     if ( _seatid == _main_seat ) {
-        strcat(_buff, "{\"show\":true}");
+        strcat(_format, "{\"show\":true, \"count\":%d }");
     }
     else {
-        strcat(_buff, "{\"show\":false}");
+        strcat(_format, "{\"show\":false, \"count\":%d }");
     }
 
+    snprintf ( _buff, sizeof(_buff), _format, _count);
     int szLen = strlen( _buff );
     if ( szLen < _size ) {
         strcat( _szCalledInfo, _buff);
@@ -67,11 +76,11 @@ void MSG_Handler_DiscardsLicense_BRD ( ServerSession * pServerSession, MSG_BASE 
     js_map.ReadInteger( "brokerage", _brokerage);
 
     char _discardsinfo[256] = {0};
-    get_user_discards_license_info( 0,  _seatid, _discardsinfo, sizeof(_discardsinfo) );
+    get_user_discards_license_info( _userkey1, 0,  _seatid, _discardsinfo, sizeof(_discardsinfo) );
     strcat( _discardsinfo, ",");
-    get_user_discards_license_info( 1,  _seatid, _discardsinfo, sizeof(_discardsinfo) );
+    get_user_discards_license_info( _userkey2, 1,  _seatid, _discardsinfo, sizeof(_discardsinfo) );
     strcat( _discardsinfo, ",");
-    get_user_discards_license_info( 2,  _seatid, _discardsinfo, sizeof(_discardsinfo) );
+    get_user_discards_license_info( _userkey3, 2,  _seatid, _discardsinfo, sizeof(_discardsinfo) );
 
     char _szHead[80] = {0};
     snprintf( _szHead, sizeof(_szHead), "\"basics\":%d,\"multiple\":%d,\"brokerage\":%d",
