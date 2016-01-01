@@ -51,7 +51,6 @@ private:
     UserSession *   m_pSession;         // 用户的网络会话层
 
 private:
-	eUSER_TYPE 		m_eUserType;
 	WORD 			m_wUserKey;         // 用户健值
 	BYTE            m_bySeatKey;        // 坐位ID;
     WORD 			m_wBattleKey;       // 房间号

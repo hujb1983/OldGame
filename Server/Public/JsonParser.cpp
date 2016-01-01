@@ -102,7 +102,7 @@ int JsonMap::ReadString(const char * in_name, char * out_data, int in_size)
         int json_len = 0;
 	    if (json_data->type==cJSON_Number){
             char temp[32] = {0};
-            sprintf( temp, "%s", json_data->valueint );
+            sprintf( temp, "%d", json_data->valueint );
             json_len = strlen( temp );
             if ( json_len > in_size ) {
                 return 0;
@@ -110,7 +110,7 @@ int JsonMap::ReadString(const char * in_name, char * out_data, int in_size)
             memcpy( out_data, temp, json_len + 1);
             return json_len;
 	    }
-	    if (json_data->type==cJSON_String){
+	    else if (json_data->type==cJSON_String){
             json_len = strlen( json_data->valuestring );
             if ( json_len > in_size ) {
                 return 0;

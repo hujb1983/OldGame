@@ -191,11 +191,14 @@ void MSG_Handler_DiscardsLicense_REQ ( ServerSession * pServerSession, MSG_BASE 
 
     BYTE _bySeatid = pBattle->getPlaying();  // 授权-并判断
 
+
     int _istatus = 0;
+    /*
     if ( pBattle->canEnd() ) {
-        pBattle->UpdateToDatabase();
+        // pBattle->UpdateToDatabase();
         return;
     }
+    */
 
     /* step1. 托管直接请机器人帮助打牌  */
     if ( pBattle->IsTrusteeship( _bySeatid )==0 ) {
@@ -237,7 +240,7 @@ void MSG_Handler_DiscardsLicense_REQ ( ServerSession * pServerSession, MSG_BASE 
                             "\"basics\":\"%d\","
                             "\"multiple\":\"%d\","
                             "\"brokerage\":\"%d\","
-                            "\"times\":\"18\" }] }";   // 暂时设定为18秒;
+                            "\"times\":\"18\" }";   // 暂时设定为18秒;
 
         snprintf( buff, sizeof(buff), format, MAKEDWORD( Games_Protocol, DiscardsLicense_BRD ),
                 szPlayerkey, _istatus, _battleid, _bySeatid, _basics, _multiple, _brokerage );

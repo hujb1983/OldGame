@@ -90,7 +90,7 @@ int Processed_Discards ( ServerSession * pServerSession, const char * pInput )
     }
     else {
         if ( pBattle->getDiscardTimes()==0 ) {
-            return FALSE;     /* step6. 如果没出牌，判断是否第一个，第一个不能不出牌的 */
+            _status = -1;   // 第一次不能不出牌!
         }
     }
 
@@ -197,7 +197,7 @@ Compare_Correct:
     return byThanType;
 
 Compare_Wrong:
-    return byThanType;
+    return FALSE;
 }
 
 
@@ -225,7 +225,7 @@ int Battle_Poker_Parser( BYTE * byPK, BYTE bySize, BYTE & byThanValue, BYTE & by
 		if ( (byPK[0] == 14) && (byPK[1] == 15) ) {
 			return (PH_MAX); // 王炸
 		}
-		return -1;
+		return PH_0;
 	}
 
 	short _Max_Value = 0; 	// PK最大面值
@@ -271,11 +271,12 @@ int Battle_Poker_Parser( BYTE * byPK, BYTE bySize, BYTE & byThanValue, BYTE & by
 	}
 
 	// 得出最小面值的牌
+	_Min_Count = _Max_Count;
 	for (short i=0; i<(short)bySize; ++i)
 	{
 		_idx = byPK[i];
 		_val = _PK_Slot[_idx];
-		_Min_Count = (_val <= _Min_Count) ? _val : _Min_Count; // 低计量获取
+		_Min_Count = (_val < _Min_Count) ? _val : _Min_Count; // 低计量获取
 	}
 
 	byThanValue = _Max_Value; // 到这里取最大值为比较值
@@ -294,13 +295,13 @@ int Battle_Poker_Parser( BYTE * byPK, BYTE bySize, BYTE & byThanValue, BYTE & by
 			}
 			if ( _Max_Count == 2 ) {
 				if ( (_Div_2 >= 3) && (_Div_3 == 0) )
-					return 0; // 连对
+					return (PH_C2); // 连对
 				else
 					return (PH_0); // 连不起来
 			}
 			if ( _Max_Count == 3 ) {
 				if ( (_Div_2 >= 2) && (_Div_3 == 0) )
-					return 0; // 飞机
+					return (PH_C3); // 飞机
 				else
 					return (PH_0); // 飞不起来
 			}

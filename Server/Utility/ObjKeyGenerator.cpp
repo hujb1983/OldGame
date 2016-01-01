@@ -87,7 +87,7 @@ VOID CObjKeyGenerator::RestoreKey(DWORD key)
 {
 	Yond_guard sync_cs(m_cs);
 	m_dequeKey.push_back(key);
-	printf("[CObjKeyGenerator::RestoreKey] m_dequeKey.push_back(%d)\n", key);
+	DEBUG_MSG( LVL_DEBUG, "m_dequeKey.push_back( %d )\n", key);
 }
 
 size_t CObjKeyGenerator::GetSize()

@@ -45,27 +45,33 @@ void game_second_send_discards_license( int _battleid )
 }
 
 // 叫地主授权
-void get_user_discards_info( int _userkey, int _sendkey, char * _szPokerInfo, int _size )
+void get_user_discards_info( int _userkey, int _seatid, int _main_seat, char * _szCalledInfo, int _size )
 {
     char _buff[256]   = {0};
+    int  _count = 0;
 
     UserSession * pSession = NULL;
     pSession = g_AgentServer->GetUserSession( _userkey );
     if ( pSession ) {
-        pSession->getPokerInfo( _sendkey, _buff, sizeof( _buff ) );
-    }
-    else {
-        char _format[256] = "{\"show\":false, \"name\":\"-\", \"count\":17, \"poker\":[-1]}";
-        strcat(_buff, _format);
+        _count = pSession->getPokerSize();
     }
 
+    char _format[128] = {0};
+    if ( _seatid == _main_seat ) {
+        strcat(_format, "{\"show\":true, \"count\":%d }");
+    }
+    else {
+        strcat(_format, "{\"show\":false, \"count\":%d }");
+    }
+
+    snprintf ( _buff, sizeof(_buff), _format, _count);
     int szLen = strlen( _buff );
     if ( szLen < _size ) {
-        strcat( _szPokerInfo, _buff);
+        strcat( _szCalledInfo, _buff);
     }
 }
 
-void server_to_user_discards(int _userkey, int _seatid, char * _szHead, ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize)
+void server_to_user_discards(int _userkey, int _seatid, int _main_seatid,  char * _szHead, ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize)
 {
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
@@ -73,17 +79,17 @@ void server_to_user_discards(int _userkey, int _seatid, char * _szHead, ServerSe
     }
 
     int _userkey1(0), _userkey2(0), _userkey3(0);
-    js_map.ReadInteger( "userkey1",  _userkey1 );
-    js_map.ReadInteger( "userkey2",  _userkey2 );
-    js_map.ReadInteger( "userkey3",  _userkey3 );
+    js_map.ReadInteger( "userkey1",  _userkey1      );
+    js_map.ReadInteger( "userkey2",  _userkey2      );
+    js_map.ReadInteger( "userkey3",  _userkey3      );
 
     // 打印需要创建地主的数据
     char _szCreatebank[256] = {0};
-    get_user_discards_info( _userkey1, _userkey, _szCreatebank, sizeof(_szCreatebank) );
+    get_user_discards_info( _userkey1, 0, _main_seatid, _szCreatebank, sizeof(_szCreatebank) );
     strcat( _szCreatebank, ",");
-    get_user_discards_info( _userkey2, _userkey, _szCreatebank, sizeof(_szCreatebank) );
+    get_user_discards_info( _userkey2, 1, _main_seatid, _szCreatebank, sizeof(_szCreatebank) );
     strcat( _szCreatebank, ",");
-    get_user_discards_info( _userkey3, _userkey, _szCreatebank, sizeof(_szCreatebank) );
+    get_user_discards_info( _userkey3, 2, _main_seatid, _szCreatebank, sizeof(_szCreatebank) );
 
     char _buff[1024]   = {0};
     char _format[256] = "{\"protocol\":\"%d\", \"data\":{ \"seatid\":%d, %s, \"showinfo\":[%s] }}";
@@ -108,6 +114,18 @@ void agent_discards_error_to_user( int _userkey )
 
     DEBUG_MSG( LVL_DEBUG, "Discards_NAK to send: %s \n", (char *) _szBuff  );
 }
+
+// 修改用户手上的牌
+void agent_set_user_cards_info( int _userkey, BYTE _pokersize, char * _poker )
+{
+    UserSession * pSession = NULL;
+    pSession = g_AgentServer->GetUserSession( _userkey );
+    if ( pSession ) {
+        pSession->getPokerSize() = _pokersize;
+        pSession->setPokers( _poker, _pokersize );
+    }
+}
+
 
 void MSG_Handler_Discards_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
@@ -137,11 +155,14 @@ void MSG_Handler_Discards_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg,
     js_map.ReadInteger( "count0",    _count0    );
     js_map.ReadString ( "poker0",    _poker0, sizeof(_poker0) );
 
+    int _userkey_array[3] ={ _userkey1, _userkey2, _userkey3 };
     if ( _status==-1 ) {
-        int _userkey_array[3] ={ _userkey1, _userkey2, _userkey3 };
         agent_discards_error_to_user( _userkey_array[_seatid] );
-        return;
+        return;     // 打得无效牌
     }
+
+    // 修改用户手上的牌;
+    agent_set_user_cards_info( _userkey_array[_seatid], _count0, _poker0 );
 
     // 获得头数据
     char _szBuff[256]   = {0};
@@ -149,18 +170,18 @@ void MSG_Handler_Discards_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg,
     snprintf( _szBuff, sizeof(_szBuff), _szHead,  _battleid,  _multiple, (_dmodel==0)?"false":"true", _count, _poker );
 
     if (_userkey1 != 0) {
-        server_to_user_discards( _userkey1, 0, _szBuff, pServerSession, pMsg, wSize );
+        server_to_user_discards( _userkey1, 0, _seatid, _szBuff, pServerSession, pMsg, wSize );
     }
 
     if (_userkey2 != 0) {
-        server_to_user_discards( _userkey2, 1, _szBuff, pServerSession, pMsg, wSize );
+        server_to_user_discards( _userkey2, 1, _seatid, _szBuff, pServerSession, pMsg, wSize );
     }
 
     if (_userkey3 != 0) {
-        server_to_user_discards( _userkey3, 2, _szBuff, pServerSession, pMsg, wSize );
+        server_to_user_discards( _userkey3, 2, _seatid, _szBuff, pServerSession, pMsg, wSize );
     }
 
-    if ( _status==1 ) {
+    if ( _status!=-1 ) {
         game_second_send_discards_license( _battleid );
     }
 }

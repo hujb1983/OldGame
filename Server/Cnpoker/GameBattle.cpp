@@ -240,6 +240,15 @@ int GameBattle::SetOnline( BYTE seatid, BYTE status )
     else if ( status == -1 ) {
         m_byOnline[seatid] = eGB_Leave;
     }
+
+    if ( m_byTableStatus != eGB_PLAYING ) {
+        if ( m_byOnline[0] == eGB_Offline &&
+             m_byOnline[1] == eGB_Offline &&
+             m_byOnline[2] == eGB_Offline ) {
+            return FALSE;
+        }
+    }
+    return TRUE;
 }
 
 /******************************************************
@@ -427,6 +436,7 @@ BYTE GameBattle::getBasecards( BYTE seatid, char * poker, WORD wSize ) {
              retSize = i;
         }
     }
+    m_nDiscardsSize[seatid] += BASE_POKER;
 
     // step2 : 返回给大家看底牌;
     if ( poker ) {
@@ -585,10 +595,10 @@ int GameBattle::canGame() {
     return FALSE;
 }
 int GameBattle::canEnd() {
-    if ( m_nDiscardsSize[ m_byPlaying ] == 0 ) {
-        return TRUE;
+    if ( m_nDiscardsSize[ m_byPlaying ] > 0 ) {
+        return FALSE;   // 未结束
     }
-    return FALSE;
+    return TRUE;  // 已经结束
 }
 
 int GameBattle::hadDiscards( BYTE seatid, BYTE * poker, BYTE bySize ) {

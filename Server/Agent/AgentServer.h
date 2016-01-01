@@ -43,26 +43,19 @@ public: // 对其游戏用户操作
 	BOOL SetUserSession( WORD wIndex, UserSession * pSession );
 	UserSession * GetUserSession( WORD wIndex );
 
-	// User Session
-	BOOL SetUserGame( WORD wIndex, UserSession * pSession );
-	UserGame * GetUserGame( WORD wIndex );
+    WORD AllocSessionKey();
+    void FreeSessionKey(WORD _wIndex);
 
 private:
 	BOOL 	        m_bShutdown;
 	IOCPServer *    m_pIOCPServer;
 
+private:
 	ServerSession * m_pGameServer;
 	ServerSession * m_pLobbyServer;
 
 	// UserKey = Key;  maxsize = 0xFFFF+1;
 	UserSession * m_pUserSession[PORT_MAX + 1];
-    UserGame * m_pUserGame[PORT_MAX + 1];
-
-public: /* ·ÖÅä¹Ø¼ü×Ö */
-    WORD AllocSessionKey();
-    void FreeSessionKey(WORD _wIndex);
-
-private:
     CObjKeyGenerator m_cObjKey;
 };
 

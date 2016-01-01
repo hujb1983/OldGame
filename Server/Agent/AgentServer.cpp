@@ -177,9 +177,9 @@ BOOL AgentServer::SendToClient( WORD wIndex, BYTE * pMsg, WORD wSize )
 {
 	UserSession * pSession = m_pUserSession[wIndex];
 	if ( pSession != NULL ) {
+        char szBuff[40960] = {0};
         CMsgBuff msgBuff;
-        char szBuff[1024] = {0};
-        msgBuff.SetBuff(szBuff, 1024);
+        msgBuff.SetBuff(szBuff, sizeof(szBuff) );
         msgBuff.Write(wSize);
         msgBuff.Write((char*)pMsg);
 		pSession->Send( msgBuff.GetHead(), msgBuff.GetWriteLen()-1 );
@@ -199,19 +199,8 @@ BOOL AgentServer::SendToClient( BYTE * pMsg, WORD wSize )
     js_map.ReadInteger( "userkey", _userport );
 	WORD wIndex = (WORD) _userport;
 
-	UserSession * pSession = m_pUserSession[wIndex];
-	if ( pSession != NULL ) {
-        CMsgBuff msgBuff;
-        char szBuff[1024] = {0};
-        msgBuff.SetBuff(szBuff, 1024);
-        msgBuff.Write(wSize);
-        msgBuff.Write((char*)pMsg);
-		pSession->Send( msgBuff.GetHead(), msgBuff.GetWriteLen()-1 );
-		return TRUE;
-	}
-    return FALSE;
+    return SendToClient( wIndex, pMsg, wSize );
 }
-
 BOOL AgentServer::SetUserSession( WORD wIndex, UserSession * pSession )
 {
 	if ( wIndex == 0 ) {
@@ -220,7 +209,6 @@ BOOL AgentServer::SetUserSession( WORD wIndex, UserSession * pSession )
 	m_pUserSession[wIndex] = pSession;
 	return TRUE;
 }
-
 UserSession * AgentServer::GetUserSession( WORD wIndex )
 {
 	if ( wIndex == 0 ) {
@@ -228,18 +216,16 @@ UserSession * AgentServer::GetUserSession( WORD wIndex )
 	}
 	return m_pUserSession[wIndex];
 }
-
 WORD AgentServer::AllocSessionKey() {
     return m_cObjKey.GetKey();
 }
-
 void AgentServer::FreeSessionKey( WORD _wIndex ) {
     m_cObjKey.RestoreKey( _wIndex );
 }
 
 
 #if 0
-BOOL AgentServer::ConnectToServer(ServerSession * pSession, char * pszIP, WORD wPort)
+BOOL AgentServer::ConnectToServer( ServerSession * pSession, char * pszIP, WORD wPort )
 {
 	//printf("AgentServer::ConnectToServer Function\n");
 	if (pSession == NULL) {
@@ -269,12 +255,12 @@ VOID DestroyServerSideAcceptedObject( NetworkObject *pObjs ) {
 	ServerSession * pSession = (ServerSession *)pObjs;
 	eSERVER_TYPE eType = pSession->GetServerType();
 	if ( eType == GAME_SERVER ) {
-		printf(">>>FreeGameSession( %x )\n", pObjs);
+		DEBUG_MSG( LVL_TRACE, ">>>FreeGameSession( %x )\n", pObjs);
 		GameSession * obj = (GameSession *)pObjs;
 		AgentFactory::Instance()->FreeGameSession(obj);
 	}
 	else if ( eType == TEMP_SERVER ) {
-		printf(">>>FreeTempSession( %x )\n", pObjs);
+		DEBUG_MSG( LVL_TRACE, ">>>FreeTempSession( %x )\n", pObjs);
 		TempSession * obj = (TempSession *)pObjs;
 		AgentFactory::Instance()->FreeTempSession(obj);
     }
@@ -289,7 +275,7 @@ NetworkObject * CreateClientSideAcceptedObject() {
     DEBUG_MSG( LVL_TRACE, "CreateClientSideAcceptedObject. \n");
 	UserSession * obj = AgentFactory::Instance()->AllocUserSession();
 	if ( obj == NULL) {
-		printf("\nAgentFactory::Instance()->AllocUserSession() Fail.\n");
+		DEBUG_MSG( LVL_TRACE, "AllocUserSession Fail.\n");
 		return NULL;
 	}
 	obj->Init();

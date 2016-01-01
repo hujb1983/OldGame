@@ -14,7 +14,7 @@ public:
 
 	eSERVER_TYPE	GetServerType() {	return GAME_SERVER;  }
 
-	virtual void Update();
+    virtual void Update();
     virtual void DBResult( WORD cate, WORD ptcl, QueryResult * pData );
 
 public:
@@ -25,6 +25,7 @@ public:
 
 private:
 	BOOL m_bFirst;
+
 };
 
 
