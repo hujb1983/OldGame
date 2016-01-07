@@ -101,7 +101,7 @@ void MSG_Handler_JoinGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg,
 // -- µÇÂ¼±¨´í
 void MSG_Handler_JoinGame_NAK ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    g_AgentServer->SendToClient( (BYTE*)pMsg, wSize );
+    //g_AgentServer->SendToClient( (BYTE*)pMsg, wSize );
 }
 
 

@@ -94,9 +94,8 @@ int User_Result_TableInfo  ( ServerSession * pServerSession, QueryResult * pResu
         JsonBuffer js_table;
         JsonBuffer js_array;
 
-        MSG_TABLEINFO_ANC wTable;
         js_send.clear_buff();
-        js_send.WriteInteger("protocol", wTable.m_dwProtocol );
+        js_send.WriteInteger("protocol", MAKEDWORD( Update_Protocol, TableInfo_ANC ) );
         js_send.WriteString ("userkey",  "%d");
         js_send.WriteInteger("count",    iSize );
 

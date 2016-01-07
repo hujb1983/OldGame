@@ -5,7 +5,7 @@ CnpokerFactory::CnpokerFactory()
     m_pDBSessionPool    = NULL;
 	m_pAgentSessionPool = NULL;
 	m_pTempSessionPool  = NULL;
-	m_pGameBattlePool    = NULL;
+	m_pGameTablePool    = NULL;
 }
 
 CnpokerFactory::~CnpokerFactory()
@@ -13,7 +13,7 @@ CnpokerFactory::~CnpokerFactory()
     if (m_pDBSessionPool) 	    delete m_pDBSessionPool;
 	if (m_pAgentSessionPool) 	delete m_pAgentSessionPool;
 	if (m_pTempSessionPool) 	delete m_pTempSessionPool;
-	if (m_pGameBattlePool) 	    delete m_pGameBattlePool;
+	if (m_pGameTablePool) 	    delete m_pGameTablePool;
 }
 
 void CnpokerFactory::Init()
@@ -21,13 +21,13 @@ void CnpokerFactory::Init()
     m_pDBSessionPool    = new MemoryFactory<DBSession>;
 	m_pAgentSessionPool = new MemoryFactory<AgentSession>;
 	m_pTempSessionPool 	= new MemoryFactory<TempSession>;
-	m_pGameBattlePool    = new MemoryFactory<GameBattle>;
+	m_pGameTablePool    = new MemoryFactory<GameTable>;
 
 	// UserSession
 	m_pDBSessionPool->Initialize(1,1);      // 已经认证用户；
 	m_pAgentSessionPool->Initialize(1,1);      // 已经认证用户；
 	m_pTempSessionPool->Initialize(1,1);      // 未认证用户；
-	m_pGameBattlePool->Initialize(300,1);
+	m_pGameTablePool->Initialize(100,1);
 }
 
 // UserSession
@@ -74,15 +74,15 @@ void CnpokerFactory::FreeTempSession(TempSession * pServerSession) {
 }
 
 // Server
-GameBattle * CnpokerFactory::AllocGameBattle()
+GameTable * CnpokerFactory::AllocGameTable()
 {
-	if ( m_pGameBattlePool == NULL ) {
+	if ( m_pGameTablePool == NULL ) {
 		return NULL;
 	}
-	return m_pGameBattlePool->Alloc();
+	return m_pGameTablePool->Alloc();
 }
 
-void CnpokerFactory::FreeGameBattle(GameBattle * pTable) {
-	return m_pGameBattlePool->Free(pTable);
+void CnpokerFactory::FreeGameTable(GameTable * pTable) {
+	return m_pGameTablePool->Free(pTable);
 }
 

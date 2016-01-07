@@ -8,7 +8,7 @@
 #include "TempSession.h"
 #include "AgentSession.h"
 #include "DBSession.h"
-#include "GameBattle.h"
+#include "GameTable.h"
 
 using namespace A;
 
@@ -20,11 +20,10 @@ public:
 	~CnpokerFactory();
 
 private:
-
 	MemoryFactory<DBSession> 	    * m_pDBSessionPool;
 	MemoryFactory<AgentSession> 	* m_pAgentSessionPool;
 	MemoryFactory<TempSession>	    * m_pTempSessionPool;
-	MemoryFactory<GameBattle> 	    * m_pGameBattlePool;
+	MemoryFactory<GameTable> 	    * m_pGameTablePool;
 
 public:
 	void Init(void);
@@ -43,8 +42,8 @@ public:
 	void FreeTempSession(TempSession * pSession);
 
 	// Server
-	GameBattle * AllocGameBattle();
-	void FreeGameBattle(GameBattle * pTable);
+	GameTable * AllocGameTable();
+	void FreeGameTable(GameTable * pTable);
 };
 
 #endif

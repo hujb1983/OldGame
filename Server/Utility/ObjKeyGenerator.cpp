@@ -24,7 +24,7 @@ DWORD CObjKeyGenerator::GetKey()
 	DWORD key;
 
 	if ( IsEmpty() == TRUE ) {
-		return NULL;
+		return 0;
 	}
 
 	m_cs.Lock();

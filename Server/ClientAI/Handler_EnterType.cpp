@@ -2,8 +2,6 @@
 
 int acl_create_login( char * pInput, WORD wSize )
 {
-	MSG_LOGIN_REQ msg;
-
 	char buff[1024]  = {0};
 	char format[256] = 	"{\"Protocol\":\"%d\","
                         " \"userid\":%d,"

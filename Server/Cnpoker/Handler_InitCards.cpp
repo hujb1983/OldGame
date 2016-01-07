@@ -50,7 +50,6 @@ void MSG_Handler_InitCards_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg
 int Initcards_SendToAgentServer( WORD _wBattleid, GameBattle * pBattle )
 {
 	char szMsg[1024]  = {0};
-
     char format[256] = 	"{\"protocol\":\"%d\","
                         " %s,"
                         " \"battleid\":\"%d\","
@@ -62,6 +61,7 @@ int Initcards_SendToAgentServer( WORD _wBattleid, GameBattle * pBattle )
                         " \"poker1\":\"%s\","
                         " \"count2\":\"%d\","
                         " \"poker2\":\"%s\" }";
+
     char poker1[256]  = {0};
     char poker2[256]  = {0};
     char poker3[256]  = {0};

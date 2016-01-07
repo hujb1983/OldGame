@@ -16,7 +16,7 @@ public:
 	PacketHandler(void);
 	~PacketHandler(void);
 
-    DWORD GetProtocol( char * szMsg );
+    DWORD GetProtocol( MSG_BASE * szMsg, WORD wSize );
 
 public:
 	BOOL RegisterHandler();

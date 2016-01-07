@@ -29,7 +29,7 @@ void MSG_Handler_WRankInfo_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg
     int _userkey = 0;
     js_map.ReadInteger( "userkey", _userkey );
     if ( _userkey!=0 ) {
-        g_AgentServer->SendToClient( (BYTE*) pMsg, wSize );
+        g_AgentServer->SendToClient( _userkey, (BYTE*) pMsg, wSize );
         User_Login_Query_Day_Rank( _userkey );
     }
 }

@@ -5,8 +5,6 @@
 #include <Common.h>
 #include <Network.h>
 #include "ServerSession.h"
-#include "ObjKeyGenerator.h"
-#include "UserGame.h"
 
 class GameSession : public ServerSession
 {
@@ -24,22 +22,6 @@ public:
 
 private:
 	BOOL m_bFirst;
-
-public:
-
-    // ≥ı ºªØ;
-    void Init();
-
-	// UserGame
-	BOOL SetUserGame( WORD wIndex, UserGame * pUser );
-	UserGame * GetUserGame( WORD wIndex );
-
-    WORD AllocGameKey();
-    void FreeGameKey(WORD _wIndex);
-
-private:
-    UserGame * m_pUserGame[PORT_MAX + 1];
-    CObjKeyGenerator m_cObjKey;
 };
 
 #endif // _AGENTPLAYER_H_INCLUDED_

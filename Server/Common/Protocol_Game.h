@@ -31,6 +31,9 @@ enum eGAME_PROTOCOL
 	JoinTable_BRD, 			        // 加入桌子应答
 	JoinTable_NAK,                  // 加入桌子错误
 	JoinTable_DBR, 			        // 加入桌子应答
+	JoinTable_ANC, 			        // 加入桌子应答
+
+	CreateTable_DBR         = 345, 	// 创建桌子数据
 
 	QuitTable_REQ           = 350, 	// 加入桌子请求
 	QuitTable_BRD,

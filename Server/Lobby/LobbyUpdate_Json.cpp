@@ -32,12 +32,11 @@ int LobbyUpdate::JsonUpdateTableInfo( int roomid, int k, char * js_table, int js
     {
         if ( byRoomGroupTableSize[roomid] > k )
         {
-            MSG_TABLEINFO_ANC send;
+            int protocol = 0;
             char szMsg[256] = {0};
             memset( szMsg, 0x0, sizeof(szMsg) );
-            snprintf( szMsg, sizeof(szMsg),
-                     " {\"protocol\":\"%d\", \"data\":{\"roomid\":\" %d \", \"tableid\":\" %d \", \"update\":\" %d \"}} ",
-                     send.m_dwProtocol, roomid, k, byTableOnlines[roomid][k]);
+            snprintf( szMsg, sizeof(szMsg), " {\"protocol\":\"%d\",\"data\":{\"roomid\":%d,\"tableid\":%d,\"update\":%d}} ",
+                  protocol, roomid, k, byTableOnlines[roomid][k]);
 
             int nLen = strlen( szMsg );
             if ( nLen < js_size ) {
@@ -52,7 +51,6 @@ int LobbyUpdate::JsonUpdateTableInfo( int roomid, int k, char * js_table, int js
 
 int LobbyUpdate::JsonOnlineInfo( char * js_table, int js_size )
 {
-    MSG_ONLINEINFO_ANC send;
     char szMsg[256] = {0};
     memset( szMsg, 0x0,  sizeof(szMsg)  );
     snprintf( szMsg, sizeof(szMsg), " \"Onlines\":\"%d\" ",

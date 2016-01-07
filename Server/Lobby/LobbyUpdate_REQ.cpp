@@ -160,10 +160,9 @@ void LobbyUpdate::Onlines_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg,
     char szInfo[1024] = {0};
     int nLen = JsonOnlineInfo( szInfo, sizeof(szInfo) );
 
-    MSG_ONLINEINFO_ANC send;
     char buff[4096] = {0};
     snprintf( buff, sizeof(szInfo), "{ \"protocol\":\"%d\", \"userkey\":\"%d\", %s }",
-             send.m_dwProtocol, _userport, szInfo);
+             MAKEDWORD( Update_Protocol, OnlineInfo_ANC ) , _userport, szInfo);
 
     nLen = strlen (szInfo);
     if ( nLen > 0) {

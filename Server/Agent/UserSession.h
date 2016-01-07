@@ -4,6 +4,7 @@
 #include <Utility.h>
 #include <Common.h>
 #include <Network.h>
+#include <Public.h>
 #include "ServerSession.h"
 
 class UserSession : public ServerSession
@@ -48,12 +49,19 @@ public:
     void getPokerInfo( int userkey, char * _pokerinfo,
                       int _size );                      // 牌的信息
 
-    void QuitTable();   // 退出桌子;
+    BYTE& getStatus();    // 取得状态;
+    void EndGame(int _imoneys, int _iwons, int _ifaileds); // 结束游戏更新数据;
+    void JoinGame();    // 加入游戏;
+    void LeaveGame();   // 离开游戏;
+    void ClearTable();  // 清理数据;
 
-	void CloseSession();
+	void CloseSession();    // 关闭桌子;
 
-	/* 1. ²éÑ¯Êý¾Ý¿â£»*/
-    virtual void  DBResult( WORD cate, WORD ptcl, QueryResult * pData );
+	void SetUserPacket(BYTE * bPack, WORD wSize);
+	UserPacket & GetUserPacket();
+
+private:
+    UserPacket  m_cPack;
 
 public:
 	virtual void 	Init();
@@ -67,6 +75,8 @@ public:
 private:
 	BOOL            m_bFirst;
 	eUSER_TYPE 		m_eUserType;
+
+	BYTE 			m_wUserStatus;      // 用户的状态
 	WORD 			m_wUserKey;         // 用户健值
 	BYTE            m_bySeatKey;        // 坐位ID;
     WORD 			m_wBattleKey;       // 房间号

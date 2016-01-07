@@ -17,7 +17,7 @@ void LobbyUpdate::RoomInfo_ANC  ( char * pMsg, WORD wSize )
     if (  MAX_SZ > wSize ) {
         wRoomGroupSize = wSize;
         memcpy( szRoomGroupInfo, pMsg, wSize );
-        printf("[LobbyUpdate::RoomInfo_ANC] %d, %s \n", byRoomGroupCount, pMsg);
+        DEBUG_MSG( LVL_DEBUG, "TableInfo_ANC: %d, %s \n", byRoomGroupCount, pMsg);
     }
 }
 
@@ -47,7 +47,7 @@ void LobbyUpdate::TableInfo_ANC ( char * pMsg ,  WORD wSize)
             }
         }
     }
-    printf("[LobbyUpdate::TableInfo_ANC] %s \n", pMsg);
+    DEBUG_MSG( LVL_DEBUG, "TableInfo_ANC: %s \n", pMsg);
 }
 
 void LobbyUpdate::WRankInfo_ANC ( char * pMsg,  WORD wSize)
@@ -55,7 +55,7 @@ void LobbyUpdate::WRankInfo_ANC ( char * pMsg,  WORD wSize)
     if ( wSize < sizeof( szWeekRank ) ) {
         iWeekRankSize = wSize;
         memcpy( szWeekRank, pMsg, wSize );
-        printf("[LobbyUpdate::WRankInfo_ANC] %s \n", szWeekRank);
+        DEBUG_MSG( LVL_DEBUG, "WRankInfo_ANC: %s \n", pMsg);
     }
 }
 
@@ -64,7 +64,7 @@ void LobbyUpdate::DRankInfo_ANC ( char * pMsg, WORD wSize)
     if ( wSize < sizeof( szDayRank ) ) {
         iDayRankSize = wSize;
         memcpy( szDayRank, pMsg, wSize );
-        printf("[LobbyUpdate::DRankInfo_ANC] %s \n", szDayRank);
+        DEBUG_MSG( LVL_DEBUG, "DRankInfo_ANC: %s \n", pMsg);
     }
 }
 

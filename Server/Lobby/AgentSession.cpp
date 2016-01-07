@@ -55,11 +55,8 @@ void AgentSession::Clear()
 	ServerSession::Clear();
 }
 
-void AgentSession::OnRecv(BYTE *pMsg, WORD wSize)
-{
-    printf("pMsg = %s \n", (char*)pMsg);
+void AgentSession::OnRecv(BYTE *pMsg, WORD wSize) {
     g_PacketHandler.ParsePacket_Agent( this, (MSG_BASE*)pMsg, wSize );
-    //g_LobbyServer->SendToDBServer(pMsg, wSize);
 }
 
 void AgentSession::OnConnect( BOOL bSuccess, DWORD dwNetworkIndex )
@@ -69,7 +66,6 @@ void AgentSession::OnConnect( BOOL bSuccess, DWORD dwNetworkIndex )
 
 void AgentSession::OnDisconnect()
 {
-	printf("[AgentSession::OnDisconnect] \n");
 	g_LobbyUpdate.QuitAgentSession( this );
 	RemoveAllUser();
 }

@@ -63,7 +63,7 @@ void MSG_Handler_DiscardsLicense_BRD ( ServerSession * pServerSession, MSG_BASE 
     }
 
     int _userkey1(0), _userkey2(0), _userkey3(0), _seatid(0);
-    int _basics(0),  _multiple(0), _brokerage(0);
+    int _basics(0),  _multiple(0), _brokerage(0), _first(0);
     int _times(0), _battleid(0), _dmodel(0);
     js_map.ReadInteger( "userkey1",  _userkey1 );
     js_map.ReadInteger( "userkey2",  _userkey2 );
@@ -71,6 +71,7 @@ void MSG_Handler_DiscardsLicense_BRD ( ServerSession * pServerSession, MSG_BASE 
     js_map.ReadInteger( "battleid",  _battleid );
     js_map.ReadInteger( "seatid",    _seatid   );
     js_map.ReadInteger( "times",     _times    );
+    js_map.ReadInteger( "first",     _first    );
     js_map.ReadInteger( "basics",    _basics   );
     js_map.ReadInteger( "multiple",  _multiple );
     js_map.ReadInteger( "brokerage", _brokerage);
@@ -83,8 +84,8 @@ void MSG_Handler_DiscardsLicense_BRD ( ServerSession * pServerSession, MSG_BASE 
     get_user_discards_license_info( _userkey3, 2,  _seatid, _discardsinfo, sizeof(_discardsinfo) );
 
     char _szHead[80] = {0};
-    snprintf( _szHead, sizeof(_szHead), "\"basics\":%d,\"multiple\":%d,\"brokerage\":%d",
-             _basics, _multiple, _brokerage );
+    snprintf( _szHead, sizeof(_szHead), "\"first\":%s,\"basics\":%d,\"multiple\":%d,\"brokerage\":%d",
+             (_first==0)?("false"):("true"), _basics, _multiple, _brokerage );
 
     if (_userkey1 != 0) {
         server_to_user_discards_license(_userkey1, _battleid, 0, _times, _szHead, _discardsinfo );

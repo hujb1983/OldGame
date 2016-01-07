@@ -52,27 +52,23 @@ void server_to_user_called(int _userkey, int _battleid, int _seatid,
                            int _multiple, int _dmodel, int _times,
                            int _calltype, char * _calledinfo )
 {
+    UserSession * pSession = NULL;
+    pSession = g_AgentServer->GetUserSession( _userkey );
+    if ( pSession ) {
+        pSession->getStatus() = eGB_CALLING;
+    }
+
     char _buff[1024]   = {0};
     char _format[256] = "{\"protocol\":\"%d\","
                         " \"data\":{"
-                            "\"battleid\":%d,"
-                            "\"seatid\":%d,"
-                            "\"multiple\":%d,"
-                            "\"dmodel\":%s,"
-                            "\"times\":%d,"
-                            "\"calltype\":%d,"
-                            "\"callinfo\":[%s]"
-                            "}}";
+                            "\"battleid\":%d,\"seatid\":%d,\"multiple\":%d,\"dmodel\":%s,"
+                            "\"times\":%d,\"calltype\":%d,\"callinfo\":[%s]}}";
 
     snprintf( _buff, sizeof(_buff), _format,
              MAKEDWORD( Games_Protocol, Called_BRD ),
-             _battleid,
-             _seatid,
-             _multiple,
+             _battleid, _seatid, _multiple,
              (_dmodel==0)?"false":"true",
-             _times,
-             _calltype,
-             _calledinfo );
+             _times, _calltype, _calledinfo );
 
     WORD wLen = strlen( _buff );
     g_AgentServer->SendToClient( _userkey, (BYTE*)_buff, wLen );

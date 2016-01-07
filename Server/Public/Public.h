@@ -5,13 +5,13 @@ struct SERVER_INFO
 {
 	char 	m_strIp[IP_MAX_LEN]; 	// IP
 	DWORD 	m_dwPort; 				// PORT
-	
+
 	SERVER_INFO()
 	{
 		memset(this, 0, sizeof(SERVER_INFO));
 		strcpy(m_strIp, "");
-		m_dwPort = 0;		
-	}	
+		m_dwPort = 0;
+	}
 };
 
 #include <ctime>
@@ -26,5 +26,9 @@ struct SERVER_INFO
 #include "InfoParser.h"
 #include "JsonParser.h"
 #include "MsgBuff.h"
+
+// Packet
+#include "UserPacket.h"
+#include "LobbyPacket.h"
 
 #endif // _PUBLIC_H_INCLUDED_

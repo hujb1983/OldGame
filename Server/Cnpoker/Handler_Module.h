@@ -14,8 +14,7 @@
 void MSG_Handler_GamePacket_ANC     ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 
 /* 1. 加入桌子；*/
-void MSG_Handler_JoinGame_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
-void MSG_Handler_JoinGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
+void MSG_Handler_JoinTable_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 
 /*   2. 退出桌子；*/
 void MSG_Handler_QuitGame_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );

@@ -38,8 +38,8 @@ public: // 对其他服务器操作
 public: // 对其游戏用户操作
 
 	// User Session
-    BOOL SendToClient( WORD wIndex, BYTE * pMsg, WORD wSize );
-	BOOL SendToClient( BYTE * pMsg, WORD wSize );
+	BOOL SendToBuffer( WORD wIndex, BYTE * pMsg, WORD wSize);
+    BOOL SendToClient( WORD wIndex, BYTE * pMsg, WORD wSize);
 	BOOL SetUserSession( WORD wIndex, UserSession * pSession );
 	UserSession * GetUserSession( WORD wIndex );
 

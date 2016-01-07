@@ -4,6 +4,8 @@
 #include <Utility.h>
 #include <Common.h>
 #include <Network.h>
+#include "UserPacket.h"
+#include "TablePacket.h"
 #include "JsonParser.h"
 #include "ServerSession.h"
 #include "AgentFactory.h"
@@ -19,6 +21,7 @@ void MSG_Handler_Logout_REQ     ( ServerSession * pServerSession, MSG_BASE * pMs
 void MSG_Handler_Logout_ANC     ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 
 void MSG_Handler_JoinTable_REQ  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
+void MSG_Handler_JoinTable_ANC  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 void MSG_Handler_JoinTable_BRD  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );
 
 void MSG_Handler_GamePacket_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize );

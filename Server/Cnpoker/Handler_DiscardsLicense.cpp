@@ -191,7 +191,6 @@ void MSG_Handler_DiscardsLicense_REQ ( ServerSession * pServerSession, MSG_BASE 
 
     BYTE _bySeatid = pBattle->getPlaying();  // 授权-并判断
 
-
     int _istatus = 0;
     /*
     if ( pBattle->canEnd() ) {
@@ -219,8 +218,13 @@ void MSG_Handler_DiscardsLicense_REQ ( ServerSession * pServerSession, MSG_BASE 
     } */
 
     /* step4. 判断授权者是否是最后出牌者  */
-    if ( pBattle->getLastSeat()==_bySeatid ) {
-        pBattle->getDiscardTimes() = 0;     // 重新开始这轮出牌
+    int _first = 0;
+    if ( pBattle->getDiscardTimes()==0 ) {
+        _first = 1;
+    }
+    else if ( pBattle->getLastSeat()==_bySeatid ) {
+        _first = 1;
+        pBattle->getDiscardTimes()=0;     // 重新开始这轮出牌
     }
 
     {
@@ -234,7 +238,8 @@ void MSG_Handler_DiscardsLicense_REQ ( ServerSession * pServerSession, MSG_BASE 
         char buff[256]   = {0};
         char format[256] = 	"{\"protocol\":\"%d\","
                             "%s,"
-                            "\"status\":\"%d\","
+                            "\"status\":%d,"
+                            "\"first\":%d,"
                             "\"battleid\":\"%d\","
                             "\"seatid\":\"%d\","
                             "\"basics\":\"%d\","
@@ -243,7 +248,7 @@ void MSG_Handler_DiscardsLicense_REQ ( ServerSession * pServerSession, MSG_BASE 
                             "\"times\":\"18\" }";   // 暂时设定为18秒;
 
         snprintf( buff, sizeof(buff), format, MAKEDWORD( Games_Protocol, DiscardsLicense_BRD ),
-                szPlayerkey, _istatus, _battleid, _bySeatid, _basics, _multiple, _brokerage );
+                szPlayerkey, _istatus, _first, _battleid, _bySeatid, _basics, _multiple, _brokerage );
 
         WORD nLen = strlen( buff );
         g_pCnpokerServer->SendToAgentServer( (BYTE*)buff, nLen );

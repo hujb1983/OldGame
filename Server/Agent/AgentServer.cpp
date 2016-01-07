@@ -173,44 +173,31 @@ ServerSession * AgentServer::GetLobbySession() const {
 }
 
 // User Server;
-BOOL AgentServer::SendToClient( WORD wIndex, BYTE * pMsg, WORD wSize )
-{
-	UserSession * pSession = m_pUserSession[wIndex];
+BOOL AgentServer::SendToBuffer( WORD wIndex, BYTE * pMsg, WORD wSize) {
+   	UserSession * pSession = m_pUserSession[wIndex];
 	if ( pSession != NULL ) {
-        char szBuff[40960] = {0};
-        CMsgBuff msgBuff;
-        msgBuff.SetBuff(szBuff, sizeof(szBuff) );
-        msgBuff.Write(wSize);
-        msgBuff.Write((char*)pMsg);
-		pSession->Send( msgBuff.GetHead(), msgBuff.GetWriteLen()-1 );
+		pSession->Send( pMsg, wSize);
 		return TRUE;
 	}
     return FALSE;
 }
-
-BOOL AgentServer::SendToClient( BYTE * pMsg, WORD wSize )
-{
-    JsonMap js_map;
-    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
-        return FALSE;
-    }
-
-    int _userport;
-    js_map.ReadInteger( "userkey", _userport );
-	WORD wIndex = (WORD) _userport;
-
-    return SendToClient( wIndex, pMsg, wSize );
+BOOL AgentServer::SendToClient( WORD wIndex, BYTE * pMsg, WORD wSize ) {
+    char szBuff[40960] = {0};
+    CMsgBuff msgBuff;
+    msgBuff.SetBuff(szBuff, sizeof(szBuff) );
+    msgBuff.Write( wSize );
+    msgBuff.Write((char*)pMsg);
+    return SendToBuffer( wIndex, msgBuff.GetHead(), msgBuff.GetWriteLen()-1 );
 }
-BOOL AgentServer::SetUserSession( WORD wIndex, UserSession * pSession )
-{
+
+BOOL AgentServer::SetUserSession( WORD wIndex, UserSession * pSession ) {
 	if ( wIndex == 0 ) {
 		return FALSE;
 	}
 	m_pUserSession[wIndex] = pSession;
 	return TRUE;
 }
-UserSession * AgentServer::GetUserSession( WORD wIndex )
-{
+UserSession * AgentServer::GetUserSession( WORD wIndex ) {
 	if ( wIndex == 0 ) {
 		return NULL;
 	}

@@ -1,6 +1,9 @@
 #include "Handler_Module.h"
 #include <dbCommon.h>
 
+/*********************************************************
+    Step 1: MSG_Handler_Login_REQ
+*********************************************************/
 void MSG_Handler_Login_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
     JsonMap js_map;
@@ -16,45 +19,86 @@ void MSG_Handler_Login_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WO
     js_map.ReadString ( "sshkey", _szSSHKEY, sizeof(_szSSHKEY) );
     pSession->SetUserid(_userid);
 
-    char buff[256] = {0};
-    char format[256] = 	"{\"Protocol\":\"%d\","
-                        "\"userid\":%d,"
-                        "\"userkey\":%d,"
-						"\"sshkey\":\"%s\"}";
-
-	snprintf( buff, sizeof(buff), format, MAKEDWORD( Login_Protocol, Login_REQ ),
-         _userid, _userkey, _szSSHKEY);
-
-    g_AgentServer->SendToLobbyServer( (BYTE*) buff, sizeof(buff) );
+    {
+        UserPacket pack;
+        pack.ToInit();
+        pack.GetProtocol() = MAKEDWORD( Login_Protocol, Login_REQ );
+        pack.GetUserKey()  = _userkey;
+        pack.GetUserId()   = _userid;
+        memcpy ( pack.GetSSHKey(), _szSSHKEY, sizeof(_szSSHKEY) );
+        pack.ToPrint();
+        g_AgentServer->SendToLobbyServer( (BYTE*)&pack, sizeof(pack) );
+    }
 }
 
-int User_Login_Query_GamePacket( WORD _userkey, int _userid)
+/*********************************************************
+    Step 4: User_GamePacket
+*********************************************************/
+int User_RoomsInfo( WORD _userkey )
 {
-    printf( "User_Login_Query_GamePacket \n" );
+    DEBUG_MSG( LVL_TRACE,  "User_Login_Query_Room_Info \n" );
+
     char szMsg[1024] = {0};
-    snprintf( szMsg, sizeof(szMsg), " { \"protocol\":\"%d\", \"userkey\":\"%d\", \"userid\":\"%d\" } ",
-            MAKEDWORD( Login_Protocol, GamePacket_SYN ), _userkey, _userid );
+    snprintf( szMsg, sizeof(szMsg), " { \"protocol\":\"%d\", \"userkey\":\"%d\" } ",
+            MAKEDWORD( Update_Protocol, RoomInfo_SYN ), _userkey );
     int nLen = strlen(szMsg);
     g_AgentServer->SendToLobbyServer( (BYTE*) szMsg, nLen );
 }
 
+/*********************************************************
+    Step 3: User_GamePacket
+*********************************************************/
+int User_GamePacket( UserPacket & pack )
+{
+    char _szMsg[256] = {0};
+    char _format[128] = "{\"protocol\":\"%d\",\"userid\":%d,"
+        "\"data\":[{\"points\":%d,\"wons\":%d,\"faileds\":%d,\"aways\":%d,\"name\":\"%s\"}]}";
+
+    snprintf( _szMsg, sizeof(_szMsg), _format,
+              MAKEDWORD( Login_Protocol, GamePacket_ANC ),  pack.GetUserId(),
+             pack.GetMoney(), pack.GetWoneds(), pack.GetFaileds(), pack.GetAways(), pack.GetName() );
+
+    WORD nLen = strlen( _szMsg );
+    g_AgentServer->SendToBuffer( pack.GetUserKey(), (BYTE*) _szMsg, nLen );
+
+    User_RoomsInfo( pack.GetUserKey() );
+}
+
+/*********************************************************
+    Step 2: MSG_Handler_Login_ANC
+*********************************************************/
 void MSG_Handler_Login_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    JsonMap js_map;
-    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
-        return;
-    }
+    UINT _logintime(0);
+    if ( wSize>=sizeof(UserPacket) )
+    {
+        UserPacket pack;
+        pack.SetPacket( (BYTE*) pMsg, wSize );
+        _logintime = pack.GetLoginTime();
+        pack.ToPrint();
 
-    int _userid  = 0;
-    int _userkey = 0;
-    int _errmsg  = 0;
-    js_map.ReadInteger( "errmsg",  _errmsg  );
-    js_map.ReadInteger( "userid",  _userid  );
-    js_map.ReadInteger( "userkey", _userkey );
+        char szJsonBuff[1024] = {0};
+        if ( _logintime != 0 ) {
+            snprintf( szJsonBuff, sizeof(szJsonBuff), " {\"protocol\":%d,\"userid\":%d,\"userkey\":%d,\"errmsg\":%d} ",
+                    pack.GetProtocol(), pack.GetUserId(),  pack.GetUserKey(),  MAKEDWORD( Errors_Protocol, Correct_NAK ) );
+        }
+        else {
+            snprintf( szJsonBuff, sizeof(szJsonBuff), " {\"protocol\":%d,\"userid\":%d,\"userkey\":%d,\"errmsg\":%d} ",
+                    pack.GetProtocol(), pack.GetUserId(),  pack.GetUserKey(),  MAKEDWORD( Errors_Protocol, ClientLogin_NAK )  );
+        }
 
-    g_AgentServer->SendToClient( (BYTE*) pMsg, wSize );
-    if ( _errmsg==MAKEDWORD( Errors_Protocol, Correct_NAK ) ) {
-        User_Login_Query_GamePacket( _userkey, _userid);
+        int iLength = strlen(szJsonBuff);
+        g_AgentServer->SendToClient( pack.GetUserKey(),  (BYTE*) szJsonBuff, iLength );
+
+        DEBUG_MSG( LVL_DEBUG, "Login_ANC: %s \n", szJsonBuff);
+
+        if ( _logintime!=0 ) {
+            UserSession * pSession = g_AgentServer->GetUserSession( pack.GetUserKey() );
+            if ( pSession) {
+                pSession->SetUserPacket( (BYTE*)pMsg, wSize );
+            }
+            User_GamePacket( pack );
+        }
     }
 }
 

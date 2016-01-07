@@ -23,7 +23,7 @@ void get_user_seatinfo_quitgame( BOOL show, int _userkey, char * _szSeatInfo, in
     pSession = g_AgentServer->GetUserSession(_userkey );
     if ( pSession ) {
         if ( show==TRUE ) {
-            pSession->QuitTable();
+            pSession->LeaveGame();
         }
         else if ( show==FALSE ) {
             memset( _buff, 0x0, sizeof(_buff) );

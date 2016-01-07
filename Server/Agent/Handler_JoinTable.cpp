@@ -2,76 +2,81 @@
 #include <dbCommon.h>
 #pragma pack(push,1)
 
+/*********************************************************
+    Step 1: MSG_Handler_JoinTable_REQ
+*********************************************************/
 void MSG_Handler_JoinTable_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    DEBUG_MSG( LVL_DEBUG, "JoinTable_REQ to recv: %s \n",  (char*)pMsg );
-
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
         return;
     }
 
     UserSession * pSession = ( UserSession * ) pServerSession;
-    int  _userkey   = pSession->GetUserKey();
-    int  _userid    = pSession->GetUserid();
-    int  _roomid    = 0;
-    int  _tableid   = 0;
-    js_map.ReadInteger( "userid",  _userid  );
-    js_map.ReadInteger( "roomid",  _roomid  );
-    js_map.ReadInteger( "tableid", _tableid );
-
-    char buff[256] = {0};
-    char format[256] = 	"{\"Protocol\":\"%d\","
-                        "\"userid\":\"%d\","
-                        "\"userkey\":\"%d\","
-                        "\"roomid\":\"%d\","
-						"\"tableid\":\"%d\" }";
-
-    snprintf( buff, sizeof(buff), format, MAKEDWORD( Games_Protocol, JoinTable_REQ ),
-        _userid, _userkey, _roomid, _tableid);
-    int nLen = strlen(buff);
-
-    g_AgentServer->SendToLobbyServer( (BYTE*) buff, nLen );
-}
-
-void MSG_Handler_JoinTable_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
-{
-    DEBUG_MSG( LVL_DEBUG, "JoinTable_BRD to recv: %s \n",  (char*)pMsg );
-
-    JsonMap js_map;
-    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
-        return;
-    }
-
-    int  _userkey(0), _userid(0), _roomid(0), _agentkey(0),
-    _tableid(0), _battleid(0), _status(0), _seatid(0);
-
-    js_map.ReadInteger( "userid",    _userid   );
-    js_map.ReadInteger( "userkey",   _userkey  );
-    js_map.ReadInteger( "agentkey",  _agentkey );
-    js_map.ReadInteger( "roomid",    _roomid   );
-    js_map.ReadInteger( "tableid",   _tableid  );
-    js_map.ReadInteger( "battleid",  _battleid );
-    js_map.ReadInteger( "seatid",    _seatid   );
-    js_map.ReadInteger( "status",    _status   );
+    int  _fieldid(0), _roomid(0);
+    js_map.ReadInteger( "roomid",  _fieldid );
+    js_map.ReadInteger( "tableid", _roomid  );
 
     {
-        char buff[256] = {0};
-        char format[256] = 	"{\"protocol\":\"%d\","
-                            "\"userid\":\"%d\","
-                            "\"userkey\":\"%d\","
-                            "\"agentkey\":\"%d\","
-                            "\"battleid\":\"%d\","
-                            "\"seatid\":\"%d\","
-                            "\"roomid\":\"%d\","
-                            "\"tableid\":\"%d\","
-                            "\"status\":\"%d\"}";
-
-        snprintf( buff, sizeof(buff), format, MAKEDWORD( Games_Protocol, JoinGame_REQ ),
-            _userid, _userkey, _agentkey, _battleid, _seatid, _roomid, _tableid, _status);
-
-        int nLen = strlen( buff );
-        g_AgentServer->SendToGameServer( (BYTE*) buff, nLen );
+        UserPacket pack = pSession->GetUserPacket();
+        pack.GetProtocol() = MAKEDWORD( Games_Protocol, JoinTable_REQ );
+        pack.GetFieldId() = _fieldid;
+        pack.GetRoomId() = _roomid;
+        pack.ToPrint();
+        g_AgentServer->SendToLobbyServer( (BYTE*)&pack, pack.GetPacketSize() );
     }
 }
 
+void MSG_Handler_JoinTable_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    if ( wSize>=sizeof(UserPacket) )
+    {
+        UserPacket pack;
+        pack.SetPacket( (BYTE*) pMsg, wSize );
+        pack.GetProtocol() = MAKEDWORD( Games_Protocol, JoinTable_ANC );
+
+        UserSession * pSession = NULL;
+        pSession = g_AgentServer->GetUserSession( pack.GetUserKey() );
+        if ( pSession ) {
+            pSession->SetUserPacket( (BYTE*)&pack, pack.GetPacketSize() );
+            pack.ToPrint();
+        }
+
+        g_AgentServer->SendToGameServer( (BYTE*)&pack, wSize );
+    }
+}
+
+void MSG_Handler_JoinTable_BRD  ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+{
+    if ( wSize>=sizeof(TablePacket) )
+    {
+        TablePacket table;
+        table.SetPacket( (BYTE*)pMsg, wSize );
+        table.GetProtocol() = MAKEDWORD( Games_Protocol, JoinGame_BRD );
+        table.ToPrint();
+
+        UINT userkey1 = table.GetUserKey(0);
+        UINT userkey2 = table.GetUserKey(1);
+        UINT userkey3 = table.GetUserKey(2);
+
+        WORD uiLength = 0;
+        if ( userkey1!=0 ){
+            char szBuff[1024] = {0};
+            uiLength = table.JsonData(0, szBuff, sizeof(szBuff) );
+            g_AgentServer->SendToClient( userkey1, (BYTE*)szBuff, uiLength );
+            DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
+        }
+        if ( userkey2!=0 ){
+            char szBuff[1024] = {0};
+            uiLength = table.JsonData(1, szBuff, sizeof(szBuff) );
+            g_AgentServer->SendToClient( userkey2, (BYTE*)szBuff, uiLength );
+            DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
+        }
+        if ( userkey3!=0 ){
+            char szBuff[1024] = {0};
+            uiLength = table.JsonData(2, szBuff, sizeof(szBuff) );
+            g_AgentServer->SendToClient( userkey3, (BYTE*)szBuff, uiLength );
+            DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
+        }
+    }
+}

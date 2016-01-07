@@ -7,7 +7,6 @@
 #include "ServerSession.h"
 #include "TempSession.h"
 #include "UserSession.h"
-#include "UserGame.h"
 #include "GameSession.h"
 #include "LobbySession.h"
 
@@ -25,9 +24,6 @@ private:
     /*  1. 用户会话层 */
 	MemoryFactory<UserSession> 	* m_pUserSessionPool;
 
-	/*  1. 用户游戏层 */
-	MemoryFactory<UserGame>	    * m_pUserGamePool;
-
 	/*  1. 游戏服务器 */
 	MemoryFactory<GameSession> 	* m_pGameSessionPool;
 
@@ -44,10 +40,6 @@ public:
 	// UserSession
 	UserSession * AllocUserSession();
 	void FreeUserSession(UserSession * pSession);
-
-	// UserGame
-	UserGame * AllocUserGame();
-	void FreeUserGame(UserGame * pUser);
 
 	// GameSession
 	GameSession * AllocGameSession();

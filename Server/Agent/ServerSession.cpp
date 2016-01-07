@@ -114,10 +114,10 @@ void ServerSession::DBQuery( Query * pQuery ) {
     //m_Database.DBQuery( pQuery );
 }
 
-WORD  ServerSession::GetUserKey() {
+WORD ServerSession::GetUserKey() {
     return 0;
 }
 
-WORD  ServerSession::GetUserid() {
+int ServerSession::GetUserid() {
     return 0;
 }

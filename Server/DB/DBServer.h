@@ -5,6 +5,7 @@
 #include <Common.h>
 #include <Network.h>
 #include "DBFactory.h"
+#include "ObjKeyGenerator.h"
 
 using namespace std;
 
@@ -33,14 +34,18 @@ public:
 	ServerSession * GetLobbySession() const;
 	ServerSession * GetLoginSession() const;
 
-private:
-	BOOL 	m_bShutdown;
+	UINT GetTableKey(); // ·¿¼äºÅ
+    void FreeTableKey( UINT _uiIndex );
 
+private:
+	BOOL m_bShutdown;
 	IOCPServer * m_pIOCPServer;
 
 	ServerSession * m_pGameServer;
 	ServerSession * m_pLobbyServer;
 	ServerSession * m_pLoginServer;
+
+	CObjKeyGenerator m_cTablesKey;
 };
 
 extern DBServer * g_DBServer;

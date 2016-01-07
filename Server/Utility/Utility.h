@@ -72,6 +72,7 @@ typedef unsigned char		BYTE, *LPBYTE;
 typedef void				VOID, *LPVOID;
 typedef long				LONG;
 typedef unsigned long		ULONG;
+typedef long long		    LLONG;
 
 #define TRUE	1
 #define FALSE	0

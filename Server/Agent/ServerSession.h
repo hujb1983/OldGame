@@ -54,7 +54,7 @@ public:
 
 public:
 	virtual WORD  GetUserKey();
-	virtual WORD  GetUserid();
+	virtual int   GetUserid();
 
 public:
 	DWORD m_dwSessionIndex;

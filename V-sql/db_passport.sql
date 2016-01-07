@@ -104,20 +104,16 @@ DROP TABLE IF EXISTS `tb_battleinfo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tb_battleinfo` (
-  `autoid` int(12) unsigned NOT NULL AUTO_INCREMENT,
-  `battleid` int(12) unsigned NOT NULL,
-  `roomid` tinyint(3) unsigned NOT NULL,
-  `tableid` tinyint(3) unsigned NOT NULL,
-  `seatid` tinyint(3) unsigned NOT NULL,
-  `status` tinyint(3) unsigned DEFAULT '0',
-  `calls` tinyint(3) unsigned DEFAULT '0',
-  `shows` tinyint(3) unsigned DEFAULT '0',
+  `battleid` int(12) unsigned NOT NULL AUTO_INCREMENT,
+  `fieldid` int(12) unsigned NOT NULL,
+  `roomid` int(12) unsigned NOT NULL,
+  `tableid` int(12) unsigned NOT NULL,
+  `seatid`int(12) unsigned NOT NULL,
   `userid` int(12) unsigned DEFAULT '0',
   `userkey` int(12) unsigned DEFAULT '0',
   `agentkey` int(12) unsigned DEFAULT '0',
-  `allcards` varchar(128) DEFAULT NULL,
-  `lastcards` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`autoid`)
+  `status` int(12) unsigned DEFAULT '0',
+  PRIMARY KEY (`battleid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1073 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

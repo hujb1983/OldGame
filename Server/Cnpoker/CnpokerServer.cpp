@@ -55,8 +55,6 @@ BOOL CnpokerServer::Init()
 		return FALSE;
 	}
 
-	g_GameMgr.InitBattles(90);
-
 	// 主动连接 Agent
 	m_pAgentSession = CnpokerFactory::Instance()->AllocAgentSession();
 	if ( m_pAgentSession ) {

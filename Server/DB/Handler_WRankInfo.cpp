@@ -88,7 +88,6 @@ int User_Result_WRankInfo  ( ServerSession * pServerSession, Query_WeekRank * pQ
         JsonBuffer js_rank ;
         JsonBuffer js_array;
 
-        MSG_WRANKING_ANC wRank;
         js_send.clear_buff();
         js_send.WriteInteger("protocol", MAKEDWORD( (WORD)Update_Protocol, (WORD)WRankInfo_ANC) );
         js_send.WriteString ("userkey",  "%d");

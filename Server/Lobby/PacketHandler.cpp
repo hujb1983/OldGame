@@ -19,10 +19,15 @@ PacketHandler::~PacketHandler(void)
 	SAFE_DELETE(m_pFuncMap_Database);
 }
 
-DWORD PacketHandler::GetProtocol( char * szMsg )
+DWORD PacketHandler::GetProtocol( MSG_BASE * szMsg, WORD wSize )
 {
     JsonMap js_map;
-    if ( js_map.set_json( szMsg) ) {
+    if ( js_map.set_json( (char*)szMsg ) ) {
+        if ( wSize==sizeof(UserPacket) ) {
+            UserPacket pack;
+            pack.SetPacket( (BYTE*) szMsg, wSize );
+            return pack.GetProtocol();
+        }
         return 0;
     }
 
@@ -41,8 +46,6 @@ BOOL PacketHandler::RegisterHandler()
 BOOL PacketHandler::Register_Agent()
 {
     AddHandler_Agent( Login_Protocol,  Login_REQ,      MSG_Handler_Login_REQ );
-    AddHandler_Agent( Login_Protocol,  Relogin_REQ,    MSG_Handler_Relogin_REQ );
-    AddHandler_Agent( Login_Protocol,  GamePacket_SYN, MSG_Handler_GamePacket_REQ  );
     AddHandler_Agent( Games_Protocol,  JoinTable_REQ,  MSG_Handler_JoinTable_REQ );
     AddHandler_Agent( Games_Protocol,  QuitTable_REQ,  MSG_Handler_QuitTable_REQ );
     AddHandler_Agent( Update_Protocol, RoomInfo_SYN,   MSG_Handler_RoomInfo_REQ );
@@ -55,14 +58,12 @@ BOOL PacketHandler::Register_Agent()
 BOOL PacketHandler::Register_Database()
 {
     AddHandler_Database( Login_Protocol,  Login_ANC,       MSG_Handler_Login_ANC       );
-    AddHandler_Database( Login_Protocol,  Relogin_ANC,     MSG_Handler_Relogin_ANC     );
-    AddHandler_Database( Login_Protocol,  GamePacket_ANC,  MSG_Handler_GamePacket_ANC  );
     AddHandler_Database( Update_Protocol, RoomInfo_ANC,    MSG_Handler_RoomInfo_ANC    );
     AddHandler_Database( Update_Protocol, TableInfo_ANC,   MSG_Handler_TableInfo_ANC   );
 	AddHandler_Database( Update_Protocol, OnlineInfo_ANC,  MSG_Handler_Onlines_ANC     );
 	AddHandler_Database( Update_Protocol, WRankInfo_ANC,   MSG_Handler_WRankInfo_ANC   );
 	AddHandler_Database( Update_Protocol, DRankInfo_ANC,   MSG_Handler_DRankInfo_ANC   );
-	AddHandler_Database( Games_Protocol,  JoinTable_BRD,   MSG_Handler_JoinTable_BRD   );
+	AddHandler_Database( Games_Protocol,  JoinTable_ANC,   MSG_Handler_JoinTable_ANC  );
 }
 
 
@@ -86,7 +87,7 @@ BOOL PacketHandler::AddHandler_Database( WORD category, WORD protocol, fnHandler
 VOID PacketHandler::ParsePacket_Agent( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-    DWORD pid = GetProtocol( (char*)pMsg );
+    DWORD pid = GetProtocol( pMsg, wSize );
     if ( pid != 0 ) {
         FUNC_Agent * pFuncInfo = (FUNC_Agent *)m_pFuncMap_Agent->Find( pid );
         if ( pFuncInfo ) {
@@ -98,7 +99,7 @@ VOID PacketHandler::ParsePacket_Agent( ServerSession * pSession, MSG_BASE * pMsg
 VOID PacketHandler::ParsePacket_Database( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-    DWORD pid = GetProtocol( (char*)pMsg );
+    DWORD pid = GetProtocol( pMsg, wSize );
     if ( pid != 0 ) {
         FUNC_Database * pFuncInfo = (FUNC_Database *)m_pFuncMap_Database->Find( pid );
         if ( pFuncInfo ) {

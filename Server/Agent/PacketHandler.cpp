@@ -21,19 +21,43 @@ PacketHandler::~PacketHandler(void)
 	SAFE_DELETE( m_pFuncMap_Games );
 }
 
-DWORD PacketHandler::GetProtocol( char * szMsg )
+DWORD PacketHandler::GetProtocol( MSG_BASE * szMsg, WORD wSize )
 {
     JsonMap js_map;
-    if ( js_map.set_json( szMsg) ) {
+    if ( js_map.set_json( (char*)szMsg ) ) {
+        if ( wSize==sizeof(UserPacket) ) {
+            UserPacket pack;
+            pack.SetPacket( (BYTE*) szMsg, wSize );
+            return pack.GetProtocol();
+        }
         return 0;
     }
 
     int pid = 0;
     js_map.ReadInteger("protocol", pid);
-    if (pid==0) {
-        DEBUG_MSG( LVL_ERROR, "AgentServer PacketHandler::GetProtocol %s ", szMsg );
-    }
     return (DWORD) pid;
+}
+
+
+DWORD PacketHandler::ClientProtocol( MSG_BASE * szMsg, WORD wSize )
+{
+    JsonMap js_map;
+    if ( js_map.set_json( (char*)szMsg ) ) {
+        return 0;
+    }
+
+    int pid = 0;
+    js_map.ReadInteger("protocol", pid);
+    return (DWORD) pid;
+}
+
+DWORD PacketHandler::ServerProtocol( MSG_BASE * szMsg, WORD wSize )
+{
+    if ( wSize>=sizeof(HeadPacket) ) {
+        HeadPacket * pack = (HeadPacket*)szMsg;
+        return pack->GetProtocol();
+    }
+    return 0;
 }
 
 
@@ -48,7 +72,6 @@ BOOL PacketHandler::RegisterHandler()
 BOOL PacketHandler::Register_Client()
 {
     AddHandler_Client ( Login_Protocol,  Login_REQ,         MSG_Handler_Login_REQ      );
-    AddHandler_Client ( Login_Protocol,  GamePacket_SYN,    MSG_Handler_GamePacket_REQ );
     AddHandler_Client ( Update_Protocol, RoomInfo_SYN,      MSG_Handler_RoomInfo_REQ   );
     AddHandler_Client ( Update_Protocol, TableInfo_SYN,     MSG_Handler_TableInfo_REQ  );
 	AddHandler_Client ( Update_Protocol, OnlineInfo_SYN,    MSG_Handler_Onlines_REQ    );
@@ -57,7 +80,6 @@ BOOL PacketHandler::Register_Client()
 	AddHandler_Client ( Games_Protocol,  JoinTable_REQ,     MSG_Handler_JoinTable_REQ  );
 	AddHandler_Client ( Games_Protocol,  QuitTable_REQ,     MSG_Handler_QuitTable_REQ  );
 	AddHandler_Client ( Games_Protocol,  StartGame_REQ,     MSG_Handler_StartGame_REQ  );
-	AddHandler_Client ( Games_Protocol,  ShowCards_REQ,     MSG_Handler_ShowCards_REQ  );
 	AddHandler_Client ( Games_Protocol,  Called_REQ,        MSG_Handler_CalledBank_REQ );
 	AddHandler_Client ( Games_Protocol,  Discards_REQ,      MSG_Handler_Discards_REQ   );
 	AddHandler_Client ( Games_Protocol,  Trusteeship_REQ,   MSG_Handler_Trusteeship_REQ);
@@ -66,26 +88,21 @@ BOOL PacketHandler::Register_Client()
 BOOL PacketHandler::Register_Lobby()
 {
     AddHandler_Lobby ( Login_Protocol,  Login_ANC,          MSG_Handler_Login_ANC       );
-	AddHandler_Lobby ( Login_Protocol,  Relogin_ANC,        MSG_Handler_Relogin_ANC     );
-    AddHandler_Lobby ( Login_Protocol,  GamePacket_ANC,     MSG_Handler_GamePacket_ANC  );
     AddHandler_Lobby ( Update_Protocol, RoomInfo_ANC,       MSG_Handler_RoomInfo_ANC    );
     AddHandler_Lobby ( Update_Protocol, TableInfo_ANC,      MSG_Handler_TableInfo_ANC   );
 	AddHandler_Lobby ( Update_Protocol, OnlineInfo_ANC,     MSG_Handler_Onlines_ANC     );
 	AddHandler_Lobby ( Update_Protocol, WRankInfo_ANC,      MSG_Handler_WRankInfo_ANC   );
 	AddHandler_Lobby ( Update_Protocol, DRankInfo_ANC,      MSG_Handler_DRankInfo_ANC   );
-	AddHandler_Lobby ( Games_Protocol,  JoinTable_BRD,      MSG_Handler_JoinTable_BRD   );
+	AddHandler_Lobby ( Games_Protocol,  JoinTable_ANC,      MSG_Handler_JoinTable_ANC   );
 }
 
 BOOL PacketHandler::Register_Games()
 {
 	AddHandler_Games( Games_Protocol, JoinTable_BRD,         MSG_Handler_JoinTable_BRD       );
-	AddHandler_Games( Games_Protocol, JoinGame_BRD,          MSG_Handler_JoinGame_BRD        );
-	AddHandler_Games( Games_Protocol, JoinGame_NAK,          MSG_Handler_JoinGame_NAK        );
 	AddHandler_Games( Games_Protocol, QuitGame_BRD,          MSG_Handler_QuitGame_BRD        );
 	AddHandler_Games( Games_Protocol, QuitTable_BRD,         MSG_Handler_QuitTable_BRD       );
 	AddHandler_Games( Games_Protocol, StartGame_BRD,         MSG_Handler_StartGame_BRD       );
 	AddHandler_Games( Games_Protocol, InitCards_BRD,         MSG_Handler_InitCards_BRD       );
-	AddHandler_Games( Games_Protocol, ShowCards_BRD,         MSG_Handler_ShowCards_BRD       );
 	AddHandler_Games( Games_Protocol, Called_BRD,            MSG_Handler_CalledBank_BRD      );
 	AddHandler_Games( Games_Protocol, CalledLicense_BRD,     MSG_Handler_CalledLicense_BRD   );
 	AddHandler_Games( Games_Protocol, CreateBank_BRD,        MSG_Handler_CreateBank_BRD      );
@@ -93,7 +110,6 @@ BOOL PacketHandler::Register_Games()
 	AddHandler_Games( Games_Protocol, Discards_BRD,          MSG_Handler_Discards_BRD        );
 	AddHandler_Games( Games_Protocol, CalledOverTime_NAK,    MSG_Handler_CalledOvertime_NAK  );
 	AddHandler_Games( Games_Protocol, DiscardsOverTime_NAK,  MSG_Handler_DiscardsOvertime_NAK);
-	AddHandler_Games( Login_Protocol, Relogin_BRD,           MSG_Handler_Relogin_BRD         );
 	AddHandler_Games( Login_Protocol, Offline_BRD,           MSG_Handler_Offline_BRD         );
 	AddHandler_Games( Games_Protocol, Trusteeship_BRD,       MSG_Handler_Trusteeship_BRD     );
 }
@@ -126,7 +142,7 @@ BOOL PacketHandler::AddHandler_Games( WORD category, WORD protocol, fnHandler fn
 VOID PacketHandler::ParsePacket_Client( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-    DWORD pid = GetProtocol( (char*)pMsg );
+    DWORD pid = ClientProtocol( pMsg, wSize );
     if ( pid != 0 ) {
         FUNC_Client * pFuncInfo = (FUNC_Client *)m_pFuncMap_Client->Find( pid );
         if (pFuncInfo) {
@@ -138,7 +154,7 @@ VOID PacketHandler::ParsePacket_Client( ServerSession * pSession, MSG_BASE * pMs
 VOID PacketHandler::ParsePacket_Lobby( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-    DWORD pid = GetProtocol( (char*)pMsg );
+    DWORD pid = GetProtocol( pMsg, wSize );
     if ( pid != 0 ) {
         FUNC_Lobby * pFuncInfo = (FUNC_Lobby *)m_pFuncMap_Lobby->Find( pid );
         if (pFuncInfo) {
@@ -150,7 +166,7 @@ VOID PacketHandler::ParsePacket_Lobby( ServerSession * pSession, MSG_BASE * pMsg
 VOID PacketHandler::ParsePacket_Games( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-	DWORD pid = GetProtocol( (char*)pMsg );
+	DWORD pid = ServerProtocol( pMsg, wSize );
     if ( pid != 0 ) {
         FUNC_Games * pFuncInfo = (FUNC_Games *)m_pFuncMap_Games->Find( pid );
         if (pFuncInfo) {

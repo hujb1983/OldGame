@@ -21,8 +21,10 @@ db_INC 		= 	-I $(HOME)/DB
 	  
 PublicObjs 		= Public/InfoParser.o \
 				  Public/JsonParser.o \
-				  Public/Unicode.o \
-				  Public/MsgProcess.o \
+				  Public/HeadPacket.o \
+				  Public/UserPacket.o \
+				  Public/LobbyPacket.o \
+				  Public/TablePacket.o \
 				  Public/MsgBuff.o \
 				  Public/Yond_drng.o \
 				  Public/Yond_json.o \
@@ -69,22 +71,11 @@ CnpokerObjs     = Cnpoker/CnpokerMain.o \
 				  Cnpoker/DBSession.o \
 				  Cnpoker/AgentSession.o \
 				  Cnpoker/GameMgr.o \
-				  Cnpoker/GameBattle.o \
+				  Cnpoker/GameTable.o \
 				  Cnpoker/GamePoker.o \
 				  Cnpoker/PacketHandler.o \
-				  Cnpoker/Handler_Relogin.o \
-				  Cnpoker/Handler_JoinGame.o \
-				  Cnpoker/Handler_QuitGame.o \
+				  Cnpoker/Handler_JoinTable.o \
 				  Cnpoker/Handler_StartGame.o \
-				  Cnpoker/Handler_Showcards.o \
-				  Cnpoker/Handler_CalledBank.o \
-				  Cnpoker/Handler_Discard.o \
-				  Cnpoker/Handler_InitCards.o \
-				  Cnpoker/Handler_CreateBank.o \
-				  Cnpoker/Handler_Offline.o \
-				  Cnpoker/Handler_CalledLicense.o \
-				  Cnpoker/Handler_DiscardsLicense.o \
-				  Cnpoker/Handler_Settlement.o
 
 LobbyObjs   	= Lobby/LobbyMain.o \
 				  Lobby/LobbyUser.o \
@@ -101,11 +92,8 @@ LobbyObjs   	= Lobby/LobbyMain.o \
 				  Lobby/AgentSession.o \
 				  Lobby/PacketHandler.o \
 				  Lobby/Handler_Login.o \
-				  Lobby/Handler_Relogin.o \
-				  Lobby/Handler_Logout.o \
 				  Lobby/Handler_JoinTable.o \
 				  Lobby/Handler_QuitTable.o \
-				  Lobby/Handler_GamePacket.o \
 				  Lobby/Handler_RoomInfo.o \
 				  Lobby/Handler_TableInfo.o \
 				  Lobby/Handler_Onlines.o \
@@ -118,13 +106,10 @@ AgentObjs   	= Agent/AgentMain.o \
 				  Agent/ServerSession.o \
 				  Agent/TempSession.o \
 				  Agent/UserSession.o \
-				  Agent/UserGame.o \
 				  Agent/GameSession.o \
 				  Agent/LobbySession.o \
 				  Agent/PacketHandler.o \
 				  Agent/Handler_Login.o \
-				  Agent/Handler_Relogin.o \
-				  Agent/Handler_Logout.o \
 				  Agent/Handler_GamePacket.o \
 				  Agent/Handler_RoomInfo.o \
 				  Agent/Handler_TableInfo.o \
@@ -135,7 +120,6 @@ AgentObjs   	= Agent/AgentMain.o \
 				  Agent/Handler_QuitTable.o \
 				  Agent/Handler_StartGame.o \
 				  Agent/Handler_InitCards.o \
-				  Agent/Handler_Showcards.o \
 				  Agent/Handler_Settlement.o \
 				  Agent/Handler_CalledBank.o \
 				  Agent/Handler_JoinGame.o \
@@ -161,8 +145,6 @@ DBObjs   		= DB/DBMain.o \
 				  DB/LoginSession.o \
 				  DB/PacketHandler.o \
 				  DB/Handler_Login.o \
-				  DB/Handler_Relogin.o \
-				  DB/Handler_GamePacket.o \
 				  DB/Handler_RoomInfo.o \
 				  DB/Handler_TableInfo.o \
 				  DB/Handler_Onlines.o \
@@ -170,8 +152,6 @@ DBObjs   		= DB/DBMain.o \
 				  DB/Handler_DRankInfo.o \
 				  DB/Handler_JoinTable.o \
 				  DB/Handler_QuitTable.o \
-				  DB/Handler_JoinGame.o \
-				  DB/Handler_QuitGame.o \
 				  DB/Handler_PreLogin.o \
 				  DB/Handler_UpdateBattle.o \
 				  DB/Handler_Settlement.o 

@@ -19,22 +19,20 @@ void DBSession::Clear()
 }
 
 void DBSession::OnRecv(BYTE *pMsg, WORD wSize) {
-    printf( "[DBSession::OnRecv] pMsg = %s \n", pMsg );
     g_PacketHandler.ParsePacket_Database( this, (MSG_BASE*)pMsg, wSize );
 }
 
 void DBSession::OnConnect( BOOL bSuccess, DWORD dwNetworkIndex )
 {
-	printf("[GameServer] : DBSession::OnConnect\n");
+	DEBUG_MSG( LVL_DEBUG, "DBSession::OnConnect. \n");
 	ServerSession::OnConnect( bSuccess, dwNetworkIndex );
 	if ( bSuccess ) {
-		printf("[DBServerSession::OnConnect] success.\n");
-		printf("Send Server Type.\n");
+		DEBUG_MSG( LVL_DEBUG, "DBSession::OnConnect success. \n");
 		ServerSession::SendServerType();
         g_LobbyUpdate.Init();   // 初始化数据
 	}
 	else {
-	    printf("[GameServer] : DBServerSession::OnConnect fail\n");
+	    DEBUG_MSG( LVL_DEBUG, "DBSession::OnConnect fail. \n");
 	}
 
 }

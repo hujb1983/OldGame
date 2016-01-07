@@ -41,7 +41,7 @@ enum ePK_TYPE   // 出牌的类型
 // 设置 m_byTableStatus[x] 状态
 enum
 {
-    eGB_EMPTY   = 0x00,
+    eGB_UNKNOW  = 0x00,
     eGB_LEAVE   = 0x01,
     eGB_SIT     = 0x02,   // 坐下阶段
     eGB_DEALING = 0x03,   // 发牌阶段

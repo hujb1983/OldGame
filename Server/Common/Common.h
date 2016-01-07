@@ -69,6 +69,8 @@ typedef unsigned long	ULONG;
 #include "CommStruct.h"
 
 #include "PackageStruct.h"
+
+
 #include "PackageStruct_Login.h"
 #include "PackageStruct_Connect.h"
 #include "PackageStruct_Game.h"

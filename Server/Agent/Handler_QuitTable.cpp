@@ -18,9 +18,7 @@ void MSG_Handler_QuitTable_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg
 
     {
         char _buff[256]   = {0};
-        char _format[128] = "{\"protocol\":\"%d\","
-                            "\"battleid\":%d,"
-                            "\"seatid\":%d}";
+        char _format[128] = "{\"protocol\":\"%d\",\"battleid\":%d,\"seatid\":%d}";
 
         snprintf( _buff, sizeof(_buff), _format,
                   MAKEDWORD( Games_Protocol, QuitGame_REQ ),

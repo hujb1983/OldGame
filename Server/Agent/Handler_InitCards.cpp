@@ -39,18 +39,21 @@ void save_to_user_session( ServerSession * pServerSession, MSG_BASE * pMsg, WORD
     UserSession * pSession = NULL;
     pSession = g_AgentServer->GetUserSession( _userkey0 );
     if ( pSession ) {
+        pSession->getStatus() = eGB_DEALING;
         pSession->getPokerSize() = _count0;
         pSession->setPokers( _poker0, sizeof( _poker0 ) );
     }
 
     pSession = g_AgentServer->GetUserSession( _userkey1 );
     if ( pSession ) {
+        pSession->getStatus() = eGB_DEALING;
         pSession->getPokerSize() = _count1;
         pSession->setPokers( _poker1, sizeof( _poker1 ) );
     }
 
     pSession = g_AgentServer->GetUserSession( _userkey2 );
     if ( pSession ) {
+        pSession->getStatus() = eGB_DEALING;
         pSession->getPokerSize() = _count2;
         pSession->setPokers( _poker2, sizeof( _poker2 ) );
     }

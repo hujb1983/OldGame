@@ -42,12 +42,7 @@ void MSG_Handler_Trusteeship_REQ ( ServerSession * pServerSession, MSG_BASE * pM
         pBattle->GetAllPlayerKey( szPlayerkey, sizeof(szPlayerkey) );
 
         char buff[256]   = {0};
-        char format[256] = 	"{\"protocol\":\"%d\","
-                            "%s,"
-                            "\"data\":[{"
-                                "\"battleid\":\"%d\","
-                                "\"seatid\":\"%d\","
-                                "\"status\":\"%d\" }] }";   // 暂时设定为18秒;
+        char format[256] = 	"{\"protocol\":\"%d\", %s,\"battleid\":%d,\"seatid\":%d,\"status\":%d}";   // 暂时设定为18秒;
 
         snprintf( buff, sizeof(buff), format, MAKEDWORD( Games_Protocol, Trusteeship_BRD ),
                 szPlayerkey,

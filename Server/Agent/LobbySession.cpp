@@ -27,15 +27,15 @@ void LobbySession::OnAccept( DWORD dwNetworkIndex )
 
 void LobbySession::OnConnect( BOOL bSuccess, DWORD dwNetworkIndex )
 {
-	printf("[AgentServer] : LobbySession::OnConnect\n");
+	DEBUG_MSG( LVL_DEBUG, "LobbySession::OnConnect. \n");
 	ServerSession::OnConnect( bSuccess, dwNetworkIndex );
 	if ( bSuccess ) {
-		printf("[LobbySession::OnConnect] success.\n");
+		DEBUG_MSG( LVL_DEBUG, "LobbySession::OnConnect success. \n");
 		printf("Send Server Type.\n");
 		ServerSession::SendServerType();
 	}
 	else {
-	    printf("[AgentServer] : LobbySession::OnConnect fail\n");
+	    DEBUG_MSG( LVL_DEBUG, "LobbySession::OnConnect fail. \n");
 	}
 }
 

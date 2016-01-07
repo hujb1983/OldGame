@@ -2,7 +2,6 @@
 #include "PacketHandler.h"
 #include "AgentServer.h"
 #include "AgentFactory.h"
-
 #include <Public.h>
 
 DWORD UserSession::m_dwClientDelay = 0xFFFFFFFF;
@@ -18,11 +17,17 @@ UserSession::~UserSession()
 {
 }
 
+void UserSession::SetUserPacket(BYTE * bPack, WORD wSize) {
+    if ( wSize>=sizeof(UserPacket) ) {
+        m_cPack.SetPacket( bPack, wSize );
+    }
+}
+UserPacket & UserSession::GetUserPacket()   { return (m_cPack); }
+
 BOOL UserSession::SendPacket(BYTE *pMsg, WORD wSize)
 {
 	return Send( (BYTE *)pMsg, wSize );
 }
-
 
 WORD UserSession::GetUserKey() const        { return m_wUserKey;    }
 void UserSession::SetUserKey(WORD dwKey)    { m_wUserKey = dwKey;   }
@@ -48,14 +53,17 @@ void UserSession::Init()
 	m_wUserKey   = 0;       // 用户健值
     m_wBattleKey = 0;       // 房间号
     m_dwUserid   = 0;       // 用户ID
-    memset( m_szName, 0x0, sizeof(m_szName) ); // 名称
     m_iMoneys    = 0;       // 点数
     m_uiWons     = 0;       // 赢的次数
 	m_uiFaileds  = 0; 	    // 失败次数
 	m_uiAways    = 0; 		// 逃跑次数
 
+    memset( m_szName, 0x0, sizeof(m_szName) ); // 名称
+
 	m_bReady     = FALSE;
     m_bShowcards = FALSE;
+
+    m_wUserStatus = eGB_UNKNOW;
 }
 
 BOOL UserSession::Update( DWORD dwDeltaTick )
@@ -67,7 +75,6 @@ BOOL UserSession::Update( DWORD dwDeltaTick )
 		Disconnect(TRUE);
 		return TRUE;
 	}
-
 	return FALSE;
 }
 
@@ -86,8 +93,7 @@ void UserSession::Release()
 	DEBUG_MSG( LVL_TRACE, "UserSession::Release " );
 
 	m_bFirst = TRUE;
-	g_AgentServer->SetUserSession( this->m_wUserKey, NULL);
-	AgentFactory::Instance()->FreeUserSession(this);
+	this->LeaveGame();
 }
 
 void UserSession::OnAccept( DWORD dwNetworkIndex )
@@ -130,17 +136,10 @@ void UserSession::OnDisconnect()
     {
         char buff[1024]  =  {0};
         char format[256] = 	"{ \"protocol\":\"%d\", \"userkey\":\"%d\", \"battleid\":\"%d\" }";
-        sprintf( buff, format, MAKEDWORD( Login_Protocol, Offline_NAK ),
-             _userkey, _battlekey);
+        sprintf( buff, format, MAKEDWORD( Login_Protocol, Offline_NAK ), _userkey, _battlekey);
         int len = strlen(buff);
         g_AgentServer->SendToGameServer( (BYTE*)buff, len );
     }
-
-	{
-	    g_AgentServer->FreeSessionKey(_userkey);
-        NetworkObject::OnDisconnect();
-        AgentFactory::Instance()->FreeUserSession( this );
-	}
 }
 
 void UserSession::OnRecv(BYTE *pMsg, WORD wSize)
@@ -159,17 +158,6 @@ void UserSession::OnLogString( char * pszLog)
 {
 }
 
-void UserSession::DBResult( WORD cate, WORD ptcl, QueryResult * pData )
-{
-    /*
-    MSG_DBPROXY_RESULT msg;
-    msg.m_byCategory = cate;
-    msg.m_byProtocol = ptcl;
-    msg.m_pData = pData;
-    g_PacketHandler.ParsePacket_Database( (ServerSession*)this, (MSG_BASE*)&msg, sizeof(msg) );
-    */
-}
-
 void UserSession::Login( ServerSession * pServerSession )
 {
    Session * pSession = pServerSession->GetSesstion();
@@ -178,14 +166,75 @@ void UserSession::Login( ServerSession * pServerSession )
         pSession->BindNetworkObject(this);
     }
 }
+void UserSession::JoinGame() {
+    ClearTable();
+    m_wUserStatus = eGB_SIT;
+}
 
-void UserSession::QuitTable()
+BYTE& UserSession::getStatus() {
+    return m_wUserStatus;
+}
+
+void UserSession::EndGame(int _imoneys, int _iwons, int _ifaileds )
+{
+    if ( m_wUserStatus==eGB_LEAVE ) {
+
+        ClearTable();
+
+        m_wUserKey   = 0;       // 用户健值
+        m_wBattleKey = 0;       // 房间号
+        m_dwUserid   = 0;       // 用户ID
+        m_iMoneys    = 0;       // 点数
+        m_uiWons     = 0;       // 赢的次数
+        m_uiFaileds  = 0; 	    // 失败次数
+        m_uiAways    = 0; 		// 逃跑次数
+
+        memset( m_szName, 0x0, sizeof(m_szName) ); // 名称
+
+        g_AgentServer->FreeSessionKey( m_wUserKey );
+        AgentFactory::Instance()->FreeUserSession( this );
+
+        return;
+    }
+
+    m_wUserStatus   = eGB_SIT;
+    m_iMoneys       = _imoneys;
+    m_uiWons        = _iwons;
+    m_uiFaileds     = _ifaileds;
+    m_bReady        = FALSE;
+    m_bPokerSize    = 0;
+    memset( m_bPoker, 0x0, sizeof(m_bPoker) );  // 牌
+}
+
+void UserSession::LeaveGame()
+{
+    DEBUG_MSG( LVL_TRACE, "UserSession::LeaveGame. \n");
+
+    if ( m_wUserStatus==eGB_UNKNOW ||
+         m_wUserStatus==eGB_LEAVE  ||
+         m_wUserStatus==eGB_SIT )
+    {
+        // 离开游戏时，如果只是坐下。
+        g_AgentServer->FreeSessionKey( m_wUserKey );
+        AgentFactory::Instance()->FreeUserSession( this );
+        return;
+    }
+
+    m_wUserStatus=eGB_LEAVE;
+    if ( m_pSession ) {
+        m_pSession->UnbindNetworkObject();
+    }
+}
+
+void UserSession::ClearTable()
 {
     m_wBattleKey    = 0;          // 房间号
     m_bReady        = FALSE; 	  // 已经准备好了
 	m_bShowcards    = FALSE;      // 显示牌
 	m_bPokerSize    = 0;          // 牌数量
     memset( m_bPoker, 0x0, sizeof(m_bPoker) );  // 牌
+
+    m_wUserStatus = eGB_LEAVE;
 }
 
 void UserSession::setName( char * _name, int _size ) {
@@ -200,10 +249,9 @@ void UserSession::setGamesinfo( int _point, UINT _wons, UINT _failed, UINT _away
 	m_uiAways   = _aways; 		    // 逃跑次数
 }
 
-void UserSession::setMoney( int _money ) {
+void UserSession::setMoney( int _money )    {
     m_iMoneys = _money;
 }
-
 void UserSession::setReady( BOOL _ready ) {
     m_bReady = _ready;
 }
@@ -215,7 +263,6 @@ void UserSession::setShowcards( BOOL _showcards ) {
 BYTE & UserSession::getPokerSize( ) {
     return m_bPokerSize;
 }
-
 // 牌
 void UserSession::setPokers( char * poker, WORD _size) {
     memset( m_bPoker, 0x0, sizeof(m_bPoker) );
@@ -259,7 +306,6 @@ void UserSession::getSeatInfo( char * _seatinfo, int _size )
         strcat( _seatinfo, _buff );
     }
 }
-
 // 牌的信息
 void UserSession::getPokerInfo( int userkey, char * _pokerinfo, int _size )
 {
@@ -268,10 +314,7 @@ void UserSession::getPokerInfo( int userkey, char * _pokerinfo, int _size )
     char _poker[128] ={ 0 };
 
     char _buff[256]   = {0};
-    char _format[256] = "{\"show\":%s,"
-                        "\"name\":\"%s\","
-                        "\"count\":%d,"
-                        "\"poker\":[%s]}";
+    char _format[256] = "{\"show\":%s,\"name\":\"%s\",\"count\":%d,\"poker\":[%s]}";
 
     char * cShow = _false;
     if ( userkey == m_wUserKey ) {

@@ -129,7 +129,6 @@ int User_Result_RoomInfo  ( ServerSession * pServerSession, QueryResult * pResul
         pServerSession->Send( (BYTE*)sendMsg, nLength );
     }
 
-    // printf( "Query_TableInfo::FREE(pQuery : %x)\n", pQuery );
     Query_RoomInfo::FREE(pQuery);
 }
 

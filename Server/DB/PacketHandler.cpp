@@ -1,4 +1,5 @@
 #include "PacketHandler.h"
+#include "UserPacket.h"
 #include "Handler_Module.h"
 
 /*  1. 游戏的命令转化格式
@@ -23,10 +24,15 @@ PacketHandler::~PacketHandler(void)
 	SAFE_DELETE(m_pFuncMap_Database);
 }
 
-DWORD PacketHandler::GetProtocol( char * szMsg )
+DWORD PacketHandler::GetProtocol( MSG_BASE * szMsg, WORD wSize )
 {
     JsonMap js_map;
-    if ( js_map.set_json( szMsg) ) {
+    if ( js_map.set_json( (char*)szMsg ) ) {
+        if ( wSize==sizeof(UserPacket) ) {
+            UserPacket pack;
+            pack.SetPacket( (BYTE*) szMsg, wSize );
+            return pack.GetProtocol();
+        }
         return 0;
     }
 
@@ -52,8 +58,6 @@ BOOL PacketHandler::Register_Login()
 BOOL PacketHandler::Register_Lobby()
 {
     AddHandler_Lobby( Login_Protocol,  Login_REQ,      MSG_Handler_Login        );
-    AddHandler_Lobby( Login_Protocol,  Relogin_REQ,    MSG_Handler_Relogin      );
-    AddHandler_Lobby( Login_Protocol,  GamePacket_SYN, MSG_Handler_GamePacket   );
     AddHandler_Lobby( Update_Protocol, RoomInfo_SYN,   MSG_Handler_RoomInfo     );
     AddHandler_Lobby( Update_Protocol, TableInfo_SYN,  MSG_Handler_TableInfo    );
 	AddHandler_Lobby( Update_Protocol, OnlineInfo_SYN, MSG_Handler_Onlines      );
@@ -64,26 +68,23 @@ BOOL PacketHandler::Register_Lobby()
 
 BOOL PacketHandler::Register_Games()
 {
-    AddHandler_Games( Games_Protocol, JoinGame_REQ,     MSG_Handler_JoinGame     );
-    AddHandler_Games( Games_Protocol, QuitGame_REQ,     MSG_Handler_QuitGame     );
     AddHandler_Games( Games_Protocol, Settlement_REQ,   MSG_Handler_Settlement   );
     AddHandler_Games( Games_Protocol, UpdateBattle_REQ, MSG_Handler_UpdateBattle );
 }
 
 BOOL PacketHandler::Register_Database()
 {
-    AddHandler_Database( Login_Protocol,  PreLogin_DBR,     MSG_Handler_PreLogin_DBR    );
-    AddHandler_Database( Login_Protocol,  Login_DBR,        MSG_Handler_Login_DBR       );
-    AddHandler_Database( Login_Protocol,  Relogin_DBR,      MSG_Handler_Relogin_DBR     );
-    AddHandler_Database( Update_Protocol, GamePacket_DBR,   MSG_Handler_GamePacket_DBR  );
+    AddHandler_Database( Login_Protocol,  PreLogin_DBR,     MSG_Handler_PreLogin_DBR    );  // 预登录
+    AddHandler_Database( Login_Protocol,  Login_DBR,        MSG_Handler_Login_DBR       );  // 登录认证
+    AddHandler_Database( Login_Protocol,  GamePacket_DBR,   MSG_Handler_GamePacket_DBR  );  // 数据包
+    AddHandler_Database( Login_Protocol,  Relogin_DBR,      MSG_Handler_Relogin_DBR     );  // 重登陆
     AddHandler_Database( Update_Protocol, RoomInfo_DBR,     MSG_Handler_RoomInfo_DBR    );
     AddHandler_Database( Update_Protocol, TableInfo_DBR,    MSG_Handler_TableInfo_DBR   );
 	AddHandler_Database( Update_Protocol, OnlineInfo_DBR,   MSG_Handler_Onlines_DBR     );
 	AddHandler_Database( Update_Protocol, WRankInfo_DBR,    MSG_Handler_WRankInfo_DBR   );
 	AddHandler_Database( Update_Protocol, DRankInfo_DBR,    MSG_Handler_DRankInfo_DBR   );
 	AddHandler_Database( Games_Protocol,  JoinTable_DBR,    MSG_Handler_JoinTable_DBR   );
-	AddHandler_Database( Games_Protocol,  JoinGame_DBR,     MSG_Handler_JoinGame_DBR    );
-	AddHandler_Database( Games_Protocol,  QuitGame_DBR,     MSG_Handler_QuitGame_DBR    );
+	AddHandler_Database( Games_Protocol,  CreateTable_DBR,  MSG_Handler_CreateTable_DBR );
 	AddHandler_Database( Games_Protocol,  UpdateBattle_DBR, MSG_Handler_UpdateBattle_DBR);
 	AddHandler_Database( Games_Protocol,  Settlement_DBR,   MSG_Handler_Settlement_DBR  );
 }
@@ -124,7 +125,7 @@ BOOL PacketHandler::AddHandler_Database( WORD category, WORD protocol, fnHandler
 VOID PacketHandler::ParsePacket_Login( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-    DWORD pid = GetProtocol( (char*)pMsg );
+    DWORD pid = GetProtocol( pMsg, wSize );
     if ( pid != 0 ) {
         FUNC_Login * pFuncInfo = (FUNC_Login *)m_pFuncMap_Login->Find( pid );
         if (pFuncInfo) {
@@ -136,19 +137,20 @@ VOID PacketHandler::ParsePacket_Login( ServerSession * pSession, MSG_BASE * pMsg
 VOID PacketHandler::ParsePacket_Lobby( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-    DWORD pid = GetProtocol( (char*)pMsg );
+    DWORD pid = GetProtocol( pMsg, wSize );
     if ( pid != 0 ) {
         FUNC_Lobby * pFuncInfo = (FUNC_Lobby *)m_pFuncMap_Lobby->Find( pid );
         if (pFuncInfo) {
             pFuncInfo->m_fnHandler( pSession, pMsg, wSize );
         }
+        DEBUG_MSG( LVL_DEBUG, "ParsePacket_Lobby : %d \n", pid );
     }
 }
 
 VOID PacketHandler::ParsePacket_Games( ServerSession * pSession, MSG_BASE * pMsg, WORD wSize )
 {
 	assert(NULL != pMsg);
-    DWORD pid = GetProtocol( (char*)pMsg );
+    DWORD pid = GetProtocol( pMsg, wSize );
     if ( pid != 0 ) {
         FUNC_Games * pFuncInfo = (FUNC_Games *)m_pFuncMap_Games->Find( pid );
         if (pFuncInfo) {

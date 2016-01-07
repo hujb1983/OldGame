@@ -8,10 +8,8 @@ void MSG_Handler_RoomInfo_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg,
 
 int User_Login_Query_Table_Info( WORD _userkey, BYTE _roomid)
 {
-    printf("User_Login_Query_Table_Info\n");
     char szMsg[1024] = {0};
-    snprintf( szMsg, sizeof(szMsg),
-            " { \"protocol\":\"%d\", \"userkey\":\"%d\", \"roomid\":\"%d\" } ",
+    snprintf( szMsg, sizeof(szMsg), "{\"protocol\":\"%d\",\"userkey\":%d,\"roomid\":%d}",
             MAKEDWORD( Update_Protocol, TableInfo_SYN ), _userkey, _roomid );
     int nLen = strlen(szMsg);
     g_AgentServer->SendToLobbyServer( (BYTE*) szMsg, nLen );
@@ -20,7 +18,8 @@ int User_Login_Query_Table_Info( WORD _userkey, BYTE _roomid)
 
 void MSG_Handler_RoomInfo_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    printf("[AgentServer::MSG_Handler_RoomInfo_ANC] %s \n", (char*)pMsg );
+    // DEBUG_MSG( LVL_DEBUG, "RoomInfo_ANC to recv: %s \n", (char*)pMsg );
+
     JsonMap js_map;
     if ( js_map.set_json( (char *) pMsg ) == -1 ) {
         return;
@@ -41,7 +40,7 @@ void MSG_Handler_RoomInfo_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg,
             js_array.ReadInteger("roomid",  _roomid);
 
             if ( _userkey!=0 ) {
-                g_AgentServer->SendToClient( (BYTE*) pMsg, wSize );
+                g_AgentServer->SendToClient( _userkey, (BYTE*) pMsg, wSize );
                 User_Login_Query_Table_Info( _userkey, _roomid);
             }
         }
