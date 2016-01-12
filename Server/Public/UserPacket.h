@@ -53,9 +53,9 @@ public:
     BYTE & GetSeatId();         // 坐位号;
 
     BYTE & GetReady();          // 是否准备好;
-    BYTE & GetCalled();          // 是否叫地主;
-    BYTE & GetBanker();          // 是否地主;
-    BYTE & GetEnd();             // 是否结束;
+    BYTE & GetCalled();         // 是否叫地主;
+    BYTE & GetBanker();         // 是否地主;
+    BYTE & GetEnd();            // 是否结束;
 
     UINT & GetCalledTimes();        // 叫地主的授权时间;
     UINT & GetCalledTimesLast();    // 叫地主的限制时间;
@@ -70,7 +70,6 @@ public:
 
     UINT & GetShowedSize();        // 是否出牌;
     CHAR * GetShowedPokers();      // 已经打出的牌;
-
 
 private:
 

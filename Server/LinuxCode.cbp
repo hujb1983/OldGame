@@ -87,11 +87,8 @@
 		<Unit filename="Cnpoker/GameTable.cpp" />
 		<Unit filename="Cnpoker/GameTable.h" />
 		<Unit filename="Cnpoker/Handler_CalledBank.cpp" />
-		<Unit filename="Cnpoker/Handler_CalledLicense.cpp" />
-		<Unit filename="Cnpoker/Handler_CreateBank.cpp" />
 		<Unit filename="Cnpoker/Handler_Discard.cpp" />
 		<Unit filename="Cnpoker/Handler_DiscardsLicense.cpp" />
-		<Unit filename="Cnpoker/Handler_InitCards.cpp" />
 		<Unit filename="Cnpoker/Handler_JoinTable.cpp" />
 		<Unit filename="Cnpoker/Handler_Module.h" />
 		<Unit filename="Cnpoker/Handler_Offline.cpp" />
@@ -112,7 +109,6 @@
 		<Unit filename="Common/Define.h" />
 		<Unit filename="Common/PackageStruct.h" />
 		<Unit filename="Common/PackageStruct_Connect.h" />
-		<Unit filename="Common/PackageStruct_Game.h" />
 		<Unit filename="Common/PackageStruct_Login.h" />
 		<Unit filename="Common/PackageStruct_Update.h" />
 		<Unit filename="Common/Protocol.h" />

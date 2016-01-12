@@ -27,6 +27,11 @@ void MSG_Handler_JoinTable_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg
                     pack.GetFieldId() = user.GetFieldId();
                     pack.GetRoomId() = user.GetRoomId();
                     pack.GetTableId() = user.GetTableId();
+                    pack.GetMultiple() = 1;
+                    strcat( pack.GetBasicPokers(), "-1" );
+                    strcat( pack.GetDiscardPokers(0), "-1" );
+                    strcat( pack.GetDiscardPokers(1), "-1" );
+                    strcat( pack.GetDiscardPokers(2), "-1" );
 
                     BYTE _seatid = user.GetSeatId();
                     if (_seatid<3)  // 只有三位玩家
@@ -37,6 +42,9 @@ void MSG_Handler_JoinTable_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg
                         pack.GetRate(_seatid) = 10; // 胜率;
                         pack.GetMoney(_seatid) = user.GetMoney();  // 钱;
                         memcpy( pack.GetName(_seatid), user.GetName(), 33); // 名称
+
+                        pack.GetOnline(_seatid) = PK_ONLINE;
+                        pack.GetTrusteeship(_seatid) = 0;
                     }
                     pack.ToPrint();
                     g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );

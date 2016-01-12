@@ -16,6 +16,10 @@ public:
 	GameMgr();
 	virtual ~GameMgr();
 
+	int InitShuffle( BYTE _t = 1, BYTE _s = 1);
+	int UpdateShuffle( BYTE * p, BYTE s);
+	vector<BYTE> m_vecCards;
+
 public:
     int  InitTable();
     int  UpdateTable();

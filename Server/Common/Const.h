@@ -82,6 +82,7 @@ enum
 // 设置 m_byCalls[] 状态
 enum
 {
+    eGB_0       =    0,   // 没有
     eGB_Apply   = 0x01,   // 申请
     eGB_Waiver  = 0x02,   // 放弃
     eGB_Point1  = 0x10,   // 分-1

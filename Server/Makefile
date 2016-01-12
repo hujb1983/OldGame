@@ -76,6 +76,7 @@ CnpokerObjs     = Cnpoker/CnpokerMain.o \
 				  Cnpoker/PacketHandler.o \
 				  Cnpoker/Handler_JoinTable.o \
 				  Cnpoker/Handler_StartGame.o \
+				  Cnpoker/Handler_CalledBank.o \
 
 LobbyObjs   	= Lobby/LobbyMain.o \
 				  Lobby/LobbyUser.o \

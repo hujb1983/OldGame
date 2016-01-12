@@ -55,6 +55,7 @@ BOOL CnpokerServer::Init()
 		return FALSE;
 	}
 
+
 	// 主动连接 Agent
 	m_pAgentSession = CnpokerFactory::Instance()->AllocAgentSession();
 	if ( m_pAgentSession ) {
@@ -68,6 +69,11 @@ BOOL CnpokerServer::Init()
 		SERVER_INFO info = g_InfoParser.GetServerInfo( DB_SERVER );
 		m_pDBSession->SetAddr( info.m_strIp, info.m_dwPort ); // DB Port 7030
 	}
+
+	/*********************************
+        初始化全局参数
+	*********************************/
+    g_GameMgr.InitShuffle(1, 54);
 
 	return TRUE;
 }

@@ -1,12 +1,42 @@
 #include "GameMgr.h"
 #include "CnpokerFactory.h"
 
+int Init_Poker_Random( BYTE i )
+{
+    return rand() % i;
+}
+
 GameMgr g_GameMgr;
 
 GameMgr::GameMgr() {
 }
 
 GameMgr::~GameMgr() {
+}
+
+
+/***********************************************
+    Ï´Ò»¸öÅÆ
+***********************************************/
+int GameMgr::InitShuffle( BYTE _Team, BYTE _Size )
+{
+	m_vecCards.reserve( _Team * _Size );    // 54
+    for(int i=0; i<_Team; ++i) {
+		for(int j=0; j<_Size; ++j) {
+            m_vecCards.push_back(j);
+        }
+	}
+}
+
+int GameMgr::UpdateShuffle( BYTE * _Pokers, BYTE _Size ) // ÂÒÐò
+{
+	srand( (unsigned)time(NULL) );
+	std::random_shuffle( m_vecCards.begin(), m_vecCards.end(), Init_Poker_Random );
+	if ( m_vecCards.size()>=_Size) {
+        for(int i = 0; i < _Size; ++i) {
+            _Pokers[i] = m_vecCards[i];
+        }
+	}
 }
 
 /***********************************************

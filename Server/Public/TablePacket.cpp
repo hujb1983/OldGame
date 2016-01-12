@@ -39,6 +39,10 @@ UINT & TablePacket::GetBrokerage()       {  return (m_uiBrokerage);  }       // 
 UINT & TablePacket::GetTimeStep()        {  return (m_uiTimeStep);   }       // Ê±¼äµã;
 BYTE & TablePacket::GetPlaySeatId()      {  return (m_byPlaySeatId); }       // ×øÎ»ºÅ;
 
+BYTE & TablePacket::GetBankerId()        {  return (m_byBankerId);      }   // µØÖ÷ID;
+BYTE & TablePacket::GetBasicPokerSize()  {  return (m_byBasicPokerSize);}   // µØÖ÷ÅÆ´óÐ¡;
+CHAR * TablePacket::GetBasicPokers()    {  return (m_byBasicPokers);   }   // µØÖ÷ÅÆÖµ;
+
 UINT & TablePacket::GetUserKey(BYTE seatid)     {  return (m_uiUserKey[seatid]);    }       // ÓÃ»§Èë¿ÚÖµ
 BYTE & TablePacket::GetPosition(BYTE seatid)    {  return (m_byPosition[seatid]);   }       // Ö°Î»£¬µØÖ÷ºÍÍæ¼Ò;
 BYTE & TablePacket::GetReady(BYTE seatid)       {  return (m_byReady[seatid]);      }       // ×¼±¸ºÃÁË;
@@ -46,27 +50,54 @@ UINT & TablePacket::GetRate(BYTE seatid)        {  return (m_uiRate[seatid]);   
 int  & TablePacket::GetMoney(BYTE seatid)       {  return (m_iMoney[seatid]);       }       // Ç®;
 CHAR * TablePacket::GetName(BYTE seatid)        {  return (m_szName[seatid]);       }       // Ãû³Æ;
 
+BYTE & TablePacket::GetOnline(BYTE seatid)         {  return (m_byOnline[seatid]);        }   // ÔÚÏß
+BYTE & TablePacket::GetTrusteeship(BYTE seatid)    {  return (m_byTrusteeship[seatid]);   }   // ÍÐ¹Ü
+
+BYTE & TablePacket::GetPokerSize(BYTE seatid)   {  return (m_byPokerSize[seatid]);    }     // ÅÆÊý
+BYTE * TablePacket::GetPokers()                 {  return (m_szPokers);               }     // ÅÆ
+
+BYTE & TablePacket::GetLimitedTimes()               {  return (m_byLimitedTimes);             }     // ×À×ÓÏÞÊ±;
+BYTE & TablePacket::GetCalledStatus(BYTE seatid)    {  return (m_byCalledStatus[seatid]);     }     // ½ÐÅÆÇé¿ö;
+BYTE & TablePacket::GetCalledType(BYTE seatid)      {  return (m_byCalledType[seatid]);       }     // ½ÐÅÆÇé¿ö;
+BYTE & TablePacket::GetDiscardStatus(BYTE seatid)   {  return (m_byDiscardStatus[seatid]);    }     // ³öÅÆÇé¿ö;
+
+BYTE & TablePacket::GetFirst()                      {  return (m_byFirst);                    }     // µÚÒ»´Î³öÅÆ;
+BYTE & TablePacket::GetInitcards()                  {  return (m_byInitCards);                }     // ³õÊ¼»¯³öÅÆ;
+
+BYTE & TablePacket::GetDiscardSeatId()              {  return (m_byDiscardSeatId);            }     // ´ò³öÅÆµÄÍæ¼Ò;
+BYTE & TablePacket::GetDiscardPokerSize(BYTE seatid){  return (m_byDiscardPokerSize[seatid]); }     // ´ò³öÅÆµÄÍæ¼Ò;
+CHAR * TablePacket::GetDiscardPokers(BYTE seatid)   {  return (m_szDiscardPokers[seatid]);    }     // Íæ¼Ò´òµÄÅÆ;
+
 void TablePacket::ToPrint()
 {
     DEBUG_MSG( LVL_DEBUG, "Begin");
 
     DEBUG_MSG( LVL_DEBUG, "| Protocol=%d | TokenKey=%d | ValidTime=%d | ValidCount=%d |",
-              m_uiProtocol, m_uiTokenKey, m_uiValidTime, m_uiValidCount);
+                m_uiProtocol, m_uiTokenKey, m_uiValidTime, m_uiValidCount);
 
     DEBUG_MSG( LVL_DEBUG, "| FieldId=%d | RoomId=%d | TableId=%d |",
-              m_byFieldId, m_byRoomId, m_uiTableId );
+                m_byFieldId, m_byRoomId, m_uiTableId );
 
     DEBUG_MSG( LVL_DEBUG, "| Model=%d | Multiple=%d | Brokerage=%d | TimeStep=%d | SeatId=%d |",
-              m_byModel, m_uiMultiple, m_uiBrokerage, m_uiTimeStep, m_byPlaySeatId );
+                m_byModel, m_uiMultiple, m_uiBrokerage, m_uiTimeStep, m_byPlaySeatId );
+
+    DEBUG_MSG( LVL_DEBUG, "| UserKey=%d | Position=%d | Ready=%d | Rate=%d | Money=%d | Name=%s | ",
+                m_uiUserKey[0],  m_byPosition[0], m_byReady[0], m_uiRate[0], m_iMoney[0], m_szName[0] );
 
     DEBUG_MSG( LVL_DEBUG, "| UserKey=%d | Position=%d | Ready=%d | Rate=%d | Money=%d | Name=%s |",
-              m_uiUserKey[0],  m_byPosition[0], m_byReady[0], m_uiRate[0], m_iMoney[0], m_szName[0] );
+                m_uiUserKey[1], m_byPosition[1], m_byReady[1], m_uiRate[1], m_iMoney[1], m_szName[1] );
 
     DEBUG_MSG( LVL_DEBUG, "| UserKey=%d | Position=%d | Ready=%d | Rate=%d | Money=%d | Name=%s |",
-              m_uiUserKey[1], m_byPosition[1], m_byReady[1], m_uiRate[1], m_iMoney[1], m_szName[1] );
+                m_uiUserKey[2], m_byPosition[2], m_byReady[2], m_uiRate[2], m_iMoney[2], m_szName[2] );
 
-    DEBUG_MSG( LVL_DEBUG, "| UserKey=%d | Position=%d | Ready=%d | Rate=%d | Money=%d | Name=%s |",
-              m_uiUserKey[2], m_byPosition[2], m_byReady[2], m_uiRate[2], m_iMoney[2], m_szName[2] );
+    DEBUG_MSG( LVL_DEBUG, "| CalledStatus=%d | CalledType=%d | DiscardPokers=%s |",
+                m_byCalledStatus[0], m_byCalledType[0], m_szDiscardPokers[0] );
+
+    DEBUG_MSG( LVL_DEBUG, "| CalledStatus=%d | CalledType=%d | DiscardPokers=%s |",
+                m_byCalledStatus[1], m_byCalledType[1], m_szDiscardPokers[1] );
+
+    DEBUG_MSG( LVL_DEBUG, "| CalledStatus=%d | CalledType=%d | DiscardPokers=%s |",
+                m_byCalledStatus[2], m_byCalledType[2], m_szDiscardPokers[2] );
 
     DEBUG_MSG( LVL_DEBUG, "End\n");
 }
@@ -76,15 +107,54 @@ char * TablePacket::ClientData( BYTE bMainSeatid, BYTE bSeatid, char * szBuff, W
 {
     memset(szBuff, 0x0, wSize);
     if ( GetPosition(bSeatid)!=0 ) {
-        snprintf( szBuff, wSize, "{\"show\":%s,\"ready\":%s,\"name\":\"%s\",\"rate\":%d,\"money\":%d}",
+
+        BYTE byCount = GetDiscardPokerSize(bSeatid);
+        char * poker = NULL;
+        if (bMainSeatid==bSeatid) {
+            poker = GetDiscardPokers(bSeatid);
+        }
+
+        snprintf( szBuff, wSize, "{ \"show\":%s,"        // ×Ô¼º
+                                   "\"ready\":%s,"       // ×¼±¸
+                                   "\"name\":\"%s\","    // ÐÕÃû
+                                   "\"rate\":%d,"        // Ê¤ÂÊ
+                                   "\"money\":%d,"       // Ç®
+                                   "\"online\":%s,"      // ×´Ì¬:
+                                   "\"trusteeship\":%s," // ÍÐ¹Ü:
+                                   "\"called\":%s,"      // ½ÐµØÖ÷
+                                   "\"calltype\":%d,"    // ½ÐµØÖ÷:·ÖÊý£¨0|1£©
+                                   "\"discard\":%s,"     // ³öÅÆ£º
+                                   "\"count\":%d,"
+                                   "\"pokers\":[%s]"
+                                 "}",
                  "true",
-                 (GetReady(bSeatid)==0)? "false":"true",
+                 (GetReady(bSeatid)!=PK_READY)? "false":"true",
                  GetName(bSeatid),
                  GetRate(bSeatid),
-                 GetMoney(bSeatid) );
+                 GetMoney(bSeatid),
+                 (GetOnline(bSeatid)!=PK_ONLINE)? "false":"true",
+                 (GetTrusteeship(bSeatid)!=PK_TRUSTEESHIP)? "false":"true",
+                 (GetPlaySeatId()!=bSeatid)?"false":"true",   // ½ÐµÄµØÖ÷
+                 GetCalledStatus(bSeatid),
+                 (GetPlaySeatId()!=bSeatid)?"false":"true",   // ³öÅÆ
+                 byCount,   // ¸öÈËÊÖÅÆ³¤¶È
+                 (poker)?(poker):("-1") );
     }
-    else {
-        snprintf( szBuff, wSize, "{\"show\":false, \"ready\":false, \"name\":\"-\", \"rate\":0,\"money\":0}" );
+    else
+    {
+        snprintf( szBuff, wSize, "{\"show\":false,"     // ÆäËûÍæ¼Ò²ÎÊý
+                                  "\"ready\":false,"    // ÒÑ¾­×¼±¸
+                                  "\"name\":\"-\","     // Ãû³Æ
+                                  "\"rate\":0,"         // Ê¤ÂÊ
+                                  "\"money\":0,"        // Ç®
+                                  "\"online\":false,"       // ×´Ì¬
+                                  "\"trusteeship\":false,"  // ÍÐ¹Ü
+                                  "\"called\":false,"       // ½ÐµØÖ÷
+                                  "\"calltype\":0,"
+                                  "\"discard\":false,"      // ³öÅÆ
+                                  "\"count\":0,"            // ³¤¶È
+                                  "\"pokers\":[-1]"         // ³öÅÆ×Ö·û´®
+                                  "}" );
     }
     return (szBuff);
 }
@@ -98,11 +168,24 @@ UINT TablePacket::JsonData(BYTE bSeatid, char * szBuff, WORD wSize )    // JsonÊ
     strcat( szBuff, _protocol);
 
     char _data[256] = {0};
-    snprintf( _data, sizeof(_data), "\"data\":[{\"battleid\":%d,\"seatid\":%d,\"basics\":%d,\"multiple\":%d,\"brokerage\":%d,",
-             m_uiTableId, bSeatid, m_BasicMoney, m_uiMultiple, m_uiBrokerage );
+    snprintf( _data, sizeof(_data), "\"data\":[{"
+                                    "\"battleid\":%d,"
+                                    "\"dmodel\":%s,"
+                                    "\"seatid\":%d,"
+                                    "\"basics\":%d,"
+                                    "\"multiple\":%d,"
+                                    "\"brokerage\":%d,"
+                                    "\"first\":%s,"
+                                    "\"banker\":%d,"
+                                    "\"times\":%d,"            // µ¹¼ÆÊ±¼ä
+                                    "\"count\":%d,"         // µØÖ÷ÅÆÊý
+                                    "\"pokers\":[%s],",      // µØÖ÷ÅÆ
+             m_uiTableId, (m_byModel==0)?"false":"true", bSeatid, m_BasicMoney, m_uiMultiple, m_uiBrokerage,
+             (GetFirst()==0)?"true":"false", GetBankerId(), GetLimitedTimes(), GetBasicPokerSize(), GetBasicPokers() );
+
     strcat( szBuff, _data);
 
-    char _show[256] = {0};
+    char _show[1024] = {0};
     strcat( _show, "\"seatinfo\":[" );
     {
         char * _ptr = NULL;

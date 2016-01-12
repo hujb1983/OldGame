@@ -9,6 +9,21 @@
 /*************************************/
 #pragma pack(push, 1)
 
+#define TEAM_SIZE   (3)
+#define POKER_SIZE  (54)
+
+#define PK_PLAYER   (17)        // 玩家0
+#define PK_BANKER   (20)        // 玩家1
+
+#define PK_DISCARD  (99)        // 已经丢牌
+#define PK_USER_0   (100)       // 玩家0
+#define PK_USER_1   (101)       // 玩家1
+#define PK_USER_2   (102)       // 玩家2
+#define PK_BANKER   (103)       // 地主牌标识
+
+#define PK_READY    (1)         // 准备好了
+
+
 class TablePacket
 {
 public:
@@ -44,10 +59,6 @@ public:
     UINT & GetTimeStep();       // 时间点;
     BYTE & GetPlaySeatId();     // 坐位号;
 
-    BYTE & GetBankerId();           // 地主ID;
-    BYTE & GetBasicPokerSize();     // 地主牌大小;
-    CHAR * GetBasicPokers();       // 地主牌值;
-
     UINT & GetUserKey(BYTE);    // 用户入口值
     BYTE & GetPosition(BYTE);   // 职位，地主和玩家;
     BYTE & GetReady(BYTE);      // 准备好了;
@@ -55,23 +66,14 @@ public:
     int  & GetMoney(BYTE);      // 钱;
     CHAR * GetName(BYTE);       // 名称
 
-    BYTE & GetOnline(BYTE);         // 在线
-    BYTE & GetTrusteeship(BYTE);    // 托管
+    CHAR & GetTimes();                  // 桌子的下一个限时;
+    CHAR & GetCalled(BYTE);             // 叫牌情况;
+    CHAR & GetDiscardStatus(BYTE);      // 出牌情况;
 
+    BYTE & GetDiscardPokerSize(BYTE);   // 玩家计牌器;
+    CHAR * GetDiscardPokers(BYTE);      // 玩家打的牌;
     BYTE & GetPokerSize(BYTE);  // 牌数
     BYTE * GetPokers();         // 牌
-
-    BYTE & GetLimitedTimes();           // 桌子限时;
-    BYTE & GetCalledStatus(BYTE);       // 叫牌情况;
-    BYTE & GetCalledType(BYTE seatid);  // 叫牌类型;
-
-    BYTE & GetFirst();                  // 第一次出牌;
-    BYTE & GetInitcards();              // 初始化出牌;
-
-    BYTE & GetDiscardStatus(BYTE);      // 出牌情况;
-    BYTE & GetDiscardSeatId();          // 出牌坐位;
-    BYTE & GetDiscardPokerSize(BYTE);   // 出牌张数;
-    CHAR * GetDiscardPokers(BYTE);      // 玩家打的牌;
 
 private:
 
@@ -92,10 +94,6 @@ private:
     UINT  m_uiTimeStep;         // 时间点
     BYTE  m_byPlaySeatId;       // 正在玩的人;
 
-    BYTE  m_byBankerId;         // 地主的坐位号;
-    BYTE  m_byBasicPokerSize;   // 底牌数
-    CHAR  m_byBasicPokers[16];  // 底牌
-
     UINT m_uiUserKey[TEAM_SIZE];    // 用户入口值
     BYTE m_byPosition[TEAM_SIZE];   // 职位，空，地主和玩家
     BYTE m_byReady[TEAM_SIZE];      // 准备好了
@@ -103,25 +101,13 @@ private:
     int  m_iMoney[TEAM_SIZE];       // 钱
     CHAR m_szName[TEAM_SIZE][33];   // 名称
 
-    BYTE m_byOnline[TEAM_SIZE];         // 在线
-    BYTE m_byTrusteeship[TEAM_SIZE];    // 托管
-
     BYTE m_byPokerSize[TEAM_SIZE];    // 牌数
     BYTE m_szPokers[POKER_SIZE+1];    // 牌
 
-    BYTE m_byLimitedTimes;              // 桌子限时状态
-    BYTE m_byCalledStatus[TEAM_SIZE];   // 叫牌状态
-    BYTE m_byCalledType[TEAM_SIZE];     // 出牌类型
-
-    BYTE m_byInitCards;                 // 初始化牌
-    BYTE m_byFirst;                     // 第一次出牌吗
-
-    BYTE m_byDiscardStatus[TEAM_SIZE];  // 出牌状态
-    BYTE m_byDiscardSeatId;             // 打出的座位
-    BYTE m_byDiscardPokerSize[TEAM_SIZE];    // 打出的座位
-    CHAR m_szDiscardPokers[TEAM_SIZE][80+1]; // 打出的牌
+    BYTE m_byDiscardSeatId;           // 打出的座位
+    CHAR m_szDiscardPokers[80+1];     // 打出的牌
 };
-
+07372708801
 #pragma pack(pop)
 /*************************************/
 

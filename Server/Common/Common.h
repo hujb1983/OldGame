@@ -73,7 +73,6 @@ typedef unsigned long	ULONG;
 
 #include "PackageStruct_Login.h"
 #include "PackageStruct_Connect.h"
-#include "PackageStruct_Game.h"
 #include "PackageStruct_Update.h"
 
 #endif // _COMMON_H_INCLUDED_

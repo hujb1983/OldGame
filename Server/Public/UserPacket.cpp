@@ -83,6 +83,9 @@ void UserPacket::ToPrint()
     DEBUG_MSG( LVL_DEBUG, "| BattleId=%d | FieldId=%d | RoomId=%d | TableId=%d |  SeatId=%d |",
               m_wBattleId, m_byFieldId, m_byRoomId, m_uiTableId, m_bySeatId );
 
+    DEBUG_MSG( LVL_DEBUG, "| Ready=%d | Called=%d | Banker=%d |",
+              m_byReady, m_byCalled, m_byBanker );
+
     DEBUG_MSG( LVL_DEBUG, "End\n");
 }
 

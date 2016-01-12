@@ -2,6 +2,9 @@
 #include "CnpokerServer.h"
 
 
+/*****************************************************
+    MSG_Handler_CreateBank_REQ
+*****************************************************/
 void MSG_Handler_CreateBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
     DEBUG_MSG( LVL_DEBUG, "CreateBank_REQ to recv: %s \n", (char*)pMsg );

@@ -1,99 +1,203 @@
 #include "Handler_Module.h"
 #include "CnpokerServer.h"
 
-
-int Processed_Called ( int _nBattleid, BYTE _nSeatid, int _nUserkey, int _nCalltype )
+/*****************************************************
+    Re_Init_Poker_SetUsercards
+*****************************************************/
+int Re_Init_Poker_SetUsercards( BYTE * _poker, BYTE _size )
 {
-    // -- ¼ì²é²ÎÊý
-    if ( (_nSeatid<0) || (_nSeatid>=3) ) {
-        return FALSE;
+    BYTE newPoker[POKER_SIZE + 1];
+    g_GameMgr.UpdateShuffle( newPoker, _size );
+
+    int i(0), sIndex(0);
+    BYTE index = 0;
+    int play_size = (_size - 3) / 3;
+    sIndex = i + play_size;
+    for (; i<(sIndex); i++) {
+        index = newPoker[i];
+        if ( index<MAX_POKER ) {
+            _poker[index] = PK_USER_0;
+        }
     }
-
-    GameBattle *pBattle = g_GameMgr.GetBattle( _nBattleid );
-    if ( pBattle==NULL ) {
-        return FALSE;
+    sIndex = i + play_size;
+    for (; i<(sIndex); i++) {
+        index = newPoker[i];
+        if ( index<MAX_POKER ) {
+            _poker[index] = PK_USER_1;
+        }
     }
-
-    // -- ÅÐ¶ÏÊÇ·ñÊÇÔÚ½ÐµØÖ÷½×¶Î;
-    if ( !pBattle->canCall() ) {
-        return FALSE;
+    sIndex = i + play_size;
+    for (; i<(sIndex); i++) {
+        index = newPoker[i];
+        if ( index<MAX_POKER ) {
+            _poker[index] = PK_USER_2;
+        }
     }
-
-    // -- ÅÐ¶ÏÊÇ·ñÕâÒ»×À×Ó½ÐµØÖ÷;
-    if ( pBattle->getCalled()!=_nSeatid ) {
-        return FALSE;
+    for (; i < _size; i++) {
+        index = newPoker[i];
+        if ( index<MAX_POKER ) {
+            _poker[index] = PK_BANKER;
+        }
     }
-
-    // -- ÉèÖÃÎª¿ªÊ¼;
-    if ( !pBattle->SetCalled( _nSeatid, _nCalltype ) ) {
-        return FALSE;
-    }
-
-    // -- ÅÐ¶Ï½ÐµØÖ÷ÊÇ·ñÓÐÐ§;
-    int _initcard = 0;
-    if ( pBattle->checkCall()==FALSE ) {
-        _initcard = 1;
-    }
-
-    // --Éú³ÉµØÖ÷ÁË;
-    int _createbarker = 0;
-    if ( pBattle->canGame() ) {
-        _createbarker = 1;
-        pBattle->SetBattleStatus( eGB_PLAYING );
-    }
-
-    int _dmodel   = pBattle->getModel();
-    int _multiple = pBattle->getMultiple();
-
-    // @{{{ ×éºÏËùÓÐµÄÅÆ
-    char szPlayerkey[256] = {0};
-    pBattle->GetAllPlayerKey( szPlayerkey, sizeof(szPlayerkey) );
-
-    char szMsg[1024] = {0};
-    char format[256] = 	"{\"protocol\":\"%d\","
-                        " \"initcard\": \"%d\", "
-                        " \"create\": \"%d\", "
-                        "%s,"
-                        "\"multiple\":\"%d\","
-                        "\"dmodel\":\"%d\","
-                        "\"battleid\":\"%d\","
-                        "\"calltype\":\"%d\","
-                        "\"seatid\":\"%d\" }";
-
-    sprintf( szMsg, format, MAKEDWORD( Games_Protocol, Called_BRD ),
-            _initcard,         // ¶¼²»ÒªÖØÐÂ·ÖÅÆ;
-            _createbarker,     // ´´½¨µØÖ÷;
-            szPlayerkey,
-            _multiple,         // ¼¸±¶;
-            _dmodel,           // Ä£Ê½;
-            _nBattleid,        // ·¿¼äºÅ!
-            _nCalltype,        // ÒªµØÂð?
-            _nSeatid );        // ÏÖÔÚ½ÐµØÖ÷µÄÈË;
-    // }}}@ ×éºÏËùÓÐµÄÅÆ
-
-    // @{{{ ·¢ËÍµ½ÆäËûÍæ¼Ò£»
-    WORD nLen = strlen( szMsg );
-    g_pCnpokerServer->SendToAgentServer( (BYTE*)szMsg, nLen );
-    // }}}@
-
-    DEBUG_MSG( LVL_DEBUG, "CalledBank_REQ to agent: %s \n", (char *) szMsg  );
 }
 
+/*****************************************************
+    InitCards_Get_Basecards
+*****************************************************/
+void Banker_Alloc_BasicCards( TablePacket & pack ) {
+
+    BYTE * pMove = pack.GetPokers();
+    BYTE bankerId = pack.GetBankerId();
+    char * b_poker = pack.GetBasicPokers();
+    char * poker = pack.GetDiscardPokers(bankerId);
+    pack.GetBasicPokerSize() = 3;
+
+    char szPoker[8] = {0};
+    char szPokerList[128] = {0};
+    BYTE byPoker(0), byCount(0);
+    for (int  i=0; i<POKER_SIZE; i++) {
+        byPoker = pMove[i];
+        if ( byPoker == PK_BANKER ) {
+            memset( szPoker, 0x0, sizeof(szPoker) );
+            if ( byCount!=0 ) {
+                strcat( szPokerList, ",");
+            }
+            sprintf( szPoker, "%d", i );
+            strcat( szPokerList, szPoker);
+            byCount++;
+        }
+    }
+
+    pack.GetDiscardPokerSize(bankerId) = 20;
+    *b_poker = '\0';
+    strcat( b_poker, szPokerList);
+    strcat( poker, ",");
+    strcat( poker, szPokerList);
+}
+
+
+/*****************************************************
+    MSG_Handler_CalledBank_REQ
+*****************************************************/
 void MSG_Handler_CalledBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    DEBUG_MSG( LVL_DEBUG, "CalledBank_REQ to recv: %s \n", (char *) pMsg  );
+    if ( wSize < sizeof(UserPacket) ) {
+        return ;
+    }
 
-    JsonMap js_map;
-    if ( js_map.set_json( (char *) pMsg ) == -1 ) {
+    BYTE _called(0);
+    UserPacket user;
+    user.SetPacket( (BYTE*)pMsg, wSize );
+    user.ToPrint();
+
+    GameTable * table = g_GameMgr.GetTable( user.GetTableId() );
+    if (!table) {
         return;
     }
 
-    int _nBattleid(0), _nSeatid(0), _nUserkey(0), _nCalltype(0);
-    js_map.ReadInteger("battleid",  _nBattleid);
-    js_map.ReadInteger("seatid",    _nSeatid  );
-    js_map.ReadInteger("userkey",   _nUserkey );
-    js_map.ReadInteger("calltype",  _nCalltype );
+    TablePacket & pack = table->GetTablePacket();
 
-    Processed_Called( _nBattleid, _nSeatid, _nUserkey, _nCalltype );
+    BYTE _seatid = user.GetSeatId();
+    if (_seatid>2) {
+        return;
+    }
+
+    if ( pack.GetPlaySeatId()!=_seatid ) {
+        return;
+    }
+
+    BYTE _count(0);
+    if ( pack.GetCalledStatus(0) == PK_CALLED ) { ++_count;}
+    if ( pack.GetCalledStatus(1) == PK_CALLED ) { ++_count;}
+    if ( pack.GetCalledStatus(2) == PK_CALLED ) { ++_count;}
+
+    _called = user.GetCalled();
+    if ( pack.GetModel()==0 ) {     // æ™®é€šå«ç‰Œ
+        if ( _called==0 ) {
+            pack.GetCalledType(_seatid) = eGB_Waiver;
+        }
+        else {
+            do {
+                     if ( _called==1 )   {   pack.GetCalledType(_seatid) = eGB_Point1; break;  }
+                else if ( _called==2 )   {   pack.GetCalledType(_seatid) = eGB_Point2; break;  }
+                else if ( _called==3 )   {   pack.GetCalledType(_seatid) = eGB_Point3; break;  }
+                return;
+            } while(1);
+            if ( _called > pack.GetMultiple() ) {
+                pack.GetMultiple() = _called;
+            }
+            pack.GetBankerId() = _seatid;
+            if ( pack.GetCalledType(_seatid) == eGB_Point3 ) {
+                Banker_Alloc_BasicCards(pack);
+                pack.GetProtocol() = MAKEDWORD( Games_Protocol, CreateBank_BRD );
+                g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+                return;
+            }
+        }
+    }
+    else {  // ç¿»å€å«ç‰Œ
+        if ( _called==0 ) {
+            pack.GetCalledType(_seatid) = eGB_Waiver;
+        }
+        else {
+            pack.GetBankerId() = _seatid;
+            pack.GetCalledType(_seatid) = eGB_Apply;
+            pack.GetMultiple() *= 2;
+        }
+    }
+
+    // åˆ¤æ–­å«ç‰Œ
+    BYTE l_seatid = (_seatid+2)%3;
+    BYTE r_seatid = (_seatid+1)%3;
+    if (_count==0 || _count==1) {
+        pack.GetProtocol() = MAKEDWORD( Games_Protocol, Called_BRD );
+        g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+    }
+    else {
+        BYTE _hasCalled(0); // è®¡ç®—å«åœ°ä¸»æ¬¡æ•°
+        if ( pack.GetCalledType(0)!=eGB_Waiver )   {   ++_hasCalled;  }
+        if ( pack.GetCalledType(1)!=eGB_Waiver )   {   ++_hasCalled;  }
+        if ( pack.GetCalledType(3)!=eGB_Waiver )   {   ++_hasCalled;  }
+
+        if (_hasCalled == 0) {
+            pack.GetProtocol() = MAKEDWORD( Games_Protocol, InitCards_BRD );
+            pack.GetCalledStatus(0) = 0;
+            pack.GetCalledStatus(1) = 0;
+            pack.GetCalledStatus(2) = 0;
+            pack.GetCalledType(0) = eGB_0;
+            pack.GetCalledType(1) = eGB_0;
+            pack.GetCalledType(2) = eGB_0;
+            pack.GetPokerSize(0) = USER_PLAYER;
+            pack.GetPokerSize(1) = USER_PLAYER;
+            pack.GetPokerSize(2) = USER_PLAYER;
+            BYTE * pokers = pack.GetPokers();
+            Re_Init_Poker_SetUsercards( pokers, POKER_SIZE );   // é‡æ–°å‘ç‰Œ
+            pack.GetInitcards()  = PK_INITCARDS;
+            g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+            return; // é‡æ–°æ´—ç‰Œæ¶ˆæ¯
+        }
+
+        if (_count==2) {
+            if ( pack.GetCalledType(r_seatid)==eGB_Waiver ) {
+                Banker_Alloc_BasicCards(pack);
+                pack.GetProtocol() = MAKEDWORD( Games_Protocol, CreateBank_BRD );
+                g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+                return;
+            }
+            else {
+                // ç¬¬ä¸€ä¸ªå«äº†ï¼Œé‚£è¿˜å¯ä»¥å«ä¸€æ¬¡
+                pack.GetProtocol() = MAKEDWORD( Games_Protocol, Called_BRD );
+                g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+            }
+        }
+        if (_count==3) {
+            if ( pack.GetCalledType(_seatid)==eGB_Waiver ) {
+                Banker_Alloc_BasicCards(pack);
+                pack.GetProtocol() = MAKEDWORD( Games_Protocol, CreateBank_BRD );
+                g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+                return;
+            }
+        }
+    }
 }
 

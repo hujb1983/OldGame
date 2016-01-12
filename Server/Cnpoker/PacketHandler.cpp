@@ -45,13 +45,13 @@ BOOL PacketHandler::RegisterHandler()
 
 BOOL PacketHandler::Register_Agent()
 {
-	AddHandler_Agent( Games_Protocol,  JoinTable_ANC,       MSG_Handler_JoinTable_ANC  );   // 完成桌子的创建
+	AddHandler_Agent( Games_Protocol,  JoinTable_ANC,       MSG_Handler_JoinTable_ANC  );
 	AddHandler_Agent( Games_Protocol,  StartGame_REQ,       MSG_Handler_StartGame_REQ  );
+	AddHandler_Agent( Games_Protocol,  Called_REQ,          MSG_Handler_CalledBank_REQ );
 
 	/*
 	AddHandler_Agent( Games_Protocol,  QuitGame_REQ,        MSG_Handler_QuitGame_REQ   );
 	AddHandler_Agent( Games_Protocol,  InitCards_REQ,       MSG_Handler_InitCards_REQ  );
-	AddHandler_Agent( Games_Protocol,  Called_REQ,          MSG_Handler_CalledBank_REQ );
 	AddHandler_Agent( Games_Protocol,  CreateBank_REQ,      MSG_Handler_CreateBank_REQ );
 	AddHandler_Agent( Games_Protocol,  Discards_REQ,        MSG_Handler_Discards_REQ   );
 	AddHandler_Agent( Login_Protocol,  Relogin_REQ,         MSG_Handler_Relogin_REQ    );

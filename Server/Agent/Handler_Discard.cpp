@@ -3,6 +3,9 @@
 #pragma pack(push,1)
 
 
+/*****************************************************
+    MSG_Handler_Discards_REQ
+*****************************************************/
 void MSG_Handler_Discards_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
     DEBUG_MSG( LVL_DEBUG, "Discards_REQ to recv: %s \n", (char *) pMsg  );
@@ -30,6 +33,7 @@ void MSG_Handler_Discards_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg,
     WORD _wLen = strlen( _buff );
     g_AgentServer->SendToGameServer( (BYTE*) _buff, _wLen );
 }
+
 
 // ´òÅÆÊÚÈ¨
 void game_second_send_discards_license( int _battleid )

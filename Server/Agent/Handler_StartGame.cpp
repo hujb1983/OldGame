@@ -2,7 +2,9 @@
 #include <dbCommon.h>
 #pragma pack(push,1)
 
-// 取得在游戏的用户信息
+/************************************************
+    MSG_Handler_StartGame_REQ
+************************************************/
 void MSG_Handler_StartGame_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize ) {
 
     UserSession * pSession = ( UserSession * ) pServerSession;
@@ -15,6 +17,9 @@ void MSG_Handler_StartGame_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg
     }
 }
 
+/************************************************
+    MSG_Handler_StartGame_BRD
+************************************************/
 void MSG_Handler_StartGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
    if ( wSize>=sizeof(TablePacket) )
@@ -28,21 +33,25 @@ void MSG_Handler_StartGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg
         UINT userkey2 = table.GetUserKey(1);
         UINT userkey3 = table.GetUserKey(2);
 
+        char szBuff[4069] = {0};
         WORD uiLength = 0;
         if ( userkey1!=0 ){
-            char szBuff[1024] = {0};
+            memset( szBuff, 0x0, sizeof(szBuff) );
             uiLength = table.JsonData(0, szBuff, sizeof(szBuff) );
             g_AgentServer->SendToClient( userkey1, (BYTE*)szBuff, uiLength );
+            DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
         }
         if ( userkey2!=0 ){
-            char szBuff[1024] = {0};
+            memset( szBuff, 0x0, sizeof(szBuff) );
             uiLength = table.JsonData(1, szBuff, sizeof(szBuff) );
             g_AgentServer->SendToClient( userkey2, (BYTE*)szBuff, uiLength );
+            DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
         }
         if ( userkey3!=0 ){
-            char szBuff[1024] = {0};
+            memset( szBuff, 0x0, sizeof(szBuff) );
             uiLength = table.JsonData(2, szBuff, sizeof(szBuff) );
             g_AgentServer->SendToClient( userkey3, (BYTE*)szBuff, uiLength );
+            DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
         }
     }
 }
