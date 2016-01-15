@@ -64,11 +64,11 @@ BOOL PacketHandler::Register_Lobby()
 	AddHandler_Lobby( Update_Protocol, WRankInfo_SYN,  MSG_Handler_WRankInfo    );
 	AddHandler_Lobby( Update_Protocol, DRankInfo_SYN,  MSG_Handler_DRankInfo    );
 	AddHandler_Lobby( Games_Protocol,  JoinTable_REQ,  MSG_Handler_JoinTable    );
+    AddHandler_Games( Games_Protocol,  Settlement_REQ, MSG_Handler_Settlement   );
 }
 
 BOOL PacketHandler::Register_Games()
 {
-    AddHandler_Games( Games_Protocol, Settlement_REQ,   MSG_Handler_Settlement   );
     AddHandler_Games( Games_Protocol, UpdateBattle_REQ, MSG_Handler_UpdateBattle );
 }
 

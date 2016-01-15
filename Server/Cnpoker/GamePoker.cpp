@@ -278,7 +278,9 @@ BOOL GamePoker::MoreThan( BYTE _type, BYTE _size, BYTE _value, BYTE _count)
     }
 }
 
-// 匹配出1个对象
+/*******************************************************************
+    MarchObject ( 匹配对象 ) 未启用的新解析方法
+*******************************************************************/
 BOOL GamePoker::MarchObject ( BYTE & _type, BYTE & _size, BYTE & _than_value, BYTE & _than_count )
 {
     _type = PH_0;
@@ -425,7 +427,9 @@ BOOL GamePoker::MarchObject ( BYTE & _type, BYTE & _size, BYTE & _than_value, BY
     return FALSE;
 }
 
-// 合理的给初始值;
+/*******************************************************************
+    FindObjectMoreThanToClone ( 查找克隆的数据 )
+*******************************************************************/
 BOOL GamePoker::FindObjectMoreThanToClone( BYTE _type, BYTE _size, BYTE _than_value, BYTE _than_count )
 {
     if ( _type==PH_MAX ) {
@@ -525,6 +529,9 @@ BOOL GamePoker::FindObjectMoreThanToClone( BYTE _type, BYTE _size, BYTE _than_va
     return (PokerCloneSize!=0);
 }
 
+/*******************************************************************
+    ClonePokerType ( 克隆结果 )
+*******************************************************************/
 BOOL GamePoker::ClonePoker( BYTE * _poker, BYTE & _size )
 {
     if (_size<PokerCloneSize) {
@@ -541,7 +548,7 @@ BOOL GamePoker::ClonePoker( BYTE * _poker, BYTE & _size )
     for ( int _i=0; _i<PokerCloneSize; _i++) {
         _pv = PokerCloneArray[_i];
         if ( _pv<13 ) {
-            shIdx = Transform(_pv);
+            shIdx = TransformGetIndex(_pv);
             if ( shIdx != -1 ) {
                 _poker[_i] = shIdx;
             }
@@ -558,6 +565,9 @@ BOOL GamePoker::ClonePoker( BYTE * _poker, BYTE & _size )
     return TRUE;
 }
 
+/*******************************************************************
+    ClonePokerType ( 克隆结果类型 )
+*******************************************************************/
 void GamePoker::ClonePokerType(BYTE & _type, BYTE & _size, BYTE & _value, BYTE & _count) {
     _type  = PokerCloneType;
     _size  = PokerCloneSize;
@@ -565,7 +575,10 @@ void GamePoker::ClonePokerType(BYTE & _type, BYTE & _size, BYTE & _value, BYTE &
     _count = PokerCloneCount;
 }
 
-short GamePoker::Transform( BYTE _value )
+/*******************************************************************
+    TransformGetIndex ( 根据牌值查找并取回牌标识)
+*******************************************************************/
+short GamePoker::TransformGetIndex( BYTE _value )
 {
     if ( _value<MAX_POKER ) {
         BYTE _index = _value;
@@ -592,6 +605,9 @@ short GamePoker::Transform( BYTE _value )
     return -1;
 }
 
+/*******************************************************************
+    MainSearch (主要部分查询)
+*******************************************************************/
 BOOL GamePoker::MainSearch(BYTE _size, BYTE & _value, BYTE _len)
 {
     int  _i     = 0;
@@ -625,6 +641,9 @@ BOOL GamePoker::MainSearch(BYTE _size, BYTE & _value, BYTE _len)
     return TRUE;
 }
 
+/*******************************************************************
+    AttachSearch (配牌部分查询)
+*******************************************************************/
 BOOL GamePoker::AttachSearch(BYTE _size, BYTE _value, BYTE _len)
 {
     int  _i     = 0;

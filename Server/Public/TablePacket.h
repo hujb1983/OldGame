@@ -37,7 +37,7 @@ public:
     WORD & GetBattleId();       // 房间号;
 
     BYTE & GetModel();          // 模式;
-    BYTE & GetBasicMoney();     // 最低金额;
+    UINT & GetBasicMoney();     // 最低金额;
     UINT & GetMultiple();       // 几倍;
     UINT & GetBrokerage();      // 佣金;
 
@@ -53,6 +53,7 @@ public:
     BYTE & GetReady(BYTE);      // 准备好了;
     UINT & GetRate(BYTE);       // 胜率;
     int  & GetMoney(BYTE);      // 钱;
+    int  & GetGain(BYTE);       // 获利;
     CHAR * GetName(BYTE);       // 名称
 
     BYTE & GetOnline(BYTE);         // 在线
@@ -69,9 +70,21 @@ public:
     BYTE & GetInitcards();              // 初始化出牌;
 
     BYTE & GetDiscardStatus(BYTE);      // 出牌情况;
-    BYTE & GetDiscardSeatId();          // 出牌坐位;
-    BYTE & GetDiscardPokerSize(BYTE);   // 出牌张数;
-    CHAR * GetDiscardPokers(BYTE);      // 玩家打的牌;
+    BYTE & GetDisplayPokerSize(BYTE);   // 出牌张数;
+    CHAR * GetDisplayPokers(BYTE);      // 玩家打的牌;
+
+    BYTE & GetThanSeatId();      // 出牌坐位;
+    BYTE & GetThanType();        // 比较类型
+    BYTE & GetThanValue();       // 比较值
+    BYTE & GetThanCount();       // 比较个数
+    BYTE & GetIndexSize();       // 出牌个数
+    BYTE & GetThanPokerSize();   // 比较个数
+    CHAR * GetThanPokers();      // 出牌个数
+
+    BYTE & GetReminderPokerSize(BYTE);   // 出牌张数;
+    CHAR * GetReminderPokers(BYTE);      // 玩家打的牌;
+
+    BYTE & GetSettlement();      // 结算;
 
 private:
 
@@ -85,7 +98,7 @@ private:
     UINT  m_uiTableId;          // 桌子号;
 
     BYTE  m_byModel;            // 加倍模式;
-    UINT  m_BasicMoney;         // 基本金额;
+    UINT  m_uiBasicMoney;       // 基本金额;
     UINT  m_uiMultiple;         // 加倍值;
     UINT  m_uiBrokerage;        // 佣金;
 
@@ -101,6 +114,7 @@ private:
     BYTE m_byReady[TEAM_SIZE];      // 准备好了
     UINT m_uiRate[TEAM_SIZE];       // 胜率
     int  m_iMoney[TEAM_SIZE];       // 钱
+    int  m_iGain[TEAM_SIZE];        // 获利
     CHAR m_szName[TEAM_SIZE][33];   // 名称
 
     BYTE m_byOnline[TEAM_SIZE];         // 在线
@@ -117,9 +131,22 @@ private:
     BYTE m_byFirst;                     // 第一次出牌吗
 
     BYTE m_byDiscardStatus[TEAM_SIZE];  // 出牌状态
-    BYTE m_byDiscardSeatId;             // 打出的座位
-    BYTE m_byDiscardPokerSize[TEAM_SIZE];    // 打出的座位
-    CHAR m_szDiscardPokers[TEAM_SIZE][80+1]; // 打出的牌
+    BYTE m_byDisplayPokerSize[TEAM_SIZE];    // 打出的座位
+    CHAR m_szDisplayPokers[TEAM_SIZE][80+1]; // 打出的牌
+
+    BYTE m_byThanSeatId;      // 比较的坐位
+    BYTE m_byThanType;
+    BYTE m_byThanValue;
+    BYTE m_byThanCount;
+    BYTE m_byIndexSize;
+
+    BYTE m_byThanPokerSize;    // 打出的座位
+    CHAR m_szThanPokers[80+1]; // 打出的牌
+
+    BYTE m_byReminderPokerSize[TEAM_SIZE];    // 打出的座位
+    CHAR m_szReminderPokers[TEAM_SIZE][60+1]; // 打出的牌
+
+    BYTE m_bySettlement;
 };
 
 #pragma pack(pop)

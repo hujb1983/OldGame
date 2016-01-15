@@ -68,7 +68,7 @@ public:
     BYTE & GetShowMan();            // 是否出牌;
     BYTE * GetShowPokers();         // 打出的牌;
 
-    UINT & GetShowedSize();        // 是否出牌;
+    UINT & GetShowedSize();        // 出牌大小;
     CHAR * GetShowedPokers();      // 已经打出的牌;
 
 private:
@@ -112,7 +112,7 @@ private:
     BYTE  m_byShowPokers[20];    // 打出的牌;
 
     UINT  m_uiShowedCount;          // 已经打出计牌;
-    CHAR  m_byShowedPokers[256];    // 已经打出的牌;
+    CHAR  m_byShowedPokers[80];     // 已经打出的牌;
 };
 
 #pragma pack(pop)

@@ -41,6 +41,8 @@ void UserSession::SetUserid(UINT dwID)      { m_dwUserid = dwID;    }
 /************ protected *************/
 void UserSession::Init()
 {
+	this->NotRecvHeader();
+
 	m_wUserKey 		= 0;
 	m_bFirst 		= TRUE;
 
@@ -48,7 +50,6 @@ void UserSession::Init()
 	m_dwOvertime    = dwCurrent + UserSession::m_dwClientDelay;
 	DEBUG_MSG( LVL_TRACE, "UserSession::Init: %d", m_dwOvertime);
 
-	this->NotPackageHeader();
 
 	m_wUserKey   = 0;       // 用户健值
     m_wBattleKey = 0;       // 房间号
@@ -108,22 +109,13 @@ void UserSession::OnAccept( DWORD dwNetworkIndex )
 
 
 	char buff[1024]  =  {0};
-	char format[256] = 	"{\"protocol\":\"%d\",\"data\":{\"type\":\"text/json\"}}";
+	char format[256] = 	"{\"protocol\":\"%d\",\"data1\":{\"type\":\"text/json\"}}";
 
 	MSG_ENTERSERVER_ANC msg2;
 	sprintf( buff, format, msg2.m_dwProtocol);
 
-	DEBUG_MSG( LVL_TRACE, "UserSession::OnAccept: %s", buff);
 	WORD len = strlen(buff);
-
-    CMsgBuff msgBuff;
-    char szBuff[256] = {0};
-    msgBuff.SetBuff(szBuff, 256);
-    msgBuff.Write(len);
-    msgBuff.Write( (char*)buff );
-    this->Send( msgBuff.GetHead(), msgBuff.GetWriteLen()-1 );
-
-	DEBUG_MSG( LVL_TRACE, "UserSession::OnAccept: %d %d", len, msgBuff.GetWriteLen() );
+    this->Send( (BYTE*)buff, len );
 }
 
 void UserSession::OnDisconnect()
@@ -144,6 +136,8 @@ void UserSession::OnDisconnect()
 
 void UserSession::OnRecv(BYTE *pMsg, WORD wSize)
 {
+    DEBUG_MSG( LVL_DEBUG, "UserSession::OnRecv: %d %s", wSize, (char*)(pMsg) );
+
 	BYTE msgPlus[1024] = {0};
 	if ( m_wUserKey != 0 ) {
 		g_PacketHandler.ParsePacket_Client(this, (MSG_BASE*)pMsg, wSize);

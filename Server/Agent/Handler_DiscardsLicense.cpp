@@ -3,7 +3,7 @@
 #pragma pack(push,1)
 
 /*****************************************************
-    MSG_Handler_CalledBank_BRD
+    MSG_Handler_DiscardsLicense_BRD
 *****************************************************/
 void MSG_Handler_DiscardsLicense_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
@@ -11,7 +11,7 @@ void MSG_Handler_DiscardsLicense_BRD ( ServerSession * pServerSession, MSG_BASE 
     {
         TablePacket table;
         table.SetPacket( (BYTE*)pMsg, wSize );
-        table.GetProtocol() = MAKEDWORD( Games_Protocol, Called_BRD );
+        table.GetProtocol() = MAKEDWORD( Games_Protocol, DiscardsLicense_BRD );
         table.ToPrint();
 
         UINT userkey1 = table.GetUserKey(0);

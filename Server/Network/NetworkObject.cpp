@@ -5,7 +5,9 @@
 NetworkObject::NetworkObject()
 {
 	m_pSession = NULL;
-	m_bPackageHander = TRUE;
+
+	m_bSendHander = TRUE;
+	m_bRecvHander = TRUE;
 }
 
 NetworkObject::~NetworkObject()

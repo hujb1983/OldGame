@@ -49,40 +49,20 @@ _IMPL_QUERY_POOL(Query_QuitTable);
 
 #pragma pack(pop)
 
-int User_Query_QuitTable( ServerSession * pServerSession, const char * js_text )
+void MSG_Handler_QuitTable ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
     Query_QuitTable * pQuery = Query_QuitTable::ALLOC();
     if ( NULL == pQuery ) {
-        return -1;     // 比较忙
+        return;     // 比较忙
     }
 
     char szQueryBuff[256] = {0};
 	snprintf( szQueryBuff, sizeof(szQueryBuff), " call p_UserQuitTable( %d ); ");
 
-    pQuery->SetIndex( MAKEDWORD( (WORD)Games_Protocol, (WORD)QuitGame_DBR ) );
+    pQuery->SetIndex( MAKEDWORD( (WORD)Games_Protocol, (WORD)QuitTable_DBR ) );
     pQuery->SetVoidObject( pServerSession );
     pQuery->SetQuery( szQueryBuff );
     pServerSession->DBQuery( pQuery );
-    return 0;     // 比较忙
-}
-
-void MSG_Handler_QuitTable ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
-{
-    User_Query_QuitTable( pServerSession, (char*)pMsg );
-}
-
-int User_Result_QuitTable ( ServerSession * pServerSession, Query_QuitTable * pQuery )
-{
-    int iError;
-    int iSize = pQuery->vctRes.size();
-
-    if ( iSize > 0 )
-    {
-        int iError = pQuery->vctRes[0].m_iError;
-        printf( " m_iError = %d \n", iError );
-
-        // 打印日志消息即可
-    }
 }
 
 void MSG_Handler_QuitTable_DBR ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
@@ -90,7 +70,17 @@ void MSG_Handler_QuitTable_DBR ( ServerSession * pServerSession, MSG_BASE * pMsg
     MSG_DBPROXY_RESULT * msg = (MSG_DBPROXY_RESULT*) pMsg;
     Query_QuitTable * pQuery = (Query_QuitTable *) msg->m_pData;
     if ( pQuery ) {
-        User_Result_QuitTable( pServerSession, pQuery );
+        int iError;
+        int iSize = pQuery->vctRes.size();
+
+        if ( iSize > 0 )
+        {
+            int iError = pQuery->vctRes[0].m_iError;
+            printf( " m_iError = %d \n", iError );
+
+            // 打印日志消息即可
+        }
+
         Query_QuitTable::FREE(pQuery);
     }
 }

@@ -1,207 +1,243 @@
 #include "Handler_Module.h"
 #include "CnpokerServer.h"
 
-/* 分析牌，输入Poker值，得到 byThanType、byThanValue、byThanCount; */
-int Battle_Poker_Parser ( BYTE * byPK, BYTE bySize, BYTE & byThanValue, BYTE & byThanCount);
-
-/* 比较牌大小 */
-int Battle_Poker_Compare ( GameBattle * pBattle, BYTE * byPK, BYTE bySize, int & byPokerType );
-
-/* 转化成ByteArray */
+/*****************************************************
+    Battle_Poker_Get_Byte_Array : 转化为牌下标
+*****************************************************/
 int Battle_Poker_Get_Byte_Array ( char *_data, BYTE * buff, int uiSize, char div);
 
-/* 转化成版型面值转化 */
+/*****************************************************
+    Battle_Poker_Parser : 判断下标是否存在
+*****************************************************/
+int Battle_Poker_Has_Discards ( TablePacket & pack, BYTE * byIndex, BYTE bySize, BYTE byUserSign );
+
+/*****************************************************
+    Battle_Poker_Transform : 下标转换牌值
+*****************************************************/
 int Battle_Poker_Transform ( BYTE * byIndex, BYTE byIndexSize, BYTE * byPK, BYTE byPKSize );
 
+/*****************************************************
+    Battle_Poker_Parser : 值牌分析
+*****************************************************/
+int Battle_Poker_Parser ( BYTE * byPK, BYTE bySize, BYTE & byThanValue, BYTE & byThanCount);
 
-/* {protocol : 1, userkey : 2, status : 3} */
-int Processed_Discards ( ServerSession * pServerSession, const char * pInput )
+/*****************************************************
+    Battle_Poker_Compare : 牌比较
+*****************************************************/
+int Battle_Poker_Compare ( TablePacket & pack, BYTE * byPK, BYTE bySize );
+
+/*****************************************************
+    Battle_Hava_Continue : 是否需要继续出牌
+*****************************************************/
+int Battle_Hava_Continue ( TablePacket & pack );
+
+/*****************************************************
+    Battle_Get_Usercards
+*****************************************************/
+BYTE Battle_Get_Usercards( TablePacket & pack, BYTE byVal, BYTE seatId );
+
+
+/*****************************************************
+    MSG_Handler_Discards_REQ
+*****************************************************/
+void MSG_Handler_Discards_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    DEBUG_MSG( LVL_DEBUG, "Discards_REQ to recv: %s \n", (char *) pInput  );
-
-    JsonMap js_map;
-    if ( js_map.set_json( (char *) pInput ) == -1 ) {
-        return FALSE;
+    if ( wSize < sizeof(UserPacket) ) {
+        return ;
     }
 
-    int _errmsg = 0;
-    int _iBattleid, _iSeatid, _iStatus, _iCount;
-    char _szPoker[256] = {0};
+    BYTE _called(0);
+    UserPacket user;
+    user.SetPacket( (BYTE*)pMsg, wSize );
+    int    _iCount = user.GetShowedSize();
+    char * _szPokers = user.GetShowedPokers();
 
-    js_map.ReadInteger("battleid", _iBattleid );
-    js_map.ReadInteger("seatid",   _iSeatid  );
-    js_map.ReadInteger("count" ,   _iCount );
-    js_map.ReadString ("poker" ,   _szPoker,  sizeof(_szPoker) );
-
-    /* if ( !(strlen( _szPoker ) > 0) ) {
-        return FALSE;
-    } */
-
-    // @{{{ 检查参数
-    if ( (_iSeatid<0) || (_iSeatid>=3) ) {
-        return FALSE;
+    GameTable * table = g_GameMgr.GetTable( user.GetTableId() );
+    if (!table) {
+        return;
     }
 
-    GameBattle *pBattle = g_GameMgr.GetBattle( _iBattleid );
-    if ( !pBattle ) {
-        return FALSE;
+    TablePacket & pack = table->GetTablePacket();
+
+    BYTE _seatid = user.GetSeatId();
+    if (_seatid>2) {
+        return;
     }
 
-    // 判断是否正在玩牌
-    if ( pBattle->getBattleStatus() != eGB_PLAYING ) {
-        return FALSE;
+    if ( pack.GetPlaySeatId()!=_seatid ) {
+        return;
     }
 
-    // 判断出牌坐位
-    if ( pBattle->getPlaying() != _iSeatid ) {
-        return FALSE;
-    }
-
-    int _status(0);
-    int _byPokerType = 0;
-    if ( _iCount>0 ) {
-
-        /* step1. 取牌 */
+    if ( _iCount>0 )
+    {
         BYTE byPokers[MAX_POKER+1] = {0};
-        int nSize = Battle_Poker_Get_Byte_Array( _szPoker, byPokers, sizeof(byPokers), ',');
+        BYTE bySize = Battle_Poker_Get_Byte_Array( _szPokers, byPokers, sizeof(byPokers), ',');
 
-        if (_iCount==nSize) {
+        if (_iCount==bySize) {
 
             /* step3. 判断是否属于你拥有的牌 */
-            if ( !pBattle->hadDiscards( _iSeatid, byPokers, nSize )  ) {
-                return FALSE;
+            BYTE byUserSign = PK_USER_0 + _seatid;
+            if ( !Battle_Poker_Has_Discards( pack, byPokers, bySize, byUserSign )  ) {
+                return;
             }
 
-            /* step4. 判断比较是否大于前面的玩家 */
-            while ( Battle_Poker_Compare( pBattle, byPokers, nSize, _byPokerType) == FALSE ) {
-                _status = -1;
-                break;
+            if ( !Battle_Poker_Compare( pack, byPokers, bySize) ) {
+                return;
             }
 
-            /* step5. 设置参数 */
-            if ( _status!=-1 ) {
-                pBattle->getDiscardTimes()++;
-                pBattle->SetDiscards( _iSeatid, byPokers, nSize );
-                pBattle->SetDiscardString( _iSeatid, _szPoker );
-                pBattle->SetLastSeat( _iSeatid );  // 出牌的坐位;
-                _status = 1;    // 授权下一位出牌
+            pack.GetFirst() = false;
+            pack.GetThanSeatId() = _seatid;
+            pack.GetThanPokerSize() = bySize;
+            char * pDis = pack.GetThanPokers();
+            *pDis = '\0';
+            strcat( pDis, _szPokers);
+
+            Battle_Get_Usercards(pack, byUserSign, _seatid);
+
+            pack.GetProtocol() = MAKEDWORD( Games_Protocol, Discards_BRD );
+            g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+
+            // 出牌最大者可以继续出牌
+            pack.GetPlaySeatId() = (++_seatid)%TEAM_SIZE;
+            if ( pack.GetThanType()==PH_MAX) {
+                pack.GetPlaySeatId() = _seatid;
+                pack.GetFirst() = true;
             }
+
+            pack.GetProtocol() = MAKEDWORD( Games_Protocol, DiscardsLicense_BRD );
+            g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+            return;
         }
     }
     else {
-        if ( pBattle->getDiscardTimes()==0 ) {
-            _status = -1;   // 第一次不能不出牌!
+        if ( pack.GetFirst()==true ) {
+            return; // 第一个出牌者不能不出牌
         }
     }
+
+    pack.GetDisplayPokerSize( _seatid ) = 0;
+    char * pDis = pack.GetDisplayPokers( _seatid );
+    *pDis = '\0';
+    strcat( pDis, "-1");
+    pack.GetProtocol() = MAKEDWORD( Games_Protocol, Discards_BRD );
+    g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
 
     {
-        /* step6. 打印参数到所有客户端 */
-
-        if ( _status!=-1 ) {
-            if ( pBattle->canEnd()==FALSE ) {
-                BYTE _nextkey = pBattle->nextSeat( _iSeatid );
-                pBattle->SetPlaying( _nextkey ); // 授权-并判断
-            }
-        }
-
-        int _dmodel   = pBattle->getModel();
-        int _multiple = pBattle->getMultiple();
-
-        char _poker0[128] = {0};
-        int  _count0 = pBattle->getUsercards( _iSeatid, _poker0, sizeof(_poker0) );
-        // @{{{ 组合所有的牌，发送给所有玩家;
-        char szMsg[1024] = {0};
-        char format[256] = 	"{ \"protocol\":\"%d\","
-                                "%s,"
-                                "\"status\":%d,"
-                                "\"battleid\":%d,"
-                                "\"seatid\":%d,"
-                                "\"multiple\":%d,"
-                                "\"dmodel\":%d,"
-                                "\"count\":%d,"
-                                "\"poker\":\"%s\","
-                                "\"count0\":%d,"
-                                "\"poker0\":\"%s\""
-                             "}";
-        char szPlayerkey[256] = {0};
-        pBattle->GetAllPlayerKey( szPlayerkey, sizeof(szPlayerkey) );
-
-        sprintf( szMsg, format, MAKEDWORD(Games_Protocol, Discards_BRD ),
-                szPlayerkey, _status, _iBattleid, _iSeatid, _multiple, _dmodel,
-                _iCount, _szPoker, _count0, _poker0 );
-        // }}}@ 组合所有的牌
-
-        // @{{{ 发送到其他玩家；
-        WORD nLen = strlen( szMsg );
-        g_pCnpokerServer->SendToAgentServer( (BYTE*)szMsg, nLen );
+        pack.GetPlaySeatId() = (++_seatid)%TEAM_SIZE;
+        pack.GetProtocol() = MAKEDWORD( Games_Protocol, DiscardsLicense_BRD );
+        g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
     }
-}
-
-void MSG_Handler_Discards_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize ) {
-    Processed_Discards( pServerSession, (char*) pMsg ); // 解析牌后返送
+    return;
 }
 
 
-/**********  比较 **********/
-int Battle_Poker_Compare( GameBattle * pBattle, BYTE * pbyIndex, BYTE byIndexSize, int & byPokerType )
+/*****************************************************
+    Battle_Poker_Get_Byte_Array : 转化为牌下标
+*****************************************************/
+#define MAX_BUFF 32
+int Battle_Poker_Get_Byte_Array( char *_data, BYTE * buff, int uiSize, char div)
 {
-    BYTE byThanType, byThanValue, byThanCount;
-    BYTE _byType, _byValue, _byCount, _bySize;
+	char szBuff[MAX_BUFF] = {0};
+	char *obj = szBuff;
+    char *src = _data;
+    BYTE *bys = buff;
+    int   sub  = 0;
 
-    // 先转化为一个数字
-    BYTE pbyPK[MAX_PK_TYPE] = {0};
-    BYTE byPKSize = MAX_PK_TYPE;
-    Battle_Poker_Transform( pbyIndex, byIndexSize, pbyPK, byPKSize );
-    byThanType  = Battle_Poker_Parser(pbyPK, byIndexSize, byThanValue, byThanCount);
-    byPokerType = byThanType; // 把类型传出去;
-
-    // step1: 出的牌有问题，直接返回错误;
-    if ( byThanType==PH_0 ) {
-        goto Compare_Wrong;
-    }
-
-    _byType  = pBattle->getLastType();
-    _byValue = pBattle->getLastValue();
-    _byCount = pBattle->getLastCount();
-    _bySize  = pBattle->getLastSize();
-
-    if ( pBattle->getDiscardTimes()==0 ) {
-        goto Compare_Correct;   // 第一个出牌直接走起
-    }
-
-    // 对两首牌的类型进行比较;
-    if (_byType == byThanType) {
-        if ( _byCount == byThanCount ) {
-            if ( _byValue < byThanValue ) {
-                goto Compare_Correct;
+    while ( *src != '\0' )
+    {
+        if ( *src == div )
+        {
+            if ( sub < uiSize )
+            {
+                if ( (obj - szBuff) < MAX_BUFF && (obj - szBuff) != 0 )
+                {
+                    *bys = (BYTE) atoi(szBuff);
+                    ++bys;
+                    ++sub;
+                }
             }
+
+            memset( szBuff, 0x0, sizeof(szBuff) );
+            obj = szBuff;
+        }
+        else if ( (obj - szBuff) < MAX_BUFF )
+        {
+            *obj = *src;
+            ++obj;
+        }
+        ++src;
+    }
+    if ( sub < uiSize )
+    {
+        if ( (obj - szBuff) < MAX_BUFF && (obj - szBuff) != 0)
+        {
+            *bys = (BYTE) atoi(szBuff);
+            ++sub;
         }
     }
-    else if (_byType != byThanType) {
-        if (byThanType == PH_MAX) {
-            goto Compare_Correct;
-        }
-        else {
-            if (byThanType == PH_4) {
-                goto Compare_Correct;
-            }
-        }
-    }
-    goto Compare_Wrong;
-
-Compare_Correct:
-    pBattle->SetLastType ( byThanType  );
-    pBattle->SetLastValue( byThanValue );
-    pBattle->SetLastCount( byThanCount );
-    pBattle->SetLastSize ( byIndexSize );
-    return byThanType;
-
-Compare_Wrong:
-    return FALSE;
+    return sub;
 }
 
 
-/**********  begin of 出牌的估值算法 **********/
+/*****************************************************
+    Battle_Poker_Parser : 判断下标是否存在
+*****************************************************/
+int Battle_Poker_Has_Discards ( TablePacket & pack, BYTE * byIndex, BYTE bySize, BYTE byUserSign )
+{
+    BYTE byCount(0), index(0);
+    BYTE * pMove = pack.GetPokers();
+    for (int i=0; i<(bySize); i++) {
+        index = byIndex[i];
+        if ( index<MAX_POKER ) {
+            if (pMove[index]==byUserSign) {
+               byCount++;
+            }
+        }
+    }
+    if (byCount==bySize)
+    {
+        for (int i=0; i<(bySize); i++) {
+        index = byIndex[i];
+            if ( index<MAX_POKER ) {
+                if (pMove[index]==byUserSign) {
+                   pMove[index]=PK_DISCARD;
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+/*****************************************************
+    Battle_Poker_Transform : 下标转换牌值
+*****************************************************/
+int Battle_Poker_Transform ( BYTE * pbyIndex, BYTE byIndexSize, BYTE * pbyPK, BYTE byPKSize )
+{
+    if ( byIndexSize > byPKSize ) {
+        return -1;
+    }
+
+    BYTE pv = 0;
+    for ( int i=0; i<byIndexSize; i++) {
+        pv = pbyIndex[i];
+        if ( pv < MAX_POKER ) {
+            pbyPK[i] = pv % 13;
+			if ( pv==52) {
+				pbyPK[i] = 13;
+			}
+			else if ( pv==53) {
+				pbyPK[i] = 14;
+			}
+		}
+    }
+    return 0;
+}
+
+
+/*****************************************************
+    Battle_Poker_Parser : 值牌分析
+*****************************************************/
 int Battle_Poker_Parser( BYTE * byPK, BYTE bySize, BYTE & byThanValue, BYTE & byThanCount)
 {
 	if ( bySize <= 0 || byPK == NULL ) {
@@ -383,77 +419,100 @@ int Battle_Poker_Parser( BYTE * byPK, BYTE bySize, BYTE & byThanValue, BYTE & by
 
 	return (PH_0);
 }
-/**********  end 出牌算法 **********/
 
 
-/********** 字符串转数字 **********/
-#define MAX_BUFF 32
-int Battle_Poker_Get_Byte_Array( char *_data, BYTE * buff, int uiSize, char div)
+/*****************************************************
+    Battle_Poker_Compare : 牌比较
+*****************************************************/
+int Battle_Poker_Compare( TablePacket & pack, BYTE * pbyIndex, BYTE byIndexSize)
 {
-	char szBuff[MAX_BUFF] = {0};
-	char *obj = szBuff;
-    char *src = _data;
-    BYTE *bys = buff;
-    int   sub  = 0;
+    BYTE byThanType, byThanValue, byThanCount;
+    BYTE _byType, _byValue, _byCount, _bySize;
 
-    while ( *src != '\0' )
-    {
-        if ( *src == div )
-        {
-            if ( sub < uiSize )
-            {
-                if ( (obj - szBuff) < MAX_BUFF && (obj - szBuff) != 0 )
-                {
-                    *bys = (BYTE) atoi(szBuff);
-                    ++bys;
-                    ++sub;
-                }
+    // 先转化为一个数字
+    BYTE pbyPK[MAX_PK_TYPE] = {0};
+    Battle_Poker_Transform( pbyIndex, byIndexSize, pbyPK, MAX_PK_TYPE );
+
+    byThanType  = Battle_Poker_Parser(pbyPK, byIndexSize, byThanValue, byThanCount);
+
+    // step1: 出的牌有问题，直接返回错误;
+    if ( byThanType==PH_0 ) {
+        goto Compare_Wrong;
+    }
+
+    if (pack.GetFirst()==true) {
+        goto Compare_Correct;   // 同一个人出牌
+    }
+
+    _byType  = pack.GetThanType();
+    _byValue = pack.GetThanValue();
+    _byCount = pack.GetThanCount();
+    _bySize  = pack.GetIndexSize();
+
+    // 对两首牌的类型进行比较;
+    if (_byType == byThanType) {
+        if ( _byCount == byThanCount ) {
+            if ( _byValue < byThanValue ) {
+                goto Compare_Correct;
             }
+        }
+    }
+    else if (_byType != byThanType) {
+        if (byThanType == PH_MAX) {
+            goto Compare_Correct;
+        }
+        else {
+            if (byThanType == PH_4) {
+                goto Compare_Correct;
+            }
+        }
+    }
+    goto Compare_Wrong;
 
-            memset( szBuff, 0x0, sizeof(szBuff) );
-            obj = szBuff;
-        }
-        else if ( (obj - szBuff) < MAX_BUFF )
-        {
-            *obj = *src;
-            ++obj;
-        }
-        ++src;
-    }
-    if ( sub < uiSize )
-    {
-        if ( (obj - szBuff) < MAX_BUFF && (obj - szBuff) != 0)
-        {
-            *bys = (BYTE) atoi(szBuff);
-            ++sub;
-        }
-    }
-    return sub;
+Compare_Correct:
+    pack.GetThanType () = byThanType;
+    pack.GetThanValue() = byThanValue;
+    pack.GetThanCount() = byThanCount;
+    pack.GetIndexSize () = byIndexSize;
+    return byThanType;
+
+Compare_Wrong:
+    return FALSE;
 }
-/********** end 字符串转数字 **********/
 
 
-/********** 下标数字转牌数字 **********/
-int Battle_Poker_Transform ( BYTE * pbyIndex, BYTE byIndexSize, BYTE * pbyPK, BYTE byPKSize )
+/*****************************************************
+    Battle_Hava_Continue : 是否需要继续出牌
+*****************************************************/
+int Battle_Hava_Continue ( TablePacket & pack )
 {
-    if ( byIndexSize > byPKSize ) {
-        return -1;
-    }
-
-    BYTE pv = 0;
-    for ( int i=0; i<byIndexSize; i++) {
-        pv = pbyIndex[i];
-        if ( pv < MAX_POKER ) {
-            pbyPK[i] = pv % 13;
-			if ( pv==52) {
-				pbyPK[i] = 13;
-			}
-			else if ( pv==53) {
-				pbyPK[i] = 14;
-			}
-		}
-    }
-    return 0;
+    return true;
 }
-/********** end 下标数字转牌数字 **********/
 
+/*****************************************************
+    Battle_Get_Usercards
+*****************************************************/
+BYTE Battle_Get_Usercards( TablePacket & pack, BYTE byVal, BYTE seatId ) {
+
+    char * poker = pack.GetDisplayPokers(seatId);
+    BYTE * pMove = pack.GetPokers();
+    char szPoker[8] = {0};
+    char szPokerList[128] = {0};
+    BYTE byPoker(0), byCount(0);
+    for (int  i=0; i<POKER_SIZE; i++) {
+        byPoker = pMove[i];
+        if ( byPoker == byVal ) {
+            memset( szPoker, 0x0, sizeof(szPoker) );
+            if ( byCount!=0 ) {
+                strcat( szPokerList, ",");
+            }
+            sprintf( szPoker, "%d", i );
+            strcat( szPokerList, szPoker);
+            byCount++;
+        }
+    }
+    DEBUG_MSG( LVL_DEBUG, "byCount = %d ",  byCount);
+    *poker = '\0';
+    strcat( poker, szPokerList);
+    pack.GetDisplayPokerSize(seatId) = byCount;
+}

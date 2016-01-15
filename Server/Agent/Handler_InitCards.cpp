@@ -25,19 +25,19 @@ void MSG_Handler_InitCards_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg
             memset( szBuff, 0x0, sizeof(szBuff) );
             uiLength = table.JsonData(0, szBuff, sizeof(szBuff) );
             g_AgentServer->SendToClient( userkey1, (BYTE*)szBuff, uiLength );
-            //DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
+            DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
         }
         if ( userkey2!=0 ){
             memset( szBuff, 0x0, sizeof(szBuff) );
             uiLength = table.JsonData(1, szBuff, sizeof(szBuff) );
             g_AgentServer->SendToClient( userkey2, (BYTE*)szBuff, uiLength );
-            //DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
+            DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
         }
         if ( userkey3!=0 ){
             memset( szBuff, 0x0, sizeof(szBuff) );
             uiLength = table.JsonData(2, szBuff, sizeof(szBuff) );
             g_AgentServer->SendToClient( userkey3, (BYTE*)szBuff, uiLength );
-            //DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
+            DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
         }
     }
 }

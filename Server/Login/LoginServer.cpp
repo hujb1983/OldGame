@@ -126,7 +126,8 @@ BOOL LoginServer::MaintainConnection()
 	// 主动连接 DB Server
 	if ( m_pDBServer ) {
 		if ( m_pDBServer->TryToConnect() ) {
-			ConnectToServer( m_pDBServer, (char *)m_pDBServer->GetConnnectIP().c_str(), m_pDBServer->GetConnnectPort() );
+			// ConnectToServer( m_pDBServer, (char *)m_pDBServer->GetConnnectIP().c_str(), m_pDBServer->GetConnnectPort() );
+			ConnectToServer( m_pDBServer, "127.0.0.1", 8900 );
 		}
 	}
 }

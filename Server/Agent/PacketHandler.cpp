@@ -77,6 +77,7 @@ BOOL PacketHandler::Register_Client()
 	AddHandler_Client ( Update_Protocol, OnlineInfo_SYN,    MSG_Handler_Onlines_REQ    );
 	AddHandler_Client ( Update_Protocol, WRankInfo_SYN,     MSG_Handler_WRankInfo_REQ  );
 	AddHandler_Client ( Update_Protocol, DRankInfo_SYN,     MSG_Handler_DRankInfo_REQ  );
+	AddHandler_Client ( Games_Protocol,  FastGame_REQ,      MSG_Handler_FastGame_REQ   );
 	AddHandler_Client ( Games_Protocol,  JoinTable_REQ,     MSG_Handler_JoinTable_REQ  );
 	AddHandler_Client ( Games_Protocol,  QuitTable_REQ,     MSG_Handler_QuitTable_REQ  );
 	AddHandler_Client ( Games_Protocol,  StartGame_REQ,     MSG_Handler_StartGame_REQ  );
@@ -94,12 +95,12 @@ BOOL PacketHandler::Register_Lobby()
 	AddHandler_Lobby ( Update_Protocol, WRankInfo_ANC,      MSG_Handler_WRankInfo_ANC   );
 	AddHandler_Lobby ( Update_Protocol, DRankInfo_ANC,      MSG_Handler_DRankInfo_ANC   );
 	AddHandler_Lobby ( Games_Protocol,  JoinTable_ANC,      MSG_Handler_JoinTable_ANC   );
+	AddHandler_Client ( Games_Protocol, FastGame_ANC,       MSG_Handler_FastGame_ANC    );
 }
 
 BOOL PacketHandler::Register_Games()
 {
 	AddHandler_Games( Games_Protocol, JoinTable_BRD,         MSG_Handler_JoinTable_BRD       );
-	AddHandler_Games( Games_Protocol, QuitGame_BRD,          MSG_Handler_QuitGame_BRD        );
 	AddHandler_Games( Games_Protocol, QuitTable_BRD,         MSG_Handler_QuitTable_BRD       );
 	AddHandler_Games( Games_Protocol, StartGame_BRD,         MSG_Handler_StartGame_BRD       );
 	AddHandler_Games( Games_Protocol, InitCards_BRD,         MSG_Handler_InitCards_BRD       );

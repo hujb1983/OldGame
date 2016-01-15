@@ -22,7 +22,7 @@ enum eCATEGORY_TYPE
 	Connect_Protocol    = 600, 		// 连接类型数据	(连接认证、心跳包)
 	Login_Protocol		= 700,		// 登陆类型数据	(预登录、登录、退出)
 	Games_Protocol		= 800,		// 游戏类型数据
-	Update_Protocol		= 900,		// 更新类型数据 (查询 和 插入数据类型)
+	Update_Protocol		= 900,		// 更新类型数据 (查询 和 插入 数据类型)
 	Errors_Protocol     = 999,      // 错误消息
 };
 

@@ -41,6 +41,13 @@
 #define PK_USER_2       (102)       // 玩家2
 #define PK_BANKER       (103)       // 地主牌标识
 
+#define PK_UNKNOW       (0x00)    // 准备好了
+#define PK_LEAVE        (0x01)    // 已经叫地主
+#define PK_SIT          (0x02)    // 在线
+#define PK_DEALING      (0x04)    // 托管好了
+#define PK_CALLING      (0x08)    // 初始化牌
+#define PK_PLAYING      (0x0F)    // 初始化牌
+
 #define PK_READY        (1)         // 准备好了
 #define PK_CALLED       (1)         // 已经叫地主
 #define PK_ONLINE       (1)         // 在线

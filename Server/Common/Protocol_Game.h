@@ -4,7 +4,6 @@
 /***** 游戏服务器 -> 代理服务器 *****/
 /***** Agent -> Game *****/
 
-
 enum eGAME_PROTOCOL
 {
     StartGame_REQ           = 300,  // 开始游戏
@@ -17,15 +16,9 @@ enum eGAME_PROTOCOL
 	SelectRoom_NAK,
     SelectRoom_DBR,
 
-	JoinGame_REQ            = 320,  // 快速加入游戏
-	JoinGame_BRD, 			        // 广播
-	JoinGame_NAK, 			        // 广播错误消息
-	JoinGame_DBR,                   // 数据库请求
-
-	QuitGame_REQ            = 330,  // 退出游戏请求
-	QuitGame_BRD, 			        // 退出游戏应答
-	QuitGame_NAK,                   // 退出游戏应答
-	QuitGame_DBR, 			        // 退出游戏应答
+	FastGame_REQ            = 320,  // 快速加入游戏
+	FastGame_ANC, 			        // 广播错误消息
+	FastGame_DBR,                   // 数据库请求
 
 	JoinTable_REQ           = 340, 	// 加入桌子请求
 	JoinTable_BRD, 			        // 加入桌子应答
@@ -70,6 +63,9 @@ enum eGAME_PROTOCOL
 	Discards_BRD,
 	Discards_NAK,
 	Discards_DBR,
+
+	Reminder_REQ            = 425, 	// 出牌提示
+	Reminder_BRD,
 
 	Settlement_REQ          = 430, 	// 结算
 	Settlement_BRD,

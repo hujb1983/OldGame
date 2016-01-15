@@ -53,8 +53,8 @@
 		<Unit filename="Agent/Handler_Module.h" />
 		<Unit filename="Agent/Handler_Offline.cpp" />
 		<Unit filename="Agent/Handler_Onlines.cpp" />
-		<Unit filename="Agent/Handler_QuitGame.cpp" />
 		<Unit filename="Agent/Handler_QuitTable.cpp" />
+		<Unit filename="Agent/Handler_Reminder.cpp" />
 		<Unit filename="Agent/Handler_RoomInfo.cpp" />
 		<Unit filename="Agent/Handler_Settlement.cpp" />
 		<Unit filename="Agent/Handler_StartGame.cpp" />
@@ -92,7 +92,8 @@
 		<Unit filename="Cnpoker/Handler_JoinTable.cpp" />
 		<Unit filename="Cnpoker/Handler_Module.h" />
 		<Unit filename="Cnpoker/Handler_Offline.cpp" />
-		<Unit filename="Cnpoker/Handler_QuitGame.cpp" />
+		<Unit filename="Cnpoker/Handler_QuitTable.cpp" />
+		<Unit filename="Cnpoker/Handler_Reminder.cpp" />
 		<Unit filename="Cnpoker/Handler_Settlement.cpp" />
 		<Unit filename="Cnpoker/Handler_StartGame.cpp" />
 		<Unit filename="Cnpoker/Handler_Trusteeship.cpp" />
@@ -130,7 +131,6 @@
 		<Unit filename="DB/Handler_Module.h" />
 		<Unit filename="DB/Handler_Onlines.cpp" />
 		<Unit filename="DB/Handler_PreLogin.cpp" />
-		<Unit filename="DB/Handler_QuitGame.cpp" />
 		<Unit filename="DB/Handler_QuitTable.cpp" />
 		<Unit filename="DB/Handler_RoomInfo.cpp" />
 		<Unit filename="DB/Handler_Settlement.cpp" />

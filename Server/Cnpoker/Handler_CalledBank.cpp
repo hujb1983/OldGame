@@ -44,12 +44,12 @@ int Re_Init_Poker_SetUsercards( BYTE * _poker, BYTE _size )
 /*****************************************************
     InitCards_Get_Basecards
 *****************************************************/
-void Banker_Alloc_BasicCards( TablePacket & pack ) {
+void Banker_Alloc_BasicCards( TablePacket & pack, BYTE byUserType ) {
 
     BYTE * pMove = pack.GetPokers();
     BYTE bankerId = pack.GetBankerId();
     char * b_poker = pack.GetBasicPokers();
-    char * poker = pack.GetDiscardPokers(bankerId);
+    char * poker = pack.GetDisplayPokers(bankerId);
     pack.GetBasicPokerSize() = 3;
 
     char szPoker[8] = {0};
@@ -58,6 +58,7 @@ void Banker_Alloc_BasicCards( TablePacket & pack ) {
     for (int  i=0; i<POKER_SIZE; i++) {
         byPoker = pMove[i];
         if ( byPoker == PK_BANKER ) {
+            pMove[i] = byUserType;
             memset( szPoker, 0x0, sizeof(szPoker) );
             if ( byCount!=0 ) {
                 strcat( szPokerList, ",");
@@ -68,7 +69,7 @@ void Banker_Alloc_BasicCards( TablePacket & pack ) {
         }
     }
 
-    pack.GetDiscardPokerSize(bankerId) = 20;
+    pack.GetDisplayPokerSize(bankerId) = 20;
     *b_poker = '\0';
     strcat( b_poker, szPokerList);
     strcat( poker, ",");
@@ -106,6 +107,8 @@ void MSG_Handler_CalledBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMs
         return;
     }
 
+    BYTE byUserSign = PK_USER_0 + _seatid;
+
     BYTE _count(0);
     if ( pack.GetCalledStatus(0) == PK_CALLED ) { ++_count;}
     if ( pack.GetCalledStatus(1) == PK_CALLED ) { ++_count;}
@@ -128,8 +131,13 @@ void MSG_Handler_CalledBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMs
             }
             pack.GetBankerId() = _seatid;
             if ( pack.GetCalledType(_seatid) == eGB_Point3 ) {
-                Banker_Alloc_BasicCards(pack);
+                Banker_Alloc_BasicCards(pack, byUserSign);
                 pack.GetProtocol() = MAKEDWORD( Games_Protocol, CreateBank_BRD );
+                g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+
+                pack.GetFirst() = true;
+                pack.GetPlaySeatId() = pack.GetBankerId();
+                pack.GetProtocol() = MAKEDWORD( Games_Protocol, DiscardsLicense_BRD );
                 g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
                 return;
             }
@@ -179,8 +187,13 @@ void MSG_Handler_CalledBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMs
 
         if (_count==2) {
             if ( pack.GetCalledType(r_seatid)==eGB_Waiver ) {
-                Banker_Alloc_BasicCards(pack);
+                Banker_Alloc_BasicCards(pack, byUserSign);
                 pack.GetProtocol() = MAKEDWORD( Games_Protocol, CreateBank_BRD );
+                g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+
+                pack.GetFirst() = true;
+                pack.GetPlaySeatId() = pack.GetBankerId();
+                pack.GetProtocol() = MAKEDWORD( Games_Protocol, DiscardsLicense_BRD );
                 g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
                 return;
             }
@@ -190,10 +203,16 @@ void MSG_Handler_CalledBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMs
                 g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
             }
         }
+
         if (_count==3) {
             if ( pack.GetCalledType(_seatid)==eGB_Waiver ) {
-                Banker_Alloc_BasicCards(pack);
+                Banker_Alloc_BasicCards(pack, byUserSign);
                 pack.GetProtocol() = MAKEDWORD( Games_Protocol, CreateBank_BRD );
+                g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+
+                pack.GetFirst() = true;
+                pack.GetPlaySeatId() = pack.GetBankerId();
+                pack.GetProtocol() = MAKEDWORD( Games_Protocol, DiscardsLicense_BRD );
                 g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
                 return;
             }

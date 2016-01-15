@@ -29,12 +29,14 @@ void UserSession::SetUserKey(WORD dwKey) {
 /************ protected *************/
 void UserSession::Init()
 {
+    this->NotSendHeader();
+	this->NotRecvHeader();
+
 	m_wUserKey 		= 0;
 	m_bFirst 		= TRUE;
 	DWORD dwCurrent = Session::GetTickCount();
 	m_dwOvertime    = dwCurrent + UserSession::m_dwClientDelay;
 	printf( "[UserSession::Init %d] \n", m_dwOvertime);
-	this->NotPackageHeader();
 }
 
 BOOL UserSession::Update( DWORD dwDeltaTick )
@@ -79,16 +81,8 @@ void UserSession::OnAccept( DWORD dwNetworkIndex )
 	MSG_ENTERSERVER_ANC msg2;
 	sprintf( buff, format, msg2.m_dwProtocol);
 
-	printf("[UserSession::OnAccept %s] \n", buff);
 	WORD len = strlen(buff);
-
-	/* CMsgBuff msgBuff;
-    char szBuff[256] = {0};
-    msgBuff.SetBuff(szBuff, 256);
-    msgBuff.Write(len);
-    msgBuff.Write( (char*)buff );
-    this->Send( msgBuff.GetHead(), msgBuff.GetWriteLen() ); */
-	this->Send( (BYTE*) buff,  len );
+    this->Send( (BYTE*)buff, len );
 }
 
 void UserSession::OnDisconnect()

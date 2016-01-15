@@ -182,12 +182,12 @@ BOOL AgentServer::SendToBuffer( WORD wIndex, BYTE * pMsg, WORD wSize) {
     return FALSE;
 }
 BOOL AgentServer::SendToClient( WORD wIndex, BYTE * pMsg, WORD wSize ) {
-    char szBuff[40960] = {0};
-    CMsgBuff msgBuff;
-    msgBuff.SetBuff(szBuff, sizeof(szBuff) );
-    msgBuff.Write( wSize );
-    msgBuff.Write((char*)pMsg);
-    return SendToBuffer( wIndex, msgBuff.GetHead(), msgBuff.GetWriteLen()-1 );
+   	UserSession * pSession = m_pUserSession[wIndex];
+	if ( pSession != NULL ) {
+		pSession->Send( pMsg, wSize);
+		return TRUE;
+	}
+    return FALSE;
 }
 
 BOOL AgentServer::SetUserSession( WORD wIndex, UserSession * pSession ) {
@@ -210,6 +210,33 @@ void AgentServer::FreeSessionKey( WORD _wIndex ) {
     m_cObjKey.RestoreKey( _wIndex );
 }
 
+void AgentServer::BroadcastToClient( TablePacket & table, BYTE * pMsg, WORD wSize )
+{
+    UINT userkey1 = table.GetUserKey(0);
+    UINT userkey2 = table.GetUserKey(1);
+    UINT userkey3 = table.GetUserKey(2);
+
+    char szBuff[4069] = {0};
+    WORD uiLength = 0;
+    if ( userkey1!=0 ){
+        memset( szBuff, 0x0, sizeof(szBuff) );
+        uiLength = table.JsonData(0, szBuff, sizeof(szBuff) );
+        g_AgentServer->SendToClient( userkey1, (BYTE*)szBuff, uiLength );
+        DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
+    }
+    if ( userkey2!=0 ){
+        memset( szBuff, 0x0, sizeof(szBuff) );
+        uiLength = table.JsonData(1, szBuff, sizeof(szBuff) );
+        g_AgentServer->SendToClient( userkey2, (BYTE*)szBuff, uiLength );
+        DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
+    }
+    if ( userkey3!=0 ){
+        memset( szBuff, 0x0, sizeof(szBuff) );
+        uiLength = table.JsonData(2, szBuff, sizeof(szBuff) );
+        g_AgentServer->SendToClient( userkey3, (BYTE*)szBuff, uiLength );
+        DEBUG_MSG( LVL_DEBUG, "%s", szBuff);
+    }
+}
 
 #if 0
 BOOL AgentServer::ConnectToServer( ServerSession * pSession, char * pszIP, WORD wPort )

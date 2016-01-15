@@ -29,9 +29,9 @@ void MSG_Handler_JoinTable_ANC ( ServerSession * pServerSession, MSG_BASE * pMsg
                     pack.GetTableId() = user.GetTableId();
                     pack.GetMultiple() = 1;
                     strcat( pack.GetBasicPokers(), "-1" );
-                    strcat( pack.GetDiscardPokers(0), "-1" );
-                    strcat( pack.GetDiscardPokers(1), "-1" );
-                    strcat( pack.GetDiscardPokers(2), "-1" );
+                    strcat( pack.GetDisplayPokers(0), "-1" );
+                    strcat( pack.GetDisplayPokers(1), "-1" );
+                    strcat( pack.GetDisplayPokers(2), "-1" );
 
                     BYTE _seatid = user.GetSeatId();
                     if (_seatid<3)  // 只有三位玩家

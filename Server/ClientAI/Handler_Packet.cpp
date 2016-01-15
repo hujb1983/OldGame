@@ -39,7 +39,6 @@ BOOL Handler_Packet::Register_Agent ()
 	AddHandler_Agent ( Update_Protocol,   OnlineInfo_ANC, 	MSG_Handler_Onlines_ANC    );
 	AddHandler_Agent ( Update_Protocol,   WRankInfo_ANC,  	MSG_Handler_WRankInfo_ANC  );
 	AddHandler_Agent ( Update_Protocol,   DRankInfo_ANC,  	MSG_Handler_DRankInfo_ANC  );
-	AddHandler_Agent ( Games_Protocol,    JoinGame_BRD,  	MSG_Handler_JoinGame_BRD   );
 	AddHandler_Agent ( Games_Protocol,    StartGame_BRD,  	MSG_Handler_StartGame_BRD  );
 	AddHandler_Agent ( Games_Protocol,    InitCards_BRD,  	MSG_Handler_InitCards_BRD  );
 	AddHandler_Agent ( Games_Protocol,    ShowCards_BRD,  	MSG_Handler_ShowCards_BRD  );

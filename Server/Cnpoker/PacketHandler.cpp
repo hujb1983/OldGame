@@ -48,22 +48,17 @@ BOOL PacketHandler::Register_Agent()
 	AddHandler_Agent( Games_Protocol,  JoinTable_ANC,       MSG_Handler_JoinTable_ANC  );
 	AddHandler_Agent( Games_Protocol,  StartGame_REQ,       MSG_Handler_StartGame_REQ  );
 	AddHandler_Agent( Games_Protocol,  Called_REQ,          MSG_Handler_CalledBank_REQ );
-
-	/*
-	AddHandler_Agent( Games_Protocol,  QuitGame_REQ,        MSG_Handler_QuitGame_REQ   );
-	AddHandler_Agent( Games_Protocol,  InitCards_REQ,       MSG_Handler_InitCards_REQ  );
-	AddHandler_Agent( Games_Protocol,  CreateBank_REQ,      MSG_Handler_CreateBank_REQ );
 	AddHandler_Agent( Games_Protocol,  Discards_REQ,        MSG_Handler_Discards_REQ   );
-	AddHandler_Agent( Login_Protocol,  Relogin_REQ,         MSG_Handler_Relogin_REQ    );
-	AddHandler_Agent( Login_Protocol,  Offline_NAK,         MSG_Handler_Offline_NAK    );
-	AddHandler_Agent( Games_Protocol,  DiscardsLicense_REQ, MSG_Handler_DiscardsLicense_REQ );
-	AddHandler_Agent( Games_Protocol,  CalledLicense_REQ,   MSG_Handler_CalledLicense_REQ   );
-	*/
+	AddHandler_Agent( Games_Protocol,  Trusteeship_REQ,     MSG_Handler_Trusteeship_REQ);
+	AddHandler_Agent( Games_Protocol,  QuitTable_REQ,       MSG_Handler_QuitTable_REQ   );
+    AddHandler_Agent( Games_Protocol,  Settlement_REQ,      MSG_Handler_Settlement_REQ );
+	// AddHandler_Agent( Login_Protocol,  Offline_NAK,         MSG_Handler_Offline_NAK    );
+	// AddHandler_Agent( Games_Protocol,  DiscardsLicense_REQ, MSG_Handler_DiscardsLicense_REQ );
 }
 
 BOOL PacketHandler::Register_Database()
 {
-    //AddHandler_Database( Games_Protocol, Settlement_BRD, MSG_Handler_Settlement_BRD );
+
 }
 
 BOOL PacketHandler::AddHandler_Agent( WORD category, WORD protocol, fnHandler fnHandler)

@@ -26,7 +26,7 @@ void MSG_Handler_StartGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg
     {
         TablePacket table;
         table.SetPacket( (BYTE*)pMsg, wSize );
-        table.GetProtocol() = MAKEDWORD( Games_Protocol, JoinGame_BRD );
+        table.GetProtocol() = MAKEDWORD( Games_Protocol, JoinTable_BRD );
         table.ToPrint();
 
         UINT userkey1 = table.GetUserKey(0);
@@ -35,6 +35,7 @@ void MSG_Handler_StartGame_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg
 
         char szBuff[4069] = {0};
         WORD uiLength = 0;
+        BYTE * pokers = table.GetPokers();
         if ( userkey1!=0 ){
             memset( szBuff, 0x0, sizeof(szBuff) );
             uiLength = table.JsonData(0, szBuff, sizeof(szBuff) );

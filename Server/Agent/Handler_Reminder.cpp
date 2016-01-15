@@ -1,28 +1,16 @@
 #include "Handler_Module.h"
-#include <dbCommon.h>
-#pragma pack(push,1)
+#include "CnpokerServer.h"
 
-
-void MSG_Handler_QuitTable_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
+/*****************************************************
+    MSG_Handler_Reminder_REQ
+*****************************************************/
+void MSG_Handler_Reminder_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
 {
-    DEBUG_MSG( LVL_DEBUG, "QuitTable_REQ to recv: %s \n", (char*) pMsg );
-
     UserSession * pSession = ( UserSession * ) pServerSession;
     {
         UserPacket & user = pSession->GetUserPacket();
-        user.GetProtocol() = MAKEDWORD( Games_Protocol, QuitTable_REQ );
-        user.ToPrint();
-        g_AgentServer->SendToGameServer( (BYTE*)&user, user.GetPacketSize() );
-    }
-}
-
-void MSG_Handler_QuitTable_BRD ( ServerSession * pServerSession, MSG_BASE * pMsg, WORD wSize )
-{
-    if ( wSize>=sizeof(TablePacket) )
-    {
-        TablePacket table;
-        table.SetPacket( (BYTE*)pMsg, wSize );
-        table.GetProtocol() = MAKEDWORD( Games_Protocol, QuitTable_BRD );
+        user.GetProtocol() = MAKEDWORD( Games_Protocol, Reminder_REQ );
+        user.GetCalled() = _calltype;
         table.ToPrint();
 
         UINT userkey1 = table.GetUserKey(0);

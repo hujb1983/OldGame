@@ -6,6 +6,7 @@
 #include <Network.h>
 #include "AgentFactory.h"
 #include "ObjKeyGenerator.h"
+#include "TablePacket.h"
 
 using namespace std;
 
@@ -27,6 +28,8 @@ public:
 
 	BOOL ConnectToServer(ServerSession * pSession, char * pszIP, WORD wPort);
     BOOL MaintainConnection();
+
+    void BroadcastToClient( TablePacket & table, BYTE * pMsg, WORD wSize );
 
 public: // 对其他服务器操作
 	BOOL SendToGameServer( BYTE * pMsg, WORD wSize);

@@ -46,8 +46,7 @@ int Init_Poker_SetUsercards( BYTE * _poker, BYTE _size )
     InitCards_Get_Usercards
 *****************************************************/
 BYTE InitCards_Get_Usercards( TablePacket & pack, BYTE byVal, BYTE seatId ) {
-    pack.GetDiscardPokerSize(seatId) = 17;
-    char * poker = pack.GetDiscardPokers(seatId);
+    char * poker = pack.GetDisplayPokers(seatId);
     BYTE * pMove = pack.GetPokers();
     char szPoker[8] = {0};
     char szPokerList[128] = {0};
@@ -64,9 +63,9 @@ BYTE InitCards_Get_Usercards( TablePacket & pack, BYTE byVal, BYTE seatId ) {
             byCount++;
         }
     }
-    DEBUG_MSG( LVL_DEBUG, "byCount = %d ",  byCount);
     *poker = '\0';
     strcat( poker, szPokerList);
+    pack.GetDisplayPokerSize(seatId) = byCount;
 }
 
 /*****************************************************

@@ -77,6 +77,11 @@ CnpokerObjs     = Cnpoker/CnpokerMain.o \
 				  Cnpoker/Handler_JoinTable.o \
 				  Cnpoker/Handler_StartGame.o \
 				  Cnpoker/Handler_CalledBank.o \
+				  Cnpoker/Handler_Discard.o \
+				  Cnpoker/Handler_QuitTable.o \
+				  Cnpoker/Handler_Trusteeship.o \
+				  Cnpoker/Handler_Settlement.o \
+				  Cnpoker/Handler_Reminder.o \
 
 LobbyObjs   	= Lobby/LobbyMain.o \
 				  Lobby/LobbyUser.o \
@@ -117,14 +122,13 @@ AgentObjs   	= Agent/AgentMain.o \
 				  Agent/Handler_Onlines.o \
 				  Agent/Handler_WRankInfo.o \
 				  Agent/Handler_DRankInfo.o \
+				  Agent/Handler_FastGame.o \
 				  Agent/Handler_JoinTable.o \
 				  Agent/Handler_QuitTable.o \
 				  Agent/Handler_StartGame.o \
 				  Agent/Handler_InitCards.o \
 				  Agent/Handler_Settlement.o \
 				  Agent/Handler_CalledBank.o \
-				  Agent/Handler_JoinGame.o \
-				  Agent/Handler_QuitGame.o \
 				  Agent/Handler_CreateBank.o \
 				  Agent/Handler_Discard.o \
 				  Agent/Handler_Upline.o \

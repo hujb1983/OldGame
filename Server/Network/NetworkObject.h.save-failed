@@ -30,10 +30,10 @@ public:
 	std::string		GetIP();
 	Session *  	    GetSesstion();
 
-	void            NotSendHeader() { m_bSendHander = FALSE; }   // default TRUE;
-	BOOL 			hasSendHeader() { return m_bSendHander; }
+	void            NoSandCancelHeader() { m_bSandHander = FALSE; }   // default TRUE;
+	BOOL 			hasSandHeader() { return m_bSandHander; }
 
-	void            NotRecvHeader() { m_bRecvHander = FALSE; }   // default TRUE;
+	void            NoRecvHeader() { m_bRecvHander = FALSE; }   // default TRUE;
 	BOOL 			hasRecvHeader() { return m_bRecvHander; }
 
 protected:
@@ -47,9 +47,7 @@ protected:
 	inline void		SetSession( Session *pSession ) { m_pSession = pSession; }
 
 	Session			*m_pSession;
-
-	BOOL			m_bSendHander;
-	BOOL			m_bRecvHander;
+	BOOL			m_bPackageHander;
 };
 
 #endif
