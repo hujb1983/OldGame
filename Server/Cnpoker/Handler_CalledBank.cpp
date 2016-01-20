@@ -118,17 +118,26 @@ void MSG_Handler_CalledBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMs
     if ( pack.GetModel()==0 ) {     // 普通叫牌
         if ( _called==0 ) {
             pack.GetCalledType(_seatid) = eGB_Waiver;
+            pack.GetCalledStatus(_seatid) = PK_CALLED;    // 已经叫牌了
         }
         else {
+
             do {
                      if ( _called==1 )   {   pack.GetCalledType(_seatid) = eGB_Point1; break;  }
                 else if ( _called==2 )   {   pack.GetCalledType(_seatid) = eGB_Point2; break;  }
                 else if ( _called==3 )   {   pack.GetCalledType(_seatid) = eGB_Point3; break;  }
                 return;
             } while(1);
-            if ( _called > pack.GetMultiple() ) {
+            if ( _count==0 ) {
                 pack.GetMultiple() = _called;
             }
+            else if ( _called > pack.GetMultiple() ) {
+                pack.GetMultiple() = _called;
+            }
+            else {
+                return; // 后面的人要叫得比前面的高;
+            }
+            pack.GetCalledStatus(_seatid) = PK_CALLED;    // 已经叫牌了
             pack.GetBankerId() = _seatid;
             if ( pack.GetCalledType(_seatid) == eGB_Point3 ) {
                 Banker_Alloc_BasicCards(pack, byUserSign);
@@ -146,10 +155,12 @@ void MSG_Handler_CalledBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMs
     else {  // 翻倍叫牌
         if ( _called==0 ) {
             pack.GetCalledType(_seatid) = eGB_Waiver;
+            pack.GetCalledStatus(_seatid) = PK_CALLED;    // 已经叫牌了
         }
         else {
             pack.GetBankerId() = _seatid;
             pack.GetCalledType(_seatid) = eGB_Apply;
+            pack.GetCalledStatus(_seatid) = PK_CALLED;    // 已经叫牌了
             pack.GetMultiple() *= 2;
         }
     }
@@ -160,8 +171,13 @@ void MSG_Handler_CalledBank_REQ ( ServerSession * pServerSession, MSG_BASE * pMs
     if (_count==0 || _count==1) {
         pack.GetProtocol() = MAKEDWORD( Games_Protocol, Called_BRD );
         g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
+
+        pack.GetPlaySeatId() = r_seatid;
+        pack.GetProtocol() = MAKEDWORD( Games_Protocol, CalledLicense_BRD );
+        g_pCnpokerServer->SendToAgentServer( (BYTE*)&pack, pack.GetPacketSize() );
     }
     else {
+
         BYTE _hasCalled(0); // 计算叫地主次数
         if ( pack.GetCalledType(0)!=eGB_Waiver )   {   ++_hasCalled;  }
         if ( pack.GetCalledType(1)!=eGB_Waiver )   {   ++_hasCalled;  }

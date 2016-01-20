@@ -224,4 +224,3 @@ void MSG_Handler_CreateTable_DBR ( ServerSession * pServerSession, MSG_BASE * pM
     pServerSession->Send( (BYTE*)&pQuery->m_cPacket, pQuery->m_cPacket.GetPacketSize() );
     Query_CreateTable::FREE(pQuery);
 }
-

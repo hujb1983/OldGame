@@ -81,9 +81,6 @@ public:
     BYTE & GetThanPokerSize();   // 比较个数
     CHAR * GetThanPokers();      // 出牌个数
 
-    BYTE & GetReminderPokerSize(BYTE);   // 出牌张数;
-    CHAR * GetReminderPokers(BYTE);      // 玩家打的牌;
-
     BYTE & GetSettlement();      // 结算;
 
 private:
@@ -142,9 +139,6 @@ private:
 
     BYTE m_byThanPokerSize;    // 打出的座位
     CHAR m_szThanPokers[80+1]; // 打出的牌
-
-    BYTE m_byReminderPokerSize[TEAM_SIZE];    // 打出的座位
-    CHAR m_szReminderPokers[TEAM_SIZE][60+1]; // 打出的牌
 
     BYTE m_bySettlement;
 };

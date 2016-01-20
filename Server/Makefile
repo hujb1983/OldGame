@@ -78,6 +78,7 @@ CnpokerObjs     = Cnpoker/CnpokerMain.o \
 				  Cnpoker/Handler_StartGame.o \
 				  Cnpoker/Handler_CalledBank.o \
 				  Cnpoker/Handler_Discard.o \
+				  Cnpoker/Handler_DiscardsLicense.o \
 				  Cnpoker/Handler_QuitTable.o \
 				  Cnpoker/Handler_Trusteeship.o \
 				  Cnpoker/Handler_Settlement.o \
@@ -133,6 +134,7 @@ AgentObjs   	= Agent/AgentMain.o \
 				  Agent/Handler_Discard.o \
 				  Agent/Handler_Upline.o \
 				  Agent/Handler_Offline.o \
+				  Agent/Handler_Reminder.o \
 				  Agent/Handler_CalledLicense.o \
 				  Agent/Handler_DiscardsLicense.o \
 				  Agent/Handler_CalledOvertime.o \

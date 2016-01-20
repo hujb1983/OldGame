@@ -65,6 +65,7 @@ enum eGAME_PROTOCOL
 	Discards_DBR,
 
 	Reminder_REQ            = 425, 	// 出牌提示
+	Reminder_ANC,
 	Reminder_BRD,
 
 	Settlement_REQ          = 430, 	// 结算
@@ -82,6 +83,8 @@ enum eGAME_PROTOCOL
 	UpdateBattle_REQ        = 460,  // 更新请求
 	UpdateBattle_DBR,
 	UpdateBattle_NAK,
+
+	JoinTableCheckRight_DBR = 470,  // 权限申核
 
 	ErroNo_BRD              = 500,   // 错误广播
 };

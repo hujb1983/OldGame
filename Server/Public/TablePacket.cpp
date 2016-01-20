@@ -77,9 +77,6 @@ BYTE & TablePacket::GetIndexSize()      {  return (m_byIndexSize);      }   // ³
 BYTE & TablePacket::GetThanPokerSize()  {  return (m_byThanPokerSize);  }   // ±È½Ï¸öÊı
 CHAR * TablePacket::GetThanPokers()     {  return (m_szThanPokers);     }   // ³öÅÆ¸öÊı
 
-BYTE & TablePacket::GetReminderPokerSize(BYTE seatid)   {  return (m_byReminderPokerSize[seatid]); }     // ÌáÊ¾³öÅÆµÄÕÅÊı;
-CHAR * TablePacket::GetReminderPokers(BYTE seatid)      {  return (m_szReminderPokers[seatid]);    }     // ÌáÊ¾´òµÄÅÆ;
-
 BYTE & TablePacket::GetSettlement()     {  return (m_bySettlement);     }   // ½áËã;
 
 void TablePacket::ToPrint()

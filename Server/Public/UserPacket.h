@@ -71,6 +71,9 @@ public:
     UINT & GetShowedSize();        // 出牌大小;
     CHAR * GetShowedPokers();      // 已经打出的牌;
 
+    CHAR * GetReminderPokers();    // 出牌提示;
+    BYTE & GetReminderSize();      // 出牌大小;
+
 private:
 
     UINT  m_uiProtocol;         // 协议;
@@ -113,6 +116,9 @@ private:
 
     UINT  m_uiShowedCount;          // 已经打出计牌;
     CHAR  m_byShowedPokers[80];     // 已经打出的牌;
+
+    CHAR m_szReminderPokers[60];
+    BYTE m_byReminderSize;
 };
 
 #pragma pack(pop)

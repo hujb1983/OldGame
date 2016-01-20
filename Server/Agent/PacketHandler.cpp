@@ -83,6 +83,7 @@ BOOL PacketHandler::Register_Client()
 	AddHandler_Client ( Games_Protocol,  StartGame_REQ,     MSG_Handler_StartGame_REQ  );
 	AddHandler_Client ( Games_Protocol,  Called_REQ,        MSG_Handler_CalledBank_REQ );
 	AddHandler_Client ( Games_Protocol,  Discards_REQ,      MSG_Handler_Discards_REQ   );
+	AddHandler_Client ( Games_Protocol,  Reminder_REQ,      MSG_Handler_Reminder_REQ   );
 	AddHandler_Client ( Games_Protocol,  Trusteeship_REQ,   MSG_Handler_Trusteeship_REQ);
 }
 
@@ -112,6 +113,7 @@ BOOL PacketHandler::Register_Games()
 	AddHandler_Games( Games_Protocol, CalledOverTime_NAK,    MSG_Handler_CalledOvertime_NAK  );
 	AddHandler_Games( Games_Protocol, DiscardsOverTime_NAK,  MSG_Handler_DiscardsOvertime_NAK);
 	AddHandler_Games( Login_Protocol, Offline_BRD,           MSG_Handler_Offline_BRD         );
+	AddHandler_Games( Games_Protocol, Reminder_ANC,          MSG_Handler_Reminder_ANC        );
 	AddHandler_Games( Games_Protocol, Trusteeship_BRD,       MSG_Handler_Trusteeship_BRD     );
 }
 

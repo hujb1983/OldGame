@@ -27,8 +27,8 @@ int acl_msg_printf()
 	printf( "%10d : >>出牌请求 \n",    			    MAKEDWORD(Games_Protocol,  Discards_REQ) ); 
 	printf( "%10d : >>托管游戏请求 \n", 			MAKEDWORD(Games_Protocol,  Trusteeship_REQ) );     
     printf( "%10d : >>托管游戏广播 \n", 			MAKEDWORD(Games_Protocol,  Trusteeship_BRD) );   
-	printf( "%10d : >>消息提示请求 \n", 			MAKEDWORD(Games_Protocol,  Reminder_REQ) );     
-    printf( "%10d : >>消息提示广播 \n", 			MAKEDWORD(Games_Protocol,  Reminder_BRD) );	
+	printf( "%10d : >>提示消息请求 \n", 			MAKEDWORD(Games_Protocol,  Reminder_REQ) );     
+    printf( "%10d : >>提示消息广播 \n", 			MAKEDWORD(Games_Protocol,  Reminder_BRD) );	
 	printf( "%10d : <<开始游戏广播 \n",        		MAKEDWORD(Games_Protocol,  StartGame_BRD) );         
 	printf( "%10d : <<分配牌广播 \n",        		MAKEDWORD(Games_Protocol,  InitCards_BRD) );         
 	printf( "%10d : <<显示牌广播 \n",        		MAKEDWORD(Games_Protocol,  ShowCards_BRD) );        
@@ -41,7 +41,7 @@ int acl_msg_printf()
 	printf( "%10d : <<出牌超时通知 \n", 		    MAKEDWORD(Games_Protocol,  DiscardsOverTime_NAK) );  
 	printf( "%10d : <<玩家重新登入游戏广播 \n",     MAKEDWORD(Login_Protocol,  Relogin_BRD) );           
 	printf( "%10d : <<玩家离开游戏广播 \n",         MAKEDWORD(Login_Protocol,  Offline_BRD) );          
-	printf( "%10d : <<游戏托管广播 \n",      		MAKEDWORD(Games_Protocol,  Trusteeship_BRD) );    
+	printf( "%10d : <<游戏托管广播 \n",      		MAKEDWORD(Games_Protocol,  Trusteeship_BRD) );
 }
 
 

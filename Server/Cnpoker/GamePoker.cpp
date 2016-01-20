@@ -12,9 +12,7 @@ GamePoker::~GamePoker()
 
 void GamePoker::SetPoker( BYTE * _byIndex, BYTE _byIndexSize )
 {
-    memset( PokerTypeTable,  0x0, sizeof(PokerTypeTable) );
-    memset( PokerIndexArray, 0x0, sizeof(PokerIndexArray) );
-    memset( PokerIndexTable, 0x0, sizeof(PokerIndexTable) );
+    memset( this,  0x0, sizeof(GamePoker) );
 
     BYTE j = 0;
     BYTE pv = 0;
@@ -23,15 +21,18 @@ void GamePoker::SetPoker( BYTE * _byIndex, BYTE _byIndexSize )
         PokerIndexArray[i]  = pv;
         PokerIndexTable[pv] = 1;
         if ( pv < MAX_POKER ) {
-            j = pv % 13;
-            PokerTypeTable[j]++;
 			if ( pv==52) {
 				PokerTypeTable[13] = 1;
 			}
 			else if ( pv==53) {
 				PokerTypeTable[14] = 1;
+
 			}
-		}
+            else {
+                j = pv % 13;
+                PokerTypeTable[j]++;
+            }
+        }
     }
 
     PokerSize = _byIndexSize;
@@ -46,43 +47,49 @@ void GamePoker::Parser( BYTE * _poker, BYTE _size )
 
     int  i  = 0;  // 指定全过程下标;
     BYTE pv = 0;
-    BYTE pv_old   = -1;
-    BYTE pv_count = 0;
 
     // 先做初始化循环
-    for ( i=0; i<(MAX_PK_TYPE-2); i++)
-    {
+    for ( i=0; i<(MAX_PK_TYPE-2); i++) {
         pv = PokerTypeTable[i];
-        if ( pv==0 ) {
-            continue;
-        }
-
-        // TODE: 单牌的启始值;
-        if ( Poker_1g_size==0 ) {
-            Poker_1g_max_value = pv;
-            Poker_1g_min_value = pv;
-        }
-
-        // TODE: 2牌的启始值;
-        else if ( (pv==2) && (Poker_2g_size==0) ) {
-            Poker_2g_max_value = pv;
-            Poker_2g_min_value = pv;
-        }
-
-        // TODE: 3牌的启始值;
-        else if ( pv==3 && (Poker_3g_size==0) ) {
-            Poker_3g_max_value = pv;
-            Poker_3g_min_value = pv;
-        }
-
-        // TODE4 4牌的启始值;
-        else if ( pv==4 && (Poker_4g_size==0) ) {
-            Poker_4g_max_value = pv;
-            Poker_4g_min_value = pv;
+        if ( pv>3 ) {
+            Poker_4g_max_value = i;
+            Poker_4g_min_value = i;
         }
     }
 
+    // TODE: 3牌的启始值;
+    for ( i=0; i<(MAX_PK_TYPE-2); i++) {
+        pv = PokerTypeTable[i];
+        if ( pv>2 ) {
+            Poker_3g_max_value = i;
+            Poker_3g_min_value = i;
+        }
+    }
+
+    // TODE: 3牌的启始值;
+    for ( i=0; i<(MAX_PK_TYPE-2); i++) {
+        pv = PokerTypeTable[i];
+        if ( pv>1 ) {
+            Poker_2g_max_value = i;
+            Poker_2g_min_value = i;
+            break;
+        }
+    }
+
+    // TODE: 3牌的启始值;
+    for ( i=0; i<(MAX_PK_TYPE-2); i++) {
+        pv = PokerTypeTable[i];
+        if ( pv>0 ) {
+            Poker_1g_max_value = i;
+            Poker_1g_min_value = i;
+            break;
+        }
+    }
+
+
     // 再进行排比查找
+    BYTE pv_old   = -1;     // 旧的值;
+    BYTE pv_count = 0;      // 旧的值;
     for ( i=0; i<(MAX_PK_TYPE-2); i++)
     {
         pv = PokerTypeTable[i];
@@ -101,39 +108,40 @@ void GamePoker::Parser( BYTE * _poker, BYTE _size )
             pv_count = 1;
         }
 
-        // TODE: 单牌的最大值;
-        if ( pv==1 ) {
-            Poker_1g_size++;
-            Poker_1g_max_value = pv;
-            Poker_1g_seq_size = ( pv_count > Poker_1g_seq_size ) ? pv_count : Poker_1g_seq_size;
-        }
-
-        // TODE: 2牌的最大值;
-        else if ( pv==2 ) {
-            Poker_2g_size++;
-            Poker_2g_max_value = pv;
-            Poker_2g_seq_size = ( pv_count > Poker_2g_seq_size ) ? pv_count : Poker_2g_seq_size;
+        // TODE4 4牌的最大值;
+        if ( pv>3 ) {
+            Poker_4g_size++;
+            Poker_4g_max_value = i;
         }
 
         // TODE: 3牌的最大值;
-        else if ( pv==3 ) {
+        if ( pv>2 ) {
             Poker_3g_size++;
-            Poker_3g_max_value = pv;
+            Poker_3g_max_value = i;
             Poker_3g_seq_size = ( pv_count > Poker_3g_seq_size ) ? pv_count : Poker_3g_seq_size;
         }
 
-        // TODE4 4牌的最大值;
-        else if ( pv==4 ) {
-            Poker_4g_size++;
-            Poker_4g_max_value = pv;
+        // TODE: 2牌的最大值;
+        if ( pv>1 ) {
+            Poker_2g_size++;
+            Poker_2g_max_value = i;
+            Poker_2g_seq_size = ( pv_count > Poker_2g_seq_size ) ? pv_count : Poker_2g_seq_size;
         }
+
+        // TODE: 单牌的最大值;
+        if ( pv>0 ) {
+            Poker_1g_max_value = i;
+            Poker_1g_seq_size = ( pv_count > Poker_1g_seq_size ) ? pv_count : Poker_1g_seq_size;
+        }
+
     }
 
     // 小王的分析;
     if ( PokerTypeTable[13]==1 ) {
         Poker_king_size++;
         Poker_king_min_value = 13;
-        Poker_1g_max_value   = 13;      // 也算单牌
+        Poker_king_max_value = 13;
+        Poker_1g_max_value = 13;      // 也算单牌
     }
 
     // 大王的分析;
@@ -436,35 +444,36 @@ BOOL GamePoker::FindObjectMoreThanToClone( BYTE _type, BYTE _size, BYTE _than_va
         return FALSE;
     }
 
-    memcpy( PokerCloneArray, 0x0, sizeof(PokerCloneArray) );
+    memset( PokerCloneArray, 0x0, sizeof(PokerCloneArray) );
     PokerCloneType  = _type;
     PokerCloneValue = _than_value+1;
     PokerCloneCount = _than_count;
     BYTE &_val = PokerCloneValue;
     BYTE &_len = PokerCloneCount;
+
     if ( _type==PH_1 ) {
-        MainSearch(1, _val, _len);
+        MainSearch(1, _val, 1);
     }
     else if ( _type==PH_2 ) {
-        MainSearch(2, _val, _len);
+        MainSearch(2, _val, 1);
     }
     else if ( _type==PH_3 ) {
-        MainSearch(3, _val, _len);
+        MainSearch(3, _val, 1);
     }
     else if ( _type==PH_4 ) {
-        MainSearch(4, _val, _len);
+        MainSearch(4, _val, 1);
     }
     else if ( _type==PH_C1 ) {
         _len = _than_count;
         MainSearch(1, _val, _len);
     }
     else if ( _type==PH_31 ) {
-        MainSearch(3, _val, _len);
-        AttachSearch(1, 0, _len);
+        MainSearch(3, _val, 1);
+        AttachSearch(1, 0, 1);
     }
     else if ( _type==PH_32 ) {
-        if ( MainSearch(3, _val, _len)==TRUE ) {
-            AttachSearch(2, 0, _len);
+        if ( MainSearch(3, _val, 1)==TRUE ) {
+            AttachSearch(2, 0, 1);
         }
     }
     else if ( _type==PH_C2 ) {
@@ -476,15 +485,15 @@ BOOL GamePoker::FindObjectMoreThanToClone( BYTE _type, BYTE _size, BYTE _than_va
         MainSearch(3, _val, _len);
     }
     else if ( _type==PH_411 ) {
-        if ( MainSearch(4, _val, _len)==TRUE ) {
-            if ( AttachSearch(1, 0, _len)==TRUE ) {
-                AttachSearch(1, 0, _len);
+        if ( MainSearch(4, _val, 1)==TRUE ) {
+            if ( AttachSearch(1, 0, 1)==TRUE ) {
+                AttachSearch(1, 0, 1);
             }
         }
     }
     else if ( _type==PH_42 ) {
-        if ( MainSearch(4, _val, _len)==TRUE ) {
-            AttachSearch(2, 0, _len);
+        if ( MainSearch(4, _val, 1)==TRUE ) {
+            AttachSearch(2, 0, 1);
         }
     }
     else if ( _type==PH_C31 ) {
@@ -500,15 +509,17 @@ BOOL GamePoker::FindObjectMoreThanToClone( BYTE _type, BYTE _size, BYTE _than_va
         }
     }
     else if ( _type==PH_422 ) {
-        if ( MainSearch(4, _val, _len)==TRUE ) {
-            if ( AttachSearch(2, 0, _len)==TRUE ) {
-                AttachSearch(2, 0, _len);
+        if ( MainSearch(4, _val, 1)==TRUE ) {
+            if ( AttachSearch(2, 0, 1)==TRUE ) {
+                AttachSearch(2, 0, 1);
             }
         }
     }
 
     _val = 0;
     _len = 1;
+
+    // 特殊处理;
     if (PokerCloneSize==0) {
         PokerCloneType = PH_4;
         MainSearch(4, _val, _len);
@@ -534,10 +545,6 @@ BOOL GamePoker::FindObjectMoreThanToClone( BYTE _type, BYTE _size, BYTE _than_va
 *******************************************************************/
 BOOL GamePoker::ClonePoker( BYTE * _poker, BYTE & _size )
 {
-    if (_size<PokerCloneSize) {
-        return FALSE;
-    }
-
     if (PokerCloneSize==0) {
         return FALSE;
     }
@@ -556,7 +563,7 @@ BOOL GamePoker::ClonePoker( BYTE * _poker, BYTE & _size )
 		else if ( _pv==13 ) {
             _poker[_i] = 52;
 		}
-		else if ( _pv==13 ) {
+		else if ( _pv==14 ) {
             _poker[_i] = 53;
 		}
     }
@@ -582,24 +589,24 @@ short GamePoker::TransformGetIndex( BYTE _value )
 {
     if ( _value<MAX_POKER ) {
         BYTE _index = _value;
-        if (PokerIndexTable[_value]==1) {
-            PokerIndexTable[_value] = 0;
-            return PokerIndexTable[_value];
+        if (PokerIndexTable[_index]==1) {
+            PokerIndexTable[_index]=0;
+            return _index;
         }
         _index += 13;
-        if (PokerIndexTable[_value]==1) {
-            PokerIndexTable[_value] = 0;
-            return PokerIndexTable[_value];
+        if (PokerIndexTable[_index]==1) {
+            PokerIndexTable[_index]=0;
+            return _index;
         }
         _index += 13;
-        if (PokerIndexTable[_value]==1) {
-            PokerIndexTable[_value] = 0;
-            return PokerIndexTable[_value];
+        if (PokerIndexTable[_index]==1) {
+            PokerIndexTable[_index]=0;
+            return _index;
         }
         _index += 13;
-        if (PokerIndexTable[_value]==1) {
-            PokerIndexTable[_value] = 0;
-            return PokerIndexTable[_value];
+        if (PokerIndexTable[_index]==1) {
+            PokerIndexTable[_index]=0;
+            return _index;
         }
     }
     return -1;
@@ -607,15 +614,20 @@ short GamePoker::TransformGetIndex( BYTE _value )
 
 /*******************************************************************
     MainSearch (主要部分查询)
+    BYTE _size  = 单体大小
+    BYTE _value = 值
+    BYTE _len   = 是否连续, 1为不连续
 *******************************************************************/
 BOOL GamePoker::MainSearch(BYTE _size, BYTE & _value, BYTE _len)
 {
     int  _i     = 0;
     BYTE _count = 0;
     BYTE _pv    = 0;
+
+    // 第一次保证牌数相同
     for ( _i=_value; _i<MAX_PK_TYPE; _i++) {
         _pv = PokerTypeTable[_i];
-        if ( _pv >= _size ) {
+        if ( _pv == _size ) {
             _count++;
 		}
 		else {
@@ -626,18 +638,39 @@ BOOL GamePoker::MainSearch(BYTE _size, BYTE & _value, BYTE _len)
 		}
     }
 
+    // 第二次多于牌数都可以
+    if ( _count!=_len ) {
+        _i = 0;
+        for ( _i=_value; _i<MAX_PK_TYPE; _i++) {
+            _pv = PokerTypeTable[_i];
+            if ( _pv >= _size ) {
+                _count++;
+            }
+            else {
+                _count = 0;
+            }
+            if ( _count==_len ) {
+                break;
+            }
+        }
+    }
+
     if ( _count==0 ) {
         PokerCloneSize = 0;
         return FALSE;
     }
 
-    int  _c = PokerCloneSize - 1;
-    int  _j = _i-_len;
-    for ( ; _j<_i; _j++) {
-        PokerCloneArray[_c] = PokerTypeTable[_j];
-    }
+    BYTE * mv = PokerCloneArray;
+    int _v = _i - _count + 1;
+    PokerCloneSize = _size * _len;
+    for (; _v<=_i; _v++ ) {
+        PokerCloneTypeTable[_v] = 1;
+        for ( int _u=0 ; _u< _size; _u++ ) {
+            (*mv) = _v;
+            ++mv;
 
-    PokerCloneSize += _count;
+        }
+    }
     return TRUE;
 }
 
@@ -650,16 +683,18 @@ BOOL GamePoker::AttachSearch(BYTE _size, BYTE _value, BYTE _len)
     BYTE _count = 0;
     BYTE _pv    = 0;
     for ( _i=_value; _i<MAX_PK_TYPE; _i++) {
-        _pv = PokerTypeTable[_i];
-        if ( _pv >= _size ) {
-            _count++;
-		}
-		else {
-            _count = 0;
-		}
-		if ( _count==_len ) {
-            break;
-		}
+        if (PokerCloneTypeTable[_i]==0) {
+            _pv = PokerTypeTable[_i];
+            if ( _pv >= _size ) {
+                _count++;
+            }
+            else {
+                _count = 0;
+            }
+            if ( _count==_len ) {
+                break;
+            }
+        }
     }
 
     if ( _count==0 ) {
@@ -667,13 +702,18 @@ BOOL GamePoker::AttachSearch(BYTE _size, BYTE _value, BYTE _len)
         return FALSE;
     }
 
-    int  _c = PokerCloneSize - 1;
-    int  _j = _i-_len;
-    for ( ; _j<_i; _j++) {
-        PokerCloneArray[_c] = PokerTypeTable[_j];
-    }
+    // 把获取的牌值, 排列成一个队列存起来;
+    BYTE * mv = PokerCloneArray + PokerCloneSize;
+    int _v = _i - _count + 1;
+    PokerCloneSize = _size * _len;
+    for (; _v<=_i; _v++ ) {
+        PokerCloneTypeTable[_v] = 1;
+        for ( int _u=0 ; _u< _size; _u++ ) {
+            (*mv) = _v;
+            ++mv;
 
-    PokerCloneSize += _count;
+        }
+    }
     return TRUE;
 }
 

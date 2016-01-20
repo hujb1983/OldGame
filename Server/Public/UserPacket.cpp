@@ -68,6 +68,9 @@ BYTE * UserPacket::GetShowPokers()      {  return (m_byShowPokers);     }       
 UINT & UserPacket::GetShowedSize()      {  return (m_uiShowedCount);   }        // 是否出牌;
 CHAR * UserPacket::GetShowedPokers()    {  return (m_byShowedPokers);  }        // 已经打出的牌;
 
+CHAR * UserPacket::GetReminderPokers()  {  return (m_szReminderPokers); }        // 出牌提示;
+BYTE & UserPacket::GetReminderSize()    {  return (m_byReminderSize);   }        // 出牌大小;
+
 void UserPacket::ToPrint()
 {
     DEBUG_MSG( LVL_DEBUG, "Begin");
@@ -85,6 +88,9 @@ void UserPacket::ToPrint()
 
     DEBUG_MSG( LVL_DEBUG, "| Ready=%d | Called=%d | Banker=%d |",
               m_byReady, m_byCalled, m_byBanker );
+
+    DEBUG_MSG( LVL_DEBUG, "| ReminderSize=%d | ReminderPokers=%s |",
+               m_byReminderSize, m_szReminderPokers );
 
     DEBUG_MSG( LVL_DEBUG, "End\n");
 }

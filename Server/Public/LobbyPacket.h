@@ -71,6 +71,8 @@ public:
     UINT & GetDataSize();        // 数据大小
     BYTE * GetData();            // 获得缓存数据
 
+
+
 private:
 
     UINT  m_uiProtocol;         // 协议;

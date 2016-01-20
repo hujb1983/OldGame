@@ -10,7 +10,7 @@ BYTE Reminder_Get_Usercards( TablePacket & pack, BYTE byVal, BYTE seatId, BYTE *
 /*****************************************************
     MSG_Handler_Reminder_REQ
 *****************************************************/
-int Reminder_User_Discards_Reminder ( TablePacket & pack );
+int Reminder_User_Discards_Reminder ( TablePacket & pack, char * reminderPokers, BYTE & reminderSize );
 
 
 /*****************************************************
@@ -42,8 +42,13 @@ void MSG_Handler_Reminder_REQ ( ServerSession * pServerSession, MSG_BASE * pMsg,
         return;
     }
 
-    Reminder_User_Discards_Reminder( pack );
+    char * reminderPokers = user.GetReminderPokers();
+    BYTE   reminderSize(0);
+    Reminder_User_Discards_Reminder( pack, reminderPokers, reminderSize );
+    user.GetReminderSize() = reminderSize;
 
+    user.GetProtocol() = MAKEDWORD( Games_Protocol, Reminder_ANC );
+    g_pCnpokerServer->SendToAgentServer( (BYTE*)&user, user.GetPacketSize() );
 }
 
 
@@ -60,7 +65,7 @@ BYTE Reminder_Get_Byte_Usercards( TablePacket & pack, BYTE byVal, BYTE seatId, B
     for (int  i=0; i<POKER_SIZE; i++) {
         byPoker = pMove[i];
         if ( byPoker == byVal ) {
-            pIndex[byCount] = byPoker;
+            pIndex[byCount] = i;
             byCount++;
             if(byCount>=maxSize){
                 break;
@@ -92,7 +97,7 @@ BYTE Reminder_Get_Char_Cards( BYTE * byIndex, BYTE bySize, char * szList) {
 /*****************************************************
     MSG_Handler_Reminder_REQ
 *****************************************************/
-int Reminder_User_Discards_Reminder ( TablePacket & pack )
+int Reminder_User_Discards_Reminder ( TablePacket & pack, char * reminderPokers, BYTE & reminderSize )
 {
     BYTE currSize(0);
     BYTE seatid = pack.GetPlaySeatId();
@@ -132,8 +137,6 @@ int Reminder_User_Discards_Reminder ( TablePacket & pack )
             return false;   // ---
         }
 
-        char * reminderPokers = pack.GetReminderPokers( seatid );
-        BYTE reminderSize = pack.GetReminderPokerSize( seatid );
         if ( !_gmPoker.ClonePoker( userPoker, reminderSize ) ) {
             return false;   // ¿ËÂ¡¶ÔÏó
         }

@@ -48,15 +48,16 @@ private:
     short TransformGetIndex(BYTE _value);        // 转化;
 
 private:
-    BYTE  PokerSize;                     // 牌总数;
-    BYTE  PokerTypeTable[MAX_PK_TYPE];   // 0~15 的下标类型表;
-    BYTE  PokerIndexArray[MAX_BHOLD];    // 0~20 的下标队列表;
-    BYTE  PokerIndexTable[MAX_POKER];    // 0~54 的下标标识表;
-    BYTE  PokerCloneSize;                // 克隆总数;
-    BYTE  PokerCloneArray[MAX_BHOLD];    // 克隆出来的下标类型;
-    BYTE  PokerCloneType;                // 克隆类型;
-    BYTE  PokerCloneValue;               // 克隆值;
-    BYTE  PokerCloneCount;               // 克隆长度;
+    BYTE  PokerSize;                        // 牌总数;
+    BYTE  PokerTypeTable[MAX_PK_TYPE];      // 0~15 的下标类型表;
+    BYTE  PokerIndexArray[MAX_BHOLD];       // 0~20 的下标队列表;
+    BYTE  PokerIndexTable[MAX_POKER];       // 0~54 的下标标识表;
+    BYTE  PokerCloneSize;                   // 克隆总数;
+    BYTE  PokerCloneTypeTable[MAX_PK_TYPE]; // 已经被克隆的下标类型;
+    BYTE  PokerCloneArray[MAX_BHOLD];       // 克隆出来的下标类型;
+    BYTE  PokerCloneType;                   // 克隆类型;
+    BYTE  PokerCloneValue;                  // 克隆值;
+    BYTE  PokerCloneCount;                  // 克隆长度;
 
 private:
 
